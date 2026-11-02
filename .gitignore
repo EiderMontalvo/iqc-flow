@@ -1,0 +1,16 @@
+# Secretos y configuración local
+.env
+.env.*
+iqc-flow-api/config/local.yml
+
+# Compilación
+**/target/
+**/node_modules/
+**/dist/
+
+# IDE y sistema
+.idea/
+.vscode/
+*.iml
+*.log
+Thumbs.db
