@@ -1,0 +1,18 @@
+server:
+  # Apache actúa como proxy inverso con HTTPS
+  forward-headers-strategy: native
+  servlet:
+    session:
+      cookie:
+        secure: true
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+logging:
+  structured:
+    format:
+      console: ecs
