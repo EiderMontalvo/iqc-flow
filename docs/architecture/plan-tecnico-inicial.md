@@ -166,8 +166,8 @@ Puntos clave para evitar ciclos:
 
 - **Sesión de servidor con cookie** `HttpOnly`, `Secure` y `SameSite=Lax`, más token CSRF para el SPA. Es más sencilla y segura que un JWT guardado en el navegador para una aplicación interna: permite revocación inmediata y no expone tokens a JavaScript.
 - Contraseñas con `DelegatingPasswordEncoder` (bcrypt o argon2), bloqueo temporal tras intentos fallidos y rate limiting en el login.
-- **2FA TOTP obligatorio para superadministradores y administradores.** Los campos se crean en el Incremento 1 y la funcionalidad se implementa antes del primer despliegue en producción.
-- Sin usuarios ni contraseñas por defecto: el primer superadministrador se crea con un comando de *bootstrap* que lee el correo y la contraseña inicial de variables de entorno y obliga a cambiarla en el primer acceso.
+- **2FA TOTP obligatorio para usuarios MASTER y administradores.** Los campos se crean en el Incremento 1 y la funcionalidad se implementa antes del primer despliegue en producción.
+- Sin usuarios ni contraseñas por defecto: el primer usuario `MASTER` se crea con el arranque inicial `CreacionMasterInicial`, que lee el correo y la contraseña inicial de variables de entorno y obliga a cambiarla en el primer acceso.
 - Recomendación de despliegue: servir la API bajo `app.iqcperu.com/api` mediante el proxy de Apache, sin CORS. `api.iqcperu.com` queda reservado para integraciones y portales futuros.
 
 ---
@@ -243,7 +243,7 @@ audit_log          id, organization_id, occurred_at, actor_user_id, actor_type (
 
 `audit_log` es de solo inserción: la aplicación no tendrá permisos `UPDATE` ni `DELETE` sobre ella en producción.
 
-**Roles iniciales** (precargados, editables después): `SUPERADMIN`, `ADMIN`, `COMMERCIAL`, `AUDIT_COORDINATOR`, `CERTIFICATION_OFFICER`.
+**Roles iniciales** (precargados, editables después): `MASTER`, `ADMINISTRADOR`, `COMERCIAL`, `COORDINADOR_AUDITORIAS`, `RESPONSABLE_CERTIFICACIONES`.
 
 **Permisos iniciales** (formato `recurso:acción[:alcance]`):
 
@@ -442,7 +442,7 @@ Los plazos (3, 5 o 7 días) son datos de la regla y se editan desde la administr
 | Varias instancias | `SELECT … FOR UPDATE SKIP LOCKED` evita que dos procesos tomen el mismo trabajo |
 | Idempotencia | `idempotency_key = regla:versión:evento:sujeto` con restricción única; acciones con `dedup_key` |
 | Sin notificaciones duplicadas | `notifications.dedup_key` único |
-| Reintentos | Backoff exponencial (1 min, 5 min, 30 min, 2 h…) hasta un máximo configurable; luego `FAILED` + alerta al superadministrador |
+| Reintentos | Backoff exponencial (1 min, 5 min, 30 min, 2 h…) hasta un máximo configurable; luego `FAILED` + alerta a los usuarios MASTER |
 | Pausar reglas | `enabled = false` / `paused_reason`; los temporizadores pendientes se cancelan o se conservan según se elija al pausar |
 | Historial | `automation_executions` + `audit_log` |
 | Zona horaria | `Clock` en `America/Lima`; días hábiles con la tabla `holidays` |
@@ -520,7 +520,7 @@ Controles:
 
 El MVP comprende las Fases 1 y 2, el núcleo de la Fase 3 y el asistente de solo lectura. Se acepta cuando:
 
-1. Un usuario interno inicia sesión; los superadministradores y administradores con 2FA.
+1. Un usuario interno inicia sesión; los usuarios MASTER y administradores con 2FA.
 2. Ningún endpoint de negocio responde sin autenticación ni sin el permiso correspondiente (verificado con tests de autorización por endpoint).
 3. Se registra un cliente con RUC válido una sola vez; un RUC duplicado se rechaza.
 4. Se registran contactos, actividades y tareas de seguimiento con responsable, prioridad y fecha.
@@ -550,13 +550,13 @@ El MVP comprende las Fases 1 y 2, el núcleo de la Fase 3 y el asistente de solo
 4. **PostgreSQL local:** instalación nativa en Windows (se recomienda la misma versión mayor que se usará en producción), bases `iqc_flow` (desarrollo) e `iqc_flow_test` (tests), usuario `iqc_dev`. Script `scripts/db/create-local-databases.sql`.
 5. **Migraciones:** reescribir `V1__init.sql` → `V1__identity_and_audit.sql` según §5.2; `V2__seed_roles_and_permissions.sql` con los roles y permisos iniciales (sin usuarios).
 6. **`shared`:** `GlobalExceptionHandler` (ProblemDetail), `CorrelationIdFilter`, bean `Clock` (America/Lima), `PageResponse`, `AuditLogService` y tipos `ActorType`/`Origin`.
-7. **`organizations`:** entidad, repositorio y fachada de lectura; organización IQC Perú creada por el bootstrap.
+7. **`organizations`:** entidad, repositorio y fachada de lectura; organización IQC Perú creada por el arranque inicial.
 8. **`identity`:**
    - Entidades `User`, `Role`, `Permission`; `UserDetailsService` que carga permisos como *authorities*.
    - `SecurityConfiguration` con sesión, CSRF para SPA, `@EnableMethodSecurity`, denegar por defecto y rate limiting básico en el login.
    - Endpoints: `POST /api/v1/auth/login`, `POST /api/v1/auth/logout`, `GET /api/v1/auth/me`, `POST /api/v1/auth/change-password`; `GET/POST/PATCH /api/v1/users`, `GET /api/v1/roles`, `PUT /api/v1/users/{id}/roles`.
    - Bloqueo tras N intentos fallidos; bitácora de inicios de sesión exitosos y fallidos.
-   - Comando de bootstrap del primer superadministrador (perfil `bootstrap`, datos tomados de variables de entorno, cambio de contraseña obligatorio).
+   - Arranque inicial del primer usuario MASTER (`IQC_MASTER_INICIAL=true` y variables `IQC_MASTER_*`, cambio de contraseña obligatorio).
 9. **Frontend (mínimo):** corregir el título a "IQC Flow"; nada más en este incremento.
 10. **Documentación:** README con instrucciones de Windows 10, `docs/architecture/adr/` (migrar ADR-001…008 a archivos individuales y añadir los nuevos), `docs/api/http/identity.http` con ejemplos.
 
@@ -575,7 +575,7 @@ El MVP comprende las Fases 1 y 2, el núcleo de la Fase 3 y el asistente de solo
 - `mvnw.cmd verify` pasa en Windows 10 con PostgreSQL local, sin Docker.
 - `mvnw.cmd spring-boot:run` arranca, Flyway crea el esquema y Swagger UI muestra los endpoints.
 - No existe ningún usuario ni contraseña por defecto en el código ni en las migraciones.
-- El bootstrap crea el superadministrador y el login funciona desde un archivo `.http`.
+- El arranque inicial crea el usuario MASTER y el inicio de sesión funciona desde un archivo `.http`.
 - Un usuario sin permisos no puede listar usuarios (403), y el intento queda en la bitácora.
 
 ---

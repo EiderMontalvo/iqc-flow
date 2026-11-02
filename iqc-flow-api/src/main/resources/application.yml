@@ -1,20 +1,72 @@
 spring:
   application:
     name: iqc-flow-api
+  config:
+    # Archivo local ignorado por git con la clave de PostgreSQL (ver config/local.example.yml)
+    import: optional:file:./config/local.yml
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/iqc_flow}
     username: ${DB_USERNAME:iqc_dev}
-    password: ${DB_PASSWORD}
+    password: ${DB_PASSWORD:${iqc.local.clave-bd:}}
   jpa:
     open-in-view: false
     hibernate:
       ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        default_batch_fetch_size: 50
   flyway:
     enabled: true
+    locations: classpath:db/migration
+  web:
+    locale: es_PE
+    locale-resolver: fixed
+
 server:
   port: 8080
+  error:
+    include-stacktrace: never
+  servlet:
+    session:
+      timeout: 8h
+      cookie:
+        name: IQCFLOWSESSION
+        http-only: true
+        same-site: lax
+
 management:
   endpoints:
     web:
       exposure:
         include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+springdoc:
+  show-login-endpoint: true
+  swagger-ui:
+    csrf:
+      enabled: true
+
+logging:
+  pattern:
+    correlation: "[%X{correlationId:-}] "
+
+iqc:
+  zona-horaria: America/Lima
+  seguridad:
+    intentos-maximos: 5
+    duracion-bloqueo: 15m
+    limite-ip-intentos: 20
+    limite-ip-ventana: 15m
+  # Arranque inicial: crea el primer usuario MASTER (ver README)
+  master-inicial:
+    habilitado: ${IQC_MASTER_INICIAL:false}
+    organizacion-codigo: IQC_PERU
+    organizacion-nombre: IQC Perú
+    correo: ${IQC_MASTER_CORREO:}
+    nombre: ${IQC_MASTER_NOMBRE:}
+    contrasena: ${IQC_MASTER_CONTRASENA:}

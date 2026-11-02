@@ -1,0 +1,6 @@
+# Copia este archivo como config/local.yml (ignorado por git) y coloca la clave
+# del usuario iqc_dev de tu PostgreSQL local. Las variables de entorno DB_PASSWORD
+# y TEST_DB_PASSWORD, si existen, tienen prioridad sobre este valor.
+iqc:
+  local:
+    clave-bd: CAMBIAR_POR_CLAVE_LOCAL
