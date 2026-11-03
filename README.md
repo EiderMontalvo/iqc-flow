@@ -11,7 +11,10 @@ PostgreSQL 18 y Flyway. Desarrollo en Windows 10, sin Docker.
   cookie y CSRF, bitácora inmutable, manejo de errores, OpenAPI y pruebas contra PostgreSQL real.
 - **Incremento 2 (clientes):** prospectos y clientes con RUC validado, contactos, direcciones y sedes,
   responsable comercial, búsqueda sin tildes, archivo y restauración.
-- Siguiente: seguimientos (Incremento 3). Ver el plan en
+- **Incremento 3 (seguimientos):** tareas con responsable y fecha límite, historial, actividades con
+  clientes, Centro de seguimientos (hoy, atrasadas, próximas, en espera, clientes sin movimiento) y avisos
+  internos de tareas vencidas o asignadas.
+- Siguiente: motor de automatizaciones y expediente de certificación. Ver el plan en
   [docs/architecture/plan-tecnico-inicial.md](docs/architecture/plan-tecnico-inicial.md).
 
 ```text
@@ -85,6 +88,8 @@ Con la extensión **REST Client** de VS Code (`humao.rest-client`):
    CSRF → inicio de sesión → CSRF → cambio de contraseña → usuarios, roles y bitácora.
 3. Para clientes, usa [docs/api/http/clientes.http](docs/api/http/clientes.http): verificación de RUC,
    registro, activación, búsqueda, contactos, direcciones, historial y archivo.
+4. Para seguimientos, usa [docs/api/http/seguimientos.http](docs/api/http/seguimientos.http): tareas, vistas
+   del centro, completar con siguiente tarea, reprogramar, actividades y notificaciones.
 
 ### Autenticación
 
@@ -124,6 +129,25 @@ Reglas principales: el RUC se valida con el dígito verificador de SUNAT; no pue
 mismo documento; un cliente `ACTIVO` necesita documento; solo hay una dirección `FISCAL` y un contacto principal;
 la bitácora guarda el correo y el teléfono de los contactos enmascarados.
 
+### Endpoints del Incremento 3 (seguimientos y notificaciones)
+
+| Método y ruta | Permiso |
+|---|---|
+| `GET /api/v1/seguimientos/tareas` (vista, mias, responsableId, clienteId, tipo, estado, prioridad, dias) | `seguimientos:leer` |
+| `GET /api/v1/seguimientos/tareas/{id}`, `GET /api/v1/seguimientos/tipos-tarea` | `seguimientos:leer` |
+| `POST /api/v1/seguimientos/tareas` | `seguimientos:escribir` (para otra persona: `seguimientos:asignar`) |
+| `PATCH /api/v1/seguimientos/tareas/{id}` | ser el responsable, o `seguimientos:asignar` / `seguimientos:leer-todos` |
+| `POST /api/v1/seguimientos/tareas/{id}/completado`, `/reprogramacion`, `/cancelacion` | igual que editar |
+| `PUT /api/v1/seguimientos/tareas/{id}/responsable` | `seguimientos:asignar` |
+| `GET /api/v1/seguimientos/resumen`, `GET /api/v1/seguimientos/clientes-sin-movimiento` | `seguimientos:leer` |
+| `POST /api/v1/seguimientos/actividades`, `GET /api/v1/seguimientos/actividades?clienteId=` | `escribir` / `leer` |
+| `GET /api/v1/notificaciones`, `/contador`, `POST /{id}/lectura`, `POST /lectura` | sesión (solo las propias) |
+
+Vistas: `ABIERTAS` (por defecto), `HOY`, `ATRASADAS`, `PROXIMAS` (de mañana a `dias`), `EN_ESPERA`, `CERRADAS`,
+`TODAS`. Un usuario ve sus tareas y las de los clientes a su cargo; con `seguimientos:leer-todos`, todas.
+Completar exige un resultado; reprogramar y cancelar exigen un motivo. Cada 15 minutos un proceso avisa una sola
+vez al responsable de cada tarea vencida (`iqc.seguimientos.revision-vencidas`).
+
 Los errores siguen RFC 9457 (`application/problem+json`) con `codigo` estable e `idCorrelacion`.
 
 ### Roles iniciales
@@ -131,9 +155,10 @@ Los errores siguen RFC 9457 (`application/problem+json`) con `codigo` estable e 
 | Rol | Permisos |
 |---|---|
 | `MASTER` | todos |
-| `ADMINISTRADOR` | `usuarios:leer`, `bitacora:leer` y todos los de `clientes:*` |
-| `COMERCIAL` | `clientes:leer`, `clientes:escribir` (ve todos los clientes; edita los suyos) |
-| `COORDINADOR_AUDITORIAS`, `RESPONSABLE_CERTIFICACIONES` | `clientes:leer` |
+| `ADMINISTRADOR` | `usuarios:leer`, `bitacora:leer`, todos los de `clientes:*` y `seguimientos:*` |
+| `COMERCIAL` | `clientes:leer`, `clientes:escribir` (ve todos los clientes; edita los suyos), `seguimientos:leer`, `seguimientos:escribir` |
+| `COORDINADOR_AUDITORIAS` | `clientes:leer`, `seguimientos:leer`, `seguimientos:escribir`, `seguimientos:asignar` |
+| `RESPONSABLE_CERTIFICACIONES` | `clientes:leer`, `seguimientos:leer`, `seguimientos:escribir` |
 
 ## 4. Pruebas
 
@@ -162,6 +187,7 @@ Abre `http://localhost:5173` y pulsa «Comprobar conexión». La interfaz de ini
 | `V1__identidad_y_bitacora.sql` | organizaciones, usuarios, roles, permisos y bitácora (con trigger de solo inserción) |
 | `V2__roles_y_permisos_iniciales.sql` | 5 roles del sistema y 4 permisos; no crea usuarios |
 | `V3__clientes.sql` | clientes (código `CLI-000001`), contactos, direcciones y 5 permisos `clientes:*` |
+| `V4__seguimientos_y_notificaciones.sql` | tipos de tarea, tareas, historial, actividades, notificaciones y 4 permisos `seguimientos:*` |
 
 Una migración aplicada nunca se modifica: los cambios se hacen con una nueva versión.
 

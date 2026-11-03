@@ -202,6 +202,6 @@ class UsuariosIT extends PruebaIntegracion {
         .andExpect(jsonPath("$[?(@.codigo == 'MASTER')].permisos[*]",
             hasItems("usuarios:gestionar", "roles:asignar", "bitacora:leer", "clientes:archivar")))
         .andExpect(jsonPath("$[?(@.codigo == 'COMERCIAL')].permisos[*]",
-            containsInAnyOrder("clientes:leer", "clientes:escribir")));
+            containsInAnyOrder("clientes:leer", "clientes:escribir", "seguimientos:leer", "seguimientos:escribir")));
   }
 }

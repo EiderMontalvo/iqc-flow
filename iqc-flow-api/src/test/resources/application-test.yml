@@ -8,3 +8,6 @@ iqc:
   seguridad:
     # Todas las pruebas comparten la IP 127.0.0.1
     limite-ip-intentos: 10000
+
+  programador:
+    habilitado: false

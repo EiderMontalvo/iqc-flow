@@ -1,0 +1,120 @@
+### IQC Flow — Seguimientos y notificaciones (extensión REST Client de VS Code: humao.rest-client)
+# Credenciales en docs/api/http/.env (ver ejemplo.env). Ejecuta en orden con "Send Request".
+# Necesitas un cliente: crea uno con clientes.http y copia su id en @clienteId.
+
+@api = http://localhost:8080/api/v1
+@correo = {{$dotenv IQC_CORREO}}
+@contrasena = {{$dotenv IQC_CONTRASENA}}
+@clienteId = PEGA_AQUI_EL_ID_DE_UN_CLIENTE
+
+### 1. Token CSRF
+# @name csrf
+GET {{api}}/autenticacion/csrf
+
+### 2. Iniciar sesión (204)
+POST {{api}}/autenticacion/inicio-sesion
+Content-Type: application/x-www-form-urlencoded
+X-XSRF-TOKEN: {{csrf.response.body.$.token}}
+
+correo={{correo}}&contrasena={{contrasena}}
+
+### 3. Token CSRF de la sesión
+# @name sesion
+GET {{api}}/autenticacion/csrf
+
+### 4. Tipos de tarea
+GET {{api}}/seguimientos/tipos-tarea
+
+### 5. Crear una tarea para el cliente (la prioridad sale del tipo si no se indica)
+# @name tarea
+POST {{api}}/seguimientos/tareas
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "titulo": "Recordar la cotización ISO 9001",
+  "tipo": "RECORDATORIO_COTIZACION",
+  "clienteId": "{{clienteId}}",
+  "fechaLimite": "{{$datetime 'YYYY-MM-DD' 2 d}}",
+  "horaLimite": "10:00"
+}
+
+### 6. Resumen para el panel: hoy, atrasadas, próximas (7 días), en espera
+GET {{api}}/seguimientos/resumen
+
+### 7. Centro de seguimientos: mis tareas próximas
+GET {{api}}/seguimientos/tareas?vista=PROXIMAS&mias=true&dias=7
+
+### 8. Atrasadas (todas las que puedo ver)
+GET {{api}}/seguimientos/tareas?vista=ATRASADAS
+
+### 9. Poner la tarea en espera de respuesta del cliente
+# @name enEspera
+PATCH {{api}}/seguimientos/tareas/{{tarea.response.body.$.id}}
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "estado": "EN_ESPERA",
+  "version": {{tarea.response.body.$.version}}
+}
+
+### 10. Reprogramar (el motivo es obligatorio)
+# @name reprogramada
+POST {{api}}/seguimientos/tareas/{{tarea.response.body.$.id}}/reprogramacion
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "fechaLimite": "{{$datetime 'YYYY-MM-DD' 5 d}}",
+  "motivo": "El cliente pidió respuesta la próxima semana",
+  "version": {{enEspera.response.body.$.version}}
+}
+
+### 11. Registrar la llamada con el cliente
+POST {{api}}/seguimientos/actividades
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "clienteId": "{{clienteId}}",
+  "tipo": "LLAMADA",
+  "direccion": "SALIENTE",
+  "resumen": "Confirmó interés; revisará la cotización con gerencia",
+  "tareaId": "{{tarea.response.body.$.id}}"
+}
+
+### 12. Completar con resultado y crear la siguiente tarea en el mismo paso
+POST {{api}}/seguimientos/tareas/{{tarea.response.body.$.id}}/completado
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "resultado": "INTERESADO",
+  "notas": "Pidió una reunión para revisar el alcance",
+  "version": {{reprogramada.response.body.$.version}},
+  "siguiente": {
+    "titulo": "Reunión para revisar el alcance",
+    "tipo": "REUNION",
+    "fechaLimite": "{{$datetime 'YYYY-MM-DD' 7 d}}"
+  }
+}
+
+### 13. Detalle con historial
+GET {{api}}/seguimientos/tareas/{{tarea.response.body.$.id}}
+
+### 14. Historial de actividades del cliente
+GET {{api}}/seguimientos/actividades?clienteId={{clienteId}}
+
+### 15. Clientes sin movimiento en 30 días (y sin tareas abiertas)
+GET {{api}}/seguimientos/clientes-sin-movimiento?dias=30
+
+### 16. Mis notificaciones y contador de no leídas
+GET {{api}}/notificaciones
+
+###
+GET {{api}}/notificaciones/contador
+
+### 17. Marcar todas como leídas
+POST {{api}}/notificaciones/lectura
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
