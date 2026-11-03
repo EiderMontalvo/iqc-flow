@@ -16,7 +16,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import pe.com.iqc.flow.compartido.domain.EntidadBase;
 
-/**usuario interno de IQC Flow. */
+/**usuario interno de IQC Flow*/
 @Entity
 @Table(name = "usuarios")
 public class Usuario extends EntidadBase {
@@ -63,7 +63,7 @@ public class Usuario extends EntidadBase {
   protected Usuario() {
   }
 
-  /**crea un usuario activo que deberá cambiar su contraseña en el primer acceso. */
+  /**crea un usuario activo que deberá cambiar su contraseña en el primer acceso*/
   public static Usuario nuevo(UUID organizacionId, String correo, String nombre, String hashContrasena,
       Set<Rol> roles, Instant ahora) {
     Usuario usuario = new Usuario();

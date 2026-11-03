@@ -7,7 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import pe.com.iqc.flow.compartido.domain.EntidadBase;
 
-/**organización usuaria de IQC Flow (tenant). Al inicio solo existe IQC Perú. */
+/**organización usuaria de IQC Flow (tenant). Al inicio solo existe IQC Perú*/
 @Entity
 @Table(name = "organizaciones")
 public class Organizacion extends EntidadBase {

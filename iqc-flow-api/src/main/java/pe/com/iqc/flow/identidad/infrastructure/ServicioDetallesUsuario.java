@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.com.iqc.flow.identidad.domain.Usuario;
 
-/**carga usuarios para Spring Security, tanto al iniciar sesión como en cada solicitud. */
+/**carga usuarios para Spring Security, tanto al iniciar sesión como en cada solicitud*/
 @Service
 public class ServicioDetallesUsuario implements UserDetailsService {
   private final UsuarioRepository usuarios;
@@ -29,7 +29,7 @@ public class ServicioDetallesUsuario implements UserDetailsService {
         .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
   }
 
-  /**datos actuales del usuario si sigue activo; vacío si fue deshabilitado o eliminado. */
+  /**datos actuales del usuario si sigue activo; vacío si fue deshabilitado o eliminado*/
   @Transactional(readOnly = true)
   public Optional<PrincipalUsuario> cargarVigente(UUID id) {
     return usuarios.findConPermisosById(id)

@@ -14,7 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import pe.com.iqc.flow.compartido.seguridad.UsuarioAutenticado;
 import pe.com.iqc.flow.identidad.domain.Usuario;
 
-/**usuario autenticado. Las autoridades son los códigos de permiso (p. ej. "usuarios:leer"). */
+/**usuario autenticado. Las autoridades son los códigos de permiso (p. ej. "usuarios:leer")*/
 public final class PrincipalUsuario implements UserDetails, CredentialsContainer, UsuarioAutenticado, Serializable {
   @Serial
   private static final long serialVersionUID = 1L;

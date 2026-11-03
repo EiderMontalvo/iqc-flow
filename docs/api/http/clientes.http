@@ -1,0 +1,144 @@
+### IQC Flow — Clientes (extensión REST Client de VS Code: humao.rest-client)
+# Credenciales en docs/api/http/.env (ver ejemplo.env). Ejecuta en orden con "Send Request".
+
+@api = http://localhost:8080/api/v1
+@correo = {{$dotenv IQC_CORREO}}
+@contrasena = {{$dotenv IQC_CONTRASENA}}
+
+### 1. Token CSRF
+# @name csrf
+GET {{api}}/autenticacion/csrf
+
+### 2. Iniciar sesión (204)
+POST {{api}}/autenticacion/inicio-sesion
+Content-Type: application/x-www-form-urlencoded
+X-XSRF-TOKEN: {{csrf.response.body.$.token}}
+
+correo={{correo}}&contrasena={{contrasena}}
+
+### 3. Token CSRF de la sesión (lo usan todas las solicitudes siguientes)
+# @name sesion
+GET {{api}}/autenticacion/csrf
+
+### 4. ¿El RUC es válido y está libre? (no registra nada)
+GET {{api}}/clientes/verificacion-documento?tipoDocumento=RUC&numeroDocumento=20131312955
+
+### 5. Registrar un prospecto (sin documento todavía)
+# @name prospecto
+POST {{api}}/clientes
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "razonSocial": "Compañía Minera Andina S.A.C.",
+  "nombreComercial": "Minera Andina",
+  "sector": "Minería",
+  "origen": "REFERIDO",
+  "notas": "Interesada en ISO 9001 e ISO 14001"
+}
+
+### 6. Completar el RUC y pasarlo a ACTIVO (envía la versión vigente)
+# @name activado
+PATCH {{api}}/clientes/{{prospecto.response.body.$.id}}
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "tipoDocumento": "RUC",
+  "numeroDocumento": "20131312955",
+  "estado": "ACTIVO",
+  "version": {{prospecto.response.body.$.version}}
+}
+
+### 7. Buscar (sin distinguir tildes ni mayúsculas; también por código o RUC)
+GET {{api}}/clientes?texto=minera andina&pagina=0&tamano=20
+
+### 8. Filtrar por estado
+GET {{api}}/clientes?estado=ACTIVO
+
+### 9. Agregar el contacto principal
+# @name contacto
+POST {{api}}/clientes/{{prospecto.response.body.$.id}}/contactos
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "nombreCompleto": "Ana Pérez Díaz",
+  "cargo": "Jefa de Calidad",
+  "correo": "ana.perez@mineraandina.pe",
+  "telefono": "+51 987 654 321",
+  "roles": ["CALIDAD", "REPRESENTANTE_LEGAL"],
+  "esPrincipal": true
+}
+
+### 10. Modificar el contacto (PUT reemplaza todos sus datos; envía la versión)
+PUT {{api}}/clientes/{{prospecto.response.body.$.id}}/contactos/{{contacto.response.body.$.id}}
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "nombreCompleto": "Ana Pérez Díaz",
+  "cargo": "Gerenta de Calidad",
+  "correo": "ana.perez@mineraandina.pe",
+  "telefono": "+51 987 654 321",
+  "roles": ["CALIDAD", "REPRESENTANTE_LEGAL"],
+  "esPrincipal": true,
+  "version": {{contacto.response.body.$.version}}
+}
+
+### 11. Agregar la dirección fiscal (solo una por cliente)
+POST {{api}}/clientes/{{prospecto.response.body.$.id}}/direcciones
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "tipo": "FISCAL",
+  "direccion": "Av. Javier Prado Este 123, Of. 501",
+  "distrito": "San Isidro",
+  "provincia": "Lima",
+  "departamento": "Lima",
+  "ubigeo": "150131"
+}
+
+### 12. Agregar una sede (se usarán en las auditorías)
+POST {{api}}/clientes/{{prospecto.response.body.$.id}}/direcciones
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "tipo": "SEDE",
+  "nombre": "Planta Lurín",
+  "direccion": "Km 30 Panamericana Sur",
+  "distrito": "Lurín",
+  "provincia": "Lima",
+  "departamento": "Lima"
+}
+
+### 13. Ficha completa (contactos, direcciones, puedeEditar)
+# @name ficha
+GET {{api}}/clientes/{{prospecto.response.body.$.id}}
+
+### 14. Historial del cliente en la bitácora (bitacora:leer)
+GET {{api}}/bitacora?entidadTipo=CLIENTE&entidadId={{prospecto.response.body.$.id}}
+
+### 15. Archivar (clientes:archivar). Deja de aparecer en las búsquedas
+POST {{api}}/clientes/{{prospecto.response.body.$.id}}/archivo
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "version": {{ficha.response.body.$.version}},
+  "motivo": "Prueba de archivo"
+}
+
+### 16. Incluir archivados en la búsqueda
+GET {{api}}/clientes?incluirArchivados=true
+
+### 17. Restaurar (la versión aumentó en 1 al archivar)
+POST {{api}}/clientes/{{prospecto.response.body.$.id}}/restauracion
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "version": 3
+}

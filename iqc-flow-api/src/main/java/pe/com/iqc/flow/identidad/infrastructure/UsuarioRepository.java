@@ -39,7 +39,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UUID> {
 
   /**
    *suma un intento fallido de forma atómica. Al alcanzar el máximo bloquea la cuenta y reinicia
-   *el contador. Los intentos durante un bloqueo vigente no cuentan ni lo prolongan.
+   *el contador. Los intentos durante un bloqueo vigente no cuentan ni lo prolongan
    */
   @Modifying
   @Query("""

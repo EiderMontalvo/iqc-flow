@@ -126,7 +126,7 @@ public class ManejadorGlobalErrores extends ResponseEntityExceptionHandler {
     return handleExceptionInternal(ex, cuerpo, cabeceras, estado, solicitud);
   }
 
-  /**completa los errores que resuelve Spring MVC (400, 404, 405, 415…) con código y correlación. */
+  /**completa los errores que resuelve Spring MVC (400, 404, 405, 415…) con código y correlación*/
   @Override
   protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object cuerpo, HttpHeaders cabeceras,
       HttpStatusCode estado, WebRequest solicitud) {

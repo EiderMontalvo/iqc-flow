@@ -1,6 +1,6 @@
 package pe.com.iqc.flow.identidad.domain;
 
-/**roles del sistema creados por la migración V2. */
+/**roles del sistema creados por la migración V2*/
 public final class CodigosRol {
   public static final String MASTER = "MASTER";
   public static final String ADMINISTRADOR = "ADMINISTRADOR";

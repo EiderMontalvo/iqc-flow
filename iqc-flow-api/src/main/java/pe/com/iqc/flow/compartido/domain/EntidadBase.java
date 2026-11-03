@@ -12,7 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
-/**identificador UUID v7, marcas de tiempo y versión para bloqueo optimista. */
+/**identificador UUID v7, marcas de tiempo y versión para bloqueo optimista*/
 @MappedSuperclass
 public abstract class EntidadBase {
   @Id

@@ -584,16 +584,16 @@ El MVP comprende las Fases 1 y 2, el núcleo de la Fase 3 y el asistente de solo
 
 | # | Decisión | Propuesta por defecto |
 |---|---|---|
-| D1 | Reescribir `V1__init.sql` (nunca aplicado) en lugar de agregar `V2` correctivo | Reescribir |
-| D2 | Instalar PostgreSQL en Windows; versión mayor alineada con producción | Instalar la versión que se usará en el VPS |
-| D3 | Sesión con cookie vs JWT | Sesión con cookie + CSRF |
+| D1 | Reescribir `V1__init.sql` (nunca aplicado) en lugar de agregar `V2` correctivo | **Resuelta:** reescrito (Incremento 1) |
+| D2 | Instalar PostgreSQL en Windows; versión mayor alineada con producción | **Resuelta:** PostgreSQL 18 |
+| D3 | Sesión con cookie vs JWT | **Resuelta:** sesión con cookie + CSRF (ADR-010) |
 | D4 | API bajo `app.iqcperu.com/api` (sin CORS) vs `api.iqcperu.com` | `app…/api` ahora; `api.` para integraciones futuras |
 | D5 | Plazos en días hábiles o calendario; feriados de Perú | Configurable por regla; días hábiles por defecto |
 | D6 | Destinatario de los escalamientos (supervisor directo, administrador, rol) | Configurable por regla; administrador por defecto |
-| D7 | ¿Los comerciales ven todos los clientes o solo los asignados? | Ven todos, editan solo los asignados (configurable por permiso) |
-| D8 | Importar clientes existentes de MariaDB (desde un volcado) en el Incremento 2 | Sí, con un volcado y nunca contra producción, en un sub-incremento |
+| D7 | ¿Los comerciales ven todos los clientes o solo los asignados? | **Resuelta:** ven todos, editan los suyos (ADR-016) |
+| D8 | Importar clientes existentes de MariaDB (desde un volcado) en el Incremento 2 | **Resuelta:** más adelante, desde un volcado (ADR-019) |
 | D9 | Proveedor y modelo de IA | Se decidirá antes del Incremento 6, tras evaluar costo, calidad en español y tratamiento de datos |
-| D10 | Biblioteca de UI del frontend | Se decidirá en el Incremento 5 |
+| D10 | Biblioteca de UI del frontend | Se decidirá en el Incremento 5 (nunca Bootstrap CSS) |
 | D11 | Generación de PDF fiel a DOCX (por ejemplo, LibreOffice headless en el servidor) | Se evaluará en la Fase 3 |
 
 ### Insumos que faltan

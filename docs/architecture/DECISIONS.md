@@ -16,3 +16,9 @@
 - ADR-013: Pruebas de integración contra PostgreSQL real (`iqc_flow_test`) con Maven Failsafe (`*IT`), sin Testcontainers porque requiere Docker. Los límites entre módulos se verifican con Spring Modulith en una prueba unitaria.
 - ADR-014: El rol de máximo privilegio se llama `MASTER`. El primer usuario `MASTER` se crea con el arranque inicial `CreacionMasterInicial` (variables `IQC_MASTER_*`); no hay credenciales por defecto. El frontend no usará Bootstrap CSS.
 - ADR-015: Los identificadores son UUID v7 generados por Hibernate, y el correo de los usuarios es único en todo el sistema y se guarda en minúsculas.
+- ADR-016 (D7): Con `clientes:leer` se ven todos los clientes de la organización; se edita un cliente solo si se es su responsable o se tiene `clientes:escribir-todos`. Así se evita duplicar prospectos y se mantiene la propiedad de cada cartera.
+- ADR-017: Prospecto y cliente son la misma entidad con distinto estado. Un cliente `ACTIVO` exige documento fiscal, que es único entre los clientes vigentes de la organización. Los clientes se archivan en lugar de eliminarse.
+- ADR-018: Los datos personales de los contactos (correo y teléfono) se guardan enmascarados en la bitácora inmutable, para poder atender una solicitud de supresión (Ley 29733) sin alterar el historial.
+- ADR-019 (D8): La importación de los clientes de Laravel se hará más adelante, desde un volcado y nunca contra producción. La tabla `clientes` ya tiene `fuente_legado` e `id_legado` para vincularlos.
+- ADR-020: Los DTO de solicitud usan tipos envoltorio (`Boolean`, `Long`) en lugar de primitivos, porque Jackson 3 (Spring Boot 4) rechaza un primitivo ausente en el JSON.
+- ADR-021: El módulo `identidad` expone `DirectorioUsuarios` como API pública para otros módulos; `clientes` lo usa para validar responsables sin depender de los internos de identidad.

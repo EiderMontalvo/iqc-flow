@@ -13,7 +13,7 @@ import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.UuidGenerator;
 
-/**registro inmutable de la bitácora. La base de datos rechaza UPDATE y DELETE sobre esta tabla. */
+/**registro inmutable de la bitácora. La base de datos rechaza UPDATE y DELETE sobre esta tabla*/
 @Entity
 @Immutable
 @Table(name = "bitacora")
