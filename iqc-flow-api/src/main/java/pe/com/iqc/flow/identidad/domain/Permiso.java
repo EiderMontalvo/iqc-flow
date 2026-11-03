@@ -6,7 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.Immutable;
 
-/**permiso granular con formato recurso:acción, p. ej. "usuarios:leer". Lo definen las migraciones. */
+/**permiso granular con formato recurso:acción, p. ej. "usuarios:leer". Lo definen las migraciones*/
 @Entity
 @Immutable
 @Table(name = "permisos")

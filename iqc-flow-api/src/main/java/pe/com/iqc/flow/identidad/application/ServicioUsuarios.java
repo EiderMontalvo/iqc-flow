@@ -38,7 +38,7 @@ import pe.com.iqc.flow.identidad.domain.Usuario;
 import pe.com.iqc.flow.identidad.infrastructure.RolRepository;
 import pe.com.iqc.flow.identidad.infrastructure.UsuarioRepository;
 
-/**administración de usuarios internos y sus roles, limitada a la organización del actor. */
+/**administración de usuarios internos y sus roles, limitada a la organización del actor*/
 @Service
 public class ServicioUsuarios {
   private static final String ENTIDAD = "USUARIO";
@@ -175,7 +175,7 @@ public class ServicioUsuarios {
     }
   }
 
-  /**estado auditable del usuario. Nunca incluye el hash de la contraseña. */
+  /**estado auditable del usuario. Nunca incluye el hash de la contraseña*/
   private static Map<String, Object> instantanea(Usuario usuario) {
     Map<String, Object> datos = new LinkedHashMap<>();
     datos.put("correo", usuario.getCorreo());

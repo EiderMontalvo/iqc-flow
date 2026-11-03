@@ -25,7 +25,7 @@ import pe.com.iqc.flow.compartido.seguridad.ActorActual;
 import pe.com.iqc.flow.compartido.seguridad.UsuarioAutenticado;
 import tools.jackson.databind.json.JsonMapper;
 
-/**punto único para registrar y consultar la bitácora de actividad. */
+/**punto único para registrar y consultar la bitácora de actividad*/
 @Service
 public class Bitacora {
   private final RegistroBitacoraRepository repositorio;
@@ -40,11 +40,11 @@ public class Bitacora {
     this.reloj = reloj;
   }
 
-  /** Registra dentro de la transacción en curso: si la operación se revierte, el registro también. */
+  /**registra dentro de la transacción en curso: si la operación se revierte, el registro también*/
   @Transactional
   public void registrar(EntradaBitacora entrada) { repositorio.save(construir(entrada)); }
 
-  /** Registra en una transacción independiente; se usa para denegaciones y fallos que revierten la operación. */
+  /**registra en una transacción independiente; se usa para denegaciones y fallos que revierten la operación*/
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void registrarAparte(EntradaBitacora entrada) { repositorio.save(construir(entrada)); }
 
@@ -54,7 +54,7 @@ public class Bitacora {
     UUID organizacionId = actorActual.requerido().organizacionId();
     Specification<RegistroBitacora> filtro = (raiz, consulta, cb) -> {
       List<Predicate> condiciones = new ArrayList<>();
-      // Los registros sin organización son eventos de seguridad previos a identificar al usuario
+      //los registros sin organización son eventos de seguridad previos a identificar al usuario
       condiciones.add(cb.or(cb.equal(raiz.get("organizacionId"), organizacionId), cb.isNull(raiz.get("organizacionId"))));
       if (entidadTipo != null && !entidadTipo.isBlank()) condiciones.add(cb.equal(raiz.get("entidadTipo"), entidadTipo));
       if (entidadId != null && !entidadId.isBlank()) condiciones.add(cb.equal(raiz.get("entidadId"), entidadId));

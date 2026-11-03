@@ -12,7 +12,7 @@ import pe.com.iqc.flow.identidad.domain.Rol;
 import pe.com.iqc.flow.identidad.domain.Usuario;
 import pe.com.iqc.flow.organizaciones.OrganizacionResumen;
 
-/**solicitudes y respuestas de la API de identidad. */
+/**solicitudes y respuestas de la API de identidad*/
 public final class DtosIdentidad {
   private DtosIdentidad() {
   }
@@ -24,7 +24,7 @@ public final class DtosIdentidad {
       Set<@NotBlank String> roles) {
   }
 
-  /**los campos nulos no se modifican. La versión es obligatoria para detectar ediciones simultáneas. */
+  /**los campos nulos no se modifican. La versión es obligatoria para detectar ediciones simultáneas*/
   public record SolicitudActualizarUsuario(
       @Size(min = 1, max = 200) String nombre,
       EstadoUsuario estado,

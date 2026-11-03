@@ -13,7 +13,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-/**propaga el identificador de correlación en logs (MDC), respuestas y bitácora. */
+/**propaga el identificador de correlación en logs (MDC), respuestas y bitácora*/
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class FiltroCorrelacion extends OncePerRequestFilter {

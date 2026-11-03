@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.UUID;
 import pe.com.iqc.flow.compartido.domain.EntidadBase;
 
-/**conjunto de permisos. Sin organización es un rol del sistema disponible para todas. */
+/**conjunto de permisos. Sin organización es un rol del sistema disponible para todas*/
 @Entity
 @Table(name = "roles")
 public class Rol extends EntidadBase {

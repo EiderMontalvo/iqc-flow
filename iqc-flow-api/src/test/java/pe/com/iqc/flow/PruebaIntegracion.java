@@ -46,7 +46,7 @@ public abstract class PruebaIntegracion {
   @BeforeEach
   void prepararBaseDeDatos() {
     // TRUNCATE no dispara el trigger que impide modificar la bitácora
-    jdbc.execute("TRUNCATE bitacora, usuarios_roles, usuarios");
+    jdbc.execute("TRUNCATE bitacora, contactos_cliente, direcciones_cliente, clientes, usuarios_roles, usuarios");
     jdbc.update("DELETE FROM organizaciones");
     organizacionId = organizaciones.asegurarExistencia("IQC_PERU", "IQC Perú").id();
   }

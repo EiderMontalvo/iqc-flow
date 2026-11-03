@@ -22,7 +22,7 @@ import pe.com.iqc.flow.identidad.infrastructure.PropiedadesSeguridad;
 import pe.com.iqc.flow.identidad.infrastructure.UsuarioRepository;
 import pe.com.iqc.flow.organizaciones.ServicioOrganizaciones;
 
-/**inicio y cierre de sesión, bloqueo por intentos fallidos y cambio de contraseña. */
+/**inicio y cierre de sesión, bloqueo por intentos fallidos y cambio de contraseña*/
 @Service
 public class ServicioAutenticacion {
   private static final String ENTIDAD = "USUARIO";

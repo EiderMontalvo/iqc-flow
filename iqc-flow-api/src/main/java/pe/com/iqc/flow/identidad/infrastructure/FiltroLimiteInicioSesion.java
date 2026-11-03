@@ -9,7 +9,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import pe.com.iqc.flow.compartido.domain.LimiteExcedidoException;
 
-/**rechaza con 429 los inicios de sesión de una IP que superó el límite de fallos. */
+/**rechaza con 429 los inicios de sesión de una IP que superó el límite de fallos*/
 class FiltroLimiteInicioSesion extends OncePerRequestFilter {
   private final LimitadorIntentosPorIp limitador;
   private final HandlerExceptionResolver resolutorErrores;

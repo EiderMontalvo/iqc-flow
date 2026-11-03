@@ -14,3 +14,11 @@ iqc-flow-api/config/local.yml
 *.iml
 *.log
 Thumbs.db
+
+# Insumos de negocio con datos reales de clientes: nunca se suben al repositorio
+docs/*.xlsx
+docs/*.xls
+docs/*.docx
+docs/*.doc
+docs/*.pdf
+docs/insumos/

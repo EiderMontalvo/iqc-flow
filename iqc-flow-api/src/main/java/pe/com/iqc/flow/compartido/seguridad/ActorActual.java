@@ -6,7 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-/**acceso al usuario que ejecuta la operación actual. */
+/**acceso al usuario que ejecuta la operación actual*/
 @Component
 public class ActorActual {
   public Optional<UsuarioAutenticado> obtener() {

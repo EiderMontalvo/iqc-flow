@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import pe.com.iqc.flow.identidad.application.ServicioAutenticacion;
 
-/**respuestas JSON del inicio y cierre de sesión, con su registro en bitácora. */
+/**respuestas JSON del inicio y cierre de sesión, con su registro en bitácora*/
 @Component
 class ManejadoresSesion implements AuthenticationSuccessHandler, AuthenticationFailureHandler, LogoutSuccessHandler {
   private final ServicioAutenticacion servicioAutenticacion;
@@ -32,7 +32,7 @@ class ManejadoresSesion implements AuthenticationSuccessHandler, AuthenticationF
       Authentication autenticacion) {
     PrincipalUsuario principal = (PrincipalUsuario) autenticacion.getPrincipal();
     servicioAutenticacion.registrarInicioExitoso(principal.id(), principal.organizacionId());
-    // El token CSRF se renueva al iniciar sesión; cargarlo aquí envía la nueva cookie en esta misma respuesta
+    //el token CSRF se renueva al iniciar sesión; cargarlo aquí envía la nueva cookie en esta misma respuesta
     if (solicitud.getAttribute(CsrfToken.class.getName()) instanceof CsrfToken token) token.getToken();
     respuesta.setStatus(HttpServletResponse.SC_NO_CONTENT);
   }

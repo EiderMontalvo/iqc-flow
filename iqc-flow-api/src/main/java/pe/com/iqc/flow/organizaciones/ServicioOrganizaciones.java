@@ -10,7 +10,7 @@ import pe.com.iqc.flow.compartido.domain.RecursoNoEncontradoException;
 import pe.com.iqc.flow.organizaciones.domain.Organizacion;
 import pe.com.iqc.flow.organizaciones.infrastructure.OrganizacionRepository;
 
-/**API pública del módulo de organizaciones. */
+/**API pública del módulo de organizaciones*/
 @Service
 public class ServicioOrganizaciones {
   private static final String PAIS_POR_DEFECTO = "PE";
@@ -30,7 +30,7 @@ public class ServicioOrganizaciones {
         .orElseThrow(() -> new RecursoNoEncontradoException("Organización", id));
   }
 
-  /**devuelve la organización con ese código, creándola si todavía no existe. */
+  /**devuelve la organización con ese código, creándola si todavía no existe*/
   @Transactional
   public OrganizacionResumen asegurarExistencia(String codigo, String nombre) {
     return repositorio.findByCodigo(codigo).map(OrganizacionResumen::de).orElseGet(() -> {

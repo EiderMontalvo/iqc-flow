@@ -5,8 +5,8 @@ import java.util.Locale;
 import pe.com.iqc.flow.compartido.domain.ReglaNegocioException;
 
 /**
- * Política de contraseñas: longitud antes que reglas de composición (criterio NIST SP 800-63B).
- * El máximo de 72 bytes es el límite de bcrypt.
+ *política de contraseñas: longitud antes que reglas de composición (criterio NIST SP 800-63B).
+ *el máximo de 72 bytes es el límite de bcrypt.
  */
 public final class PoliticaContrasena {
   public static final int LONGITUD_MINIMA = 12;

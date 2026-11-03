@@ -1,6 +1,6 @@
 package pe.com.iqc.flow.compartido.domain;
 
-/**error de negocio con un código estable que el frontend puede interpretar. */
+/**error de negocio con un código estable que el frontend puede interpretar*/
 public abstract class ExcepcionNegocio extends RuntimeException {
   private final String codigo;
 

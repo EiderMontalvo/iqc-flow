@@ -2,6 +2,8 @@ package pe.com.iqc.flow.identidad;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -197,6 +199,9 @@ class UsuariosIT extends PruebaIntegracion {
     mvc.perform(get("/api/v1/roles").session(sesionAna))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(5)))
-        .andExpect(jsonPath("$[?(@.codigo == 'MASTER')].permisos[*]", hasSize(4)));
+        .andExpect(jsonPath("$[?(@.codigo == 'MASTER')].permisos[*]",
+            hasItems("usuarios:gestionar", "roles:asignar", "bitacora:leer", "clientes:archivar")))
+        .andExpect(jsonPath("$[?(@.codigo == 'COMERCIAL')].permisos[*]",
+            containsInAnyOrder("clientes:leer", "clientes:escribir")));
   }
 }

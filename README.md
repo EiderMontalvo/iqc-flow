@@ -6,10 +6,13 @@ con automatización de seguimientos, reuniones y documentos.
 Monolito modular: Java 21 + Spring Boot 4.1 (`iqc-flow-api`), React + TypeScript (`iqc-flow-web`),
 PostgreSQL 18 y Flyway. Desarrollo en Windows 10, sin Docker.
 
-**Estado — Incremento 1 (base ejecutable y segura):** identidad (usuarios, roles, permisos), inicio de
-sesión con cookie y CSRF, bitácora inmutable, manejo de errores, OpenAPI y pruebas contra PostgreSQL real.
-Aún no hay módulos de negocio (clientes, seguimientos…). Ver el plan en
-[docs/architecture/plan-tecnico-inicial.md](docs/architecture/plan-tecnico-inicial.md).
+**Estado:**
+- **Incremento 1 (base ejecutable y segura):** identidad (usuarios, roles, permisos), inicio de sesión con
+  cookie y CSRF, bitácora inmutable, manejo de errores, OpenAPI y pruebas contra PostgreSQL real.
+- **Incremento 2 (clientes):** prospectos y clientes con RUC validado, contactos, direcciones y sedes,
+  responsable comercial, búsqueda sin tildes, archivo y restauración.
+- Siguiente: seguimientos (Incremento 3). Ver el plan en
+  [docs/architecture/plan-tecnico-inicial.md](docs/architecture/plan-tecnico-inicial.md).
 
 ```text
 iqc-flow/
@@ -80,6 +83,8 @@ Con la extensión **REST Client** de VS Code (`humao.rest-client`):
 1. Copia `docs/api/http/ejemplo.env` como `docs/api/http/.env` (git lo ignora) y completa tu correo y contraseñas.
 2. Abre [docs/api/http/identidad.http](docs/api/http/identidad.http) y ejecuta las solicitudes en orden:
    CSRF → inicio de sesión → CSRF → cambio de contraseña → usuarios, roles y bitácora.
+3. Para clientes, usa [docs/api/http/clientes.http](docs/api/http/clientes.http): verificación de RUC,
+   registro, activación, búsqueda, contactos, direcciones, historial y archivo.
 
 ### Autenticación
 
@@ -102,15 +107,33 @@ Con la extensión **REST Client** de VS Code (`humao.rest-client`):
 | `PUT /api/v1/usuarios/{id}/roles` | `roles:asignar` |
 | `GET /api/v1/bitacora` | `bitacora:leer` |
 
+### Endpoints del Incremento 2 (clientes)
+
+| Método y ruta | Permiso |
+|---|---|
+| `GET /api/v1/clientes` (texto, estado, responsableId, incluirArchivados) | `clientes:leer` |
+| `GET /api/v1/clientes/{id}`, `GET /api/v1/clientes/verificacion-documento` | `clientes:leer` |
+| `POST /api/v1/clientes` | `clientes:escribir` (otro responsable: también `clientes:reasignar`) |
+| `PATCH /api/v1/clientes/{id}` | `clientes:escribir` y ser el responsable, o `clientes:escribir-todos` |
+| `POST\|PUT\|DELETE /api/v1/clientes/{id}/contactos[/{contactoId}]` | igual que editar el cliente |
+| `POST\|PUT\|DELETE /api/v1/clientes/{id}/direcciones[/{direccionId}]` | igual que editar el cliente |
+| `PUT /api/v1/clientes/{id}/responsable` | `clientes:reasignar` |
+| `POST /api/v1/clientes/{id}/archivo`, `POST /api/v1/clientes/{id}/restauracion` | `clientes:archivar` |
+
+Reglas principales: el RUC se valida con el dígito verificador de SUNAT; no puede haber dos clientes vigentes con el
+mismo documento; un cliente `ACTIVO` necesita documento; solo hay una dirección `FISCAL` y un contacto principal;
+la bitácora guarda el correo y el teléfono de los contactos enmascarados.
+
 Los errores siguen RFC 9457 (`application/problem+json`) con `codigo` estable e `idCorrelacion`.
 
 ### Roles iniciales
 
-| Rol | Permisos en el Incremento 1 |
+| Rol | Permisos |
 |---|---|
 | `MASTER` | todos |
-| `ADMINISTRADOR` | `usuarios:leer`, `bitacora:leer` |
-| `COMERCIAL`, `COORDINADOR_AUDITORIAS`, `RESPONSABLE_CERTIFICACIONES` | ninguno todavía; cada incremento añade los suyos |
+| `ADMINISTRADOR` | `usuarios:leer`, `bitacora:leer` y todos los de `clientes:*` |
+| `COMERCIAL` | `clientes:leer`, `clientes:escribir` (ve todos los clientes; edita los suyos) |
+| `COORDINADOR_AUDITORIAS`, `RESPONSABLE_CERTIFICACIONES` | `clientes:leer` |
 
 ## 4. Pruebas
 
@@ -138,6 +161,7 @@ Abre `http://localhost:5173` y pulsa «Comprobar conexión». La interfaz de ini
 |---|---|
 | `V1__identidad_y_bitacora.sql` | organizaciones, usuarios, roles, permisos y bitácora (con trigger de solo inserción) |
 | `V2__roles_y_permisos_iniciales.sql` | 5 roles del sistema y 4 permisos; no crea usuarios |
+| `V3__clientes.sql` | clientes (código `CLI-000001`), contactos, direcciones y 5 permisos `clientes:*` |
 
 Una migración aplicada nunca se modifica: los cambios se hacen con una nueva versión.
 
