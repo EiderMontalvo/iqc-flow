@@ -20,7 +20,11 @@ PostgreSQL 18 y Flyway. Desarrollo en Windows 10, sin Docker.
 - **Incremento 5 (expedientes):** expediente de certificación (cliente, esquema, tipo CI/RC/AMP, varias normas
   con edición, sedes, aliado comercial), flujo con India o INACAL/SAE, auditorías con equipo auditor, ciclo
   automático de vigilancias con tareas de seguimiento, auditores y aliados comerciales.
-- Siguiente: decisiones de certificación y certificados (Incremento 6). Ver el plan en
+- **Incremento 6 (decisiones y certificados):** control automático de imparcialidad y declaraciones de
+  conflicto de interés, decisiones DDC-PRO-003 con vía del Comité de Imparcialidad, certificados por norma con
+  código generado, checklist y firma configurable (Gerencia, o Gerencia y Jefe Técnico), certificados de India,
+  entrega bloqueada por pagos y encuesta, plazos de suspensión y documentos adjuntos.
+- Siguiente: motor de automatizaciones y módulo comercial (Fase 3). Ver el plan en
   [docs/architecture/plan-tecnico-inicial.md](docs/architecture/plan-tecnico-inicial.md).
 
 ```text
@@ -188,7 +192,8 @@ Los errores siguen RFC 9457 (`application/problem+json`) con `codigo` estable e 
     PAQUETE_FASE1_ENVIADO → PAQUETE_FASE2_RECIBIDO → PAQUETE_FASE2_ENVIADO → (OBSERVADO ↔ reenvío) →
     CERTIFICADO_RECIBIDO → TRADUCIDO → ENTREGADO`.
   - INACAL / SAE: `EN_PLANIFICACION → ETAPA1_REALIZADA → ETAPA2_REALIZADA → EXPEDIENTE_VERIFICADO → EN_DECISION →
-    EMITIDO → ENTREGADO`.
+    EN_EMISION (o RECHAZADO) → EMITIDO → ENTREGADO`. Desde el Incremento 6, los cuatro últimos los asigna el
+    sistema (decisión, firma y entrega), no `POST /transicion`.
   - Una recertificación o ampliación puede omitir la Etapa 1. Cancelar exige un motivo.
 - **Ciclo:** `POST /{id}/certificacion` registra la fecha de otorgamiento (solo con el certificado emitido o
   recibido) y crea las vigilancias 1 y 2 (antes de los aniversarios), la expiración a los 3 años y tareas
@@ -197,15 +202,42 @@ Los errores siguen RFC 9457 (`application/problem+json`) con `codigo` estable e 
   entrenamiento) y hay un solo líder. La respuesta avisa, sin bloquear, si falta un líder o si un auditor no tiene
   competencia registrada en alguna norma del expediente.
 
+### Endpoints del Incremento 6 (imparcialidad, decisiones, certificados y entrega)
+
+| Método y ruta | Permiso |
+|---|---|
+| `POST /api/v1/documentos?categoria=` (multipart, campo `archivo`), `GET /{id}`, `GET /{id}/contenido` | `documentos:subir` / `expedientes:leer` |
+| `GET\|PUT /api/v1/organizacion/parametros[/{clave}]` | autenticado / `organizacion:configurar` |
+| `GET\|PUT /api/v1/expedientes/{id}/auditorias/{a}/declaraciones[/{auditorId}]` | `expedientes:leer` / el propio auditor o `expedientes:gestionar` |
+| `GET /{id}/decisores`, `GET /{id}/decisiones`, `GET /{id}/certificados`, `GET /{id}/condiciones-entrega` | `expedientes:leer` |
+| `POST /api/v1/expedientes/{id}/decisiones` | `decisiones:registrar` |
+| `PATCH /{id}/certificados/{c}`, `POST …/revision`, `POST /{id}/certificados/externos`, `PUT …/traduccion` | `certificados:gestionar` |
+| `POST /{id}/certificados/{c}/firma` (`GERENCIA` o `JEFE_TECNICO`) | `certificados:firmar-gerencia` / `certificados:firmar-jefe-tecnico` |
+| `PUT /{id}/condiciones-entrega`, `POST /{id}/entrega` | `entregas:gestionar` |
+
+- **Imparcialidad:** nadie vinculado a un auditor que participó en una auditoría del cliente puede decidir; la
+  alternativa es la vía `COMITE_IMPARCIALIDAD` con el acta adjunta. Cada miembro del equipo declara conflicto de
+  interés antes de ejecutar la auditoría (el auditor desde su usuario, o el coordinador con la declaración firmada).
+- **Certificados:** la decisión favorable genera un borrador por norma con el código `PE-INA|SAE-…` → checklist
+  de emisión → firma según `POLITICA_FIRMA_CERTIFICADOS` (`FIRMA_GERENCIA` por defecto) → emitido `V.01 - fecha`.
+  En IQC Global se registra el código que envía India.
+- **Entrega:** bloqueada hasta registrar pagos conformes y la encuesta de satisfacción aplicada.
+- **Suspensión:** exige el Anexo 1 adjunto y crea las tareas de restauración (6 meses) y retiro (1 año), que se
+  cancelan solas al restaurar.
+- Los documentos se guardan en `iqc.documentos.directorio` (variable `IQC_DOCUMENTOS_DIR`, por defecto
+  `./datos/documentos`, ignorado por git). Respáldalo junto con la base de datos.
+- Ejemplos: `docs/api/http/certificacion.http`.
+
 ### Roles iniciales
 
 | Rol | Permisos |
 |---|---|
-| `MASTER` | todos |
-| `ADMINISTRADOR` | `usuarios:leer`, `bitacora:leer`, todos los de `clientes:*`, `seguimientos:*`, `expedientes:*` y `auditores:*` |
+| `MASTER` | todos (incluye firmar como Gerencia y `organizacion:configurar`) |
+| `ADMINISTRADOR` | `usuarios:leer`, `bitacora:leer`, todos los de `clientes:*`, `seguimientos:*`, `expedientes:*` y `auditores:*`, `certificados:gestionar`, `certificados:firmar-gerencia`, `entregas:gestionar`, `documentos:subir` |
 | `COMERCIAL` | `clientes:leer`, `clientes:escribir` (ve todos los clientes; edita los suyos), `seguimientos:leer`, `seguimientos:escribir`, `expedientes:leer`, `auditores:leer` |
-| `COORDINADOR_AUDITORIAS` (Jefe de Operaciones) | `clientes:leer`, `seguimientos:leer`, `seguimientos:escribir`, `seguimientos:asignar`, `expedientes:*`, `auditores:*` |
-| `RESPONSABLE_CERTIFICACIONES` (Jefe Técnico) | `clientes:leer`, `seguimientos:leer`, `seguimientos:escribir`, `expedientes:leer`, `auditores:leer` |
+| `COORDINADOR_AUDITORIAS` (Jefe de Operaciones) | `clientes:leer`, `seguimientos:leer`, `seguimientos:escribir`, `seguimientos:asignar`, `expedientes:*`, `auditores:*`, `documentos:subir` |
+| `RESPONSABLE_CERTIFICACIONES` (Jefe Técnico) | `clientes:leer`, `seguimientos:leer`, `seguimientos:escribir`, `expedientes:leer`, `auditores:leer`, `decisiones:registrar`, `certificados:gestionar`, `certificados:firmar-jefe-tecnico`, `documentos:subir` |
+| `ADMINISTRACION_LOGISTICA` | `expedientes:leer`, `entregas:gestionar` (conformidad de pagos, encuesta y entrega) |
 
 ## 4. Pruebas
 
@@ -237,6 +269,7 @@ Abre `http://localhost:5173` y pulsa «Comprobar conexión». La interfaz de ini
 | `V4__seguimientos_y_notificaciones.sql` | tipos de tarea, tareas, historial, actividades, notificaciones y 4 permisos `seguimientos:*` |
 | `V5__catalogos_multipais.sql` | países (PE, EC), esquemas de acreditación (INACAL, SAE, IQC Global), normas y ediciones |
 | `V6__expedientes_y_auditorias.sql` | auditores y competencias, aliados comerciales, expedientes (normas, sedes, historial), auditorías y equipo auditor; IQC Global: decide India |
+| `V7__decisiones_y_certificados.sql` | documentos, parámetros de la organización, declaraciones de conflicto, decisiones, certificados, condiciones de entrega, rol `ADMINISTRACION_LOGISTICA` y 7 permisos |
 
 Una migración aplicada nunca se modifica: los cambios se hacen con una nueva versión.
 

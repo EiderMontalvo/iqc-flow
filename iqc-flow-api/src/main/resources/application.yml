@@ -20,6 +20,10 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 16MB
   web:
     locale: es_PE
     locale-resolver: fixed
@@ -66,6 +70,10 @@ iqc:
   expedientes:
     dias-anticipacion-vigilancia: 60
     dias-anticipacion-recertificacion: 120
+  # Almacén local de documentos adjuntos (actas, declaraciones, checklists). Fuera del repositorio y con respaldo
+  documentos:
+    directorio: ${IQC_DOCUMENTOS_DIR:./datos/documentos}
+    tamano-maximo: 15MB
   # Arranque inicial: crea el primer usuario MASTER (ver README)
   master-inicial:
     habilitado: ${IQC_MASTER_INICIAL:false}

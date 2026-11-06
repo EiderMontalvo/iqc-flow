@@ -200,7 +200,9 @@ class UsuariosIT extends PruebaIntegracion {
   void listaLosRolesConSusPermisos() throws Exception {
     mvc.perform(get("/api/v1/roles").session(sesionAna))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(5)))
+        .andExpect(jsonPath("$", hasSize(6)))
+        .andExpect(jsonPath("$[?(@.codigo == 'ADMINISTRACION_LOGISTICA')].permisos[*]",
+            allOf(hasItems("entregas:gestionar", "expedientes:leer"), not(hasItem("decisiones:registrar")))))
         .andExpect(jsonPath("$[?(@.codigo == 'MASTER')].permisos[*]",
             hasItems("usuarios:gestionar", "roles:asignar", "bitacora:leer", "clientes:archivar")))
         .andExpect(jsonPath("$[?(@.codigo == 'COMERCIAL')].permisos[*]",

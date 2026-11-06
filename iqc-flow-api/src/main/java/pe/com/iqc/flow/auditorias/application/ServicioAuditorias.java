@@ -28,7 +28,9 @@ import pe.com.iqc.flow.auditorias.domain.Expediente;
 import pe.com.iqc.flow.auditorias.domain.MiembroEquipo;
 import pe.com.iqc.flow.auditorias.domain.TipoAuditoria;
 import pe.com.iqc.flow.auditorias.domain.TipoServicio;
+import pe.com.iqc.flow.auditorias.domain.DeclaracionConflicto;
 import pe.com.iqc.flow.auditorias.infrastructure.AuditoriaRepository;
+import pe.com.iqc.flow.auditorias.infrastructure.DeclaracionConflictoRepository;
 import pe.com.iqc.flow.auditorias.infrastructure.ExpedienteRepository;
 import pe.com.iqc.flow.clientes.ClienteReferencia;
 import pe.com.iqc.flow.clientes.ConsultaClientes;
@@ -50,6 +52,7 @@ public class ServicioAuditorias {
   public enum VistaVigilancias { PROXIMAS, VENCIDAS }
 
   private final AuditoriaRepository auditorias;
+  private final DeclaracionConflictoRepository declaraciones;
   private final ExpedienteRepository expedientes;
   private final ServicioExpedientes servicioExpedientes;
   private final PresentadorExpedientes presentador;
@@ -59,10 +62,12 @@ public class ServicioAuditorias {
   private final Bitacora bitacora;
   private final Clock reloj;
 
-  public ServicioAuditorias(AuditoriaRepository auditorias, ExpedienteRepository expedientes,
+  public ServicioAuditorias(AuditoriaRepository auditorias, DeclaracionConflictoRepository declaraciones,
+      ExpedienteRepository expedientes,
       ServicioExpedientes servicioExpedientes, PresentadorExpedientes presentador, ConsultaAuditores auditores,
       ConsultaClientes clientes, ActorActual actorActual, Bitacora bitacora, Clock reloj) {
     this.auditorias = auditorias;
+    this.declaraciones = declaraciones;
     this.expedientes = expedientes;
     this.servicioExpedientes = servicioExpedientes;
     this.presentador = presentador;
@@ -119,6 +124,7 @@ public class ServicioAuditorias {
       if (s.fechaRealInicio().isAfter(LocalDate.now(reloj))) {
         throw new ReglaNegocioException("FECHA_FUTURA", "La fecha real de la auditoría no puede ser futura.");
       }
+      exigirDeclaraciones(e, a);
       a.registrarEjecucion(s.fechaRealInicio(), s.fechaRealFin());
     }
     if (s.estadoPaquete() != null) {
@@ -153,11 +159,45 @@ public class ServicioAuditorias {
         throw new ReglaNegocioException("ROL_NO_PERMITIDO", auditor.nombreCompleto() + " no está registrado para el rol " + m.rol() + ".");
       }
     }
+    Set<UUID> conConflicto = declaraciones.findByAuditoriaId(a.getId()).stream()
+        .filter(DeclaracionConflicto::isTieneConflicto).map(DeclaracionConflicto::getAuditorId).collect(Collectors.toSet());
+    for (MiembroSolicitado m : s.miembros()) {
+      if (conConflicto.contains(m.auditorId())) {
+        throw new ReglaNegocioException("AUDITOR_CON_CONFLICTO",
+            refs.get(m.auditorId()).nombreCompleto() + " declaró conflicto de interés para esta auditoría y no puede integrar el equipo.");
+      }
+    }
     a.asignarEquipo(s.miembros().stream().map(m -> new MiembroEquipo(m.auditorId(), m.rol())).toList());
     auditorias.flush();
     bitacora.registrar(EntradaBitacora.accion("EQUIPO_AUDITOR_ASIGNADO").entidad(ENTIDAD, a.getId())
         .estadoNuevo(Map.of("miembros", s.miembros().stream().map(m -> m.auditorId() + ":" + m.rol()).toList())));
     return respuesta(e, a);
+  }
+
+  /**
+   *estudio de conflictos: antes de registrar la auditoría como ejecutada, cada miembro del equipo debe haber
+   *declarado que no tiene conflicto de interés con el cliente
+   */
+  private void exigirDeclaraciones(Expediente e, Auditoria a) {
+    if (a.getEquipo().isEmpty()) return;
+    Map<UUID, DeclaracionConflicto> porAuditor = declaraciones.findByAuditoriaId(a.getId()).stream()
+        .collect(Collectors.toMap(DeclaracionConflicto::getAuditorId, Function.identity()));
+    Map<UUID, AuditorReferencia> refs = auditores.buscarPorIds(e.getOrganizacionId(),
+        a.getEquipo().stream().map(MiembroEquipo::auditorId).collect(Collectors.toSet()));
+    List<String> pendientes = a.getEquipo().stream().map(MiembroEquipo::auditorId)
+        .filter(id -> !porAuditor.containsKey(id))
+        .map(id -> refs.containsKey(id) ? refs.get(id).nombreCompleto() : id.toString()).sorted().toList();
+    if (!pendientes.isEmpty()) {
+      throw new ReglaNegocioException("DECLARACIONES_PENDIENTES",
+          "Falta la declaración de conflicto de interés de: " + String.join(", ", pendientes) + ".");
+    }
+    List<String> conConflicto = a.getEquipo().stream().map(MiembroEquipo::auditorId)
+        .filter(id -> porAuditor.get(id).isTieneConflicto())
+        .map(id -> refs.containsKey(id) ? refs.get(id).nombreCompleto() : id.toString()).sorted().toList();
+    if (!conConflicto.isEmpty()) {
+      throw new ReglaNegocioException("CONFLICTO_DECLARADO",
+          String.join(", ", conConflicto) + " declaró conflicto de interés: retíralo del equipo antes de registrar la auditoría.");
+    }
   }
 
   @Transactional(readOnly = true)

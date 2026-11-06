@@ -11,6 +11,9 @@ public interface ProgramadorTareas {
    */
   UUID crearTareaAutomatica(NuevaTareaAutomatica tarea);
 
+  /**cancela la tarea abierta con esa clave de deduplicación, si existe (p. ej. al restaurar una suspensión)*/
+  boolean cancelarTareaAutomatica(UUID organizacionId, String claveDeduplicacion, String motivo);
+
   record NuevaTareaAutomatica(
       UUID organizacionId,
       String titulo,

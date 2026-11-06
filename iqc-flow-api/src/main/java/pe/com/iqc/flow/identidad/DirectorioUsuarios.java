@@ -1,6 +1,7 @@
 package pe.com.iqc.flow.identidad;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -12,4 +13,7 @@ public interface DirectorioUsuarios {
 
   /**usuarios de la organización con esos identificadores (activos o no), indexados por id*/
   Map<UUID, UsuarioResumen> buscarPorIds(UUID organizacionId, Collection<UUID> ids);
+
+  /**usuarios activos de la organización que tienen el permiso por alguno de sus roles*/
+  List<UsuarioResumen> activosConPermiso(UUID organizacionId, String permiso);
 }

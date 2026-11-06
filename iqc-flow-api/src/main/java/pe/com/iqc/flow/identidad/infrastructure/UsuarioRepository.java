@@ -21,6 +21,14 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UUID> {
 
   boolean existsByCorreo(String correo);
 
+  @EntityGraph(attributePaths = {"roles", "roles.permisos"})
+  @Query("""
+      select distinct u from Usuario u join u.roles r join r.permisos p
+      where u.organizacionId = :organizacionId and p.codigo = :permiso and u.estado = :estado
+      order by u.nombre
+      """)
+  java.util.List<Usuario> activosConPermiso(UUID organizacionId, String permiso, EstadoUsuario estado);
+
   @Query("""
       select u from Usuario u
       where u.organizacionId = :organizacionId

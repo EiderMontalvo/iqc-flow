@@ -11,3 +11,6 @@ iqc:
 
   programador:
     habilitado: false
+
+  documentos:
+    directorio: target/documentos-prueba
