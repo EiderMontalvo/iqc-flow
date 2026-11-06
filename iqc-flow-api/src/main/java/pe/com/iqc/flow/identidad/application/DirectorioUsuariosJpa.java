@@ -41,6 +41,15 @@ class DirectorioUsuariosJpa implements DirectorioUsuarios {
 
   @Override
   @Transactional(readOnly = true)
+  public Optional<UsuarioResumen> buscarActivoPorCorreo(UUID organizacionId, String correo) {
+    if (correo == null) return Optional.empty();
+    return usuarios.findByCorreo(correo.trim().toLowerCase(java.util.Locale.ROOT))
+        .filter(usuario -> usuario.getOrganizacionId().equals(organizacionId) && usuario.estaActivo())
+        .map(DirectorioUsuariosJpa::resumir);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
   public List<UsuarioResumen> activosConPermiso(UUID organizacionId, String permiso) {
     return usuarios.activosConPermiso(organizacionId, permiso, EstadoUsuario.ACTIVO).stream()
         .map(DirectorioUsuariosJpa::resumir).toList();

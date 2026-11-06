@@ -259,6 +259,23 @@ npm run dev
 
 Abre `http://localhost:5173` y pulsa «Comprobar conexión». La interfaz de inicio de sesión llega en el Incremento 5.
 
+## Importar el histórico de la plataforma anterior
+
+Exporta desde phpMyAdmin solo los datos de `Certificaciones`, `Clientes`, `generarQR`, `estados_certificados`,
+`fondos`, `personas` y `certificados_personales` (ver `docs/analisis/analisis-volcado-plataforma-actual.md`).
+Guarda el archivo **fuera del repositorio**, por ejemplo en `%USERPROFILE%\.iqc-flow\volcados\`, porque contiene datos reales.
+
+```powershell
+cd iqc-flow-api
+# 1. Informe: no escribe nada; deja iqc_prod_db.sql.informe.md junto al volcado
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.arguments=--server.port=0 --iqc.importacion-legado.archivo=C:/Users/<usuario>/.iqc-flow/volcados/iqc_prod_db.sql"
+# 2. Aplicar (todo o nada; se puede repetir sin duplicar)
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.arguments=--server.port=0 --iqc.importacion-legado.archivo=C:/Users/<usuario>/.iqc-flow/volcados/iqc_prod_db.sql --iqc.importacion-legado.modo=APLICAR --iqc.importacion-legado.responsable=<correo de un usuario activo>"
+```
+
+La aplicación termina sola al acabar. Revisa el informe antes de aplicar: lista los descartes, las fusiones y los
+posibles duplicados.
+
 ## Migraciones
 
 | Versión | Contenido |
@@ -270,6 +287,7 @@ Abre `http://localhost:5173` y pulsa «Comprobar conexión». La interfaz de ini
 | `V5__catalogos_multipais.sql` | países (PE, EC), esquemas de acreditación (INACAL, SAE, IQC Global), normas y ediciones |
 | `V6__expedientes_y_auditorias.sql` | auditores y competencias, aliados comerciales, expedientes (normas, sedes, historial), auditorías y equipo auditor; IQC Global: decide India |
 | `V7__decisiones_y_certificados.sql` | documentos, parámetros de la organización, declaraciones de conflicto, decisiones, certificados, condiciones de entrega, rol `ADMINISTRACION_LOGISTICA` y 7 permisos |
+| `V8__correcciones_codigo_e_importacion_legado.sql` | letra de edición en el código, unicidad código + norma, origen legado en expedientes y certificados, tabla `qr_legado` |
 
 Una migración aplicada nunca se modifica: los cambios se hacen con una nueva versión.
 

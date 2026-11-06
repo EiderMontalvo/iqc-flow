@@ -14,6 +14,9 @@ public interface DirectorioUsuarios {
   /**usuarios de la organización con esos identificadores (activos o no), indexados por id*/
   Map<UUID, UsuarioResumen> buscarPorIds(UUID organizacionId, Collection<UUID> ids);
 
+  /**usuario activo de la organización con ese correo (sin distinguir mayúsculas)*/
+  Optional<UsuarioResumen> buscarActivoPorCorreo(UUID organizacionId, String correo);
+
   /**usuarios activos de la organización que tienen el permiso por alguno de sus roles*/
   List<UsuarioResumen> activosConPermiso(UUID organizacionId, String permiso);
 }

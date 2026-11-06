@@ -63,7 +63,7 @@ public class ServicioCatalogos {
     return normas.findById(normaCodigo == null ? "" : normaCodigo)
         .flatMap(n -> n.getEdiciones().stream().filter(e -> e.getEdicion().equals(edicion)).findFirst()
             .map(e -> new NormaEdicion(n.getCodigo(), n.getNombreCorto(), n.getCodigoSistema(), e.getEdicion(),
-                n.getNombreCorto() + ":" + e.getEdicion(), e.isVigente())));
+                n.getNombreCorto() + ":" + e.getEdicion(), e.isVigente(), e.getSufijoCodigo())));
   }
 
   private static PaisCatalogo pais(Pais p) {
@@ -109,7 +109,8 @@ public class ServicioCatalogos {
   public record EdicionCatalogo(String edicion, String designacion, boolean vigente, String notas) {
   }
 
+  /**sufijoCodigo: letra que la edición agrega al código del certificado (nulo si ninguna)*/
   public record NormaEdicion(String normaCodigo, String nombreCorto, String codigoSistema, String edicion,
-      String designacion, boolean vigente) {
+      String designacion, boolean vigente, String sufijoCodigo) {
   }
 }

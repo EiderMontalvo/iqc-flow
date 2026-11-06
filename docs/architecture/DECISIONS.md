@@ -62,3 +62,22 @@
   - **Emisión.** El certificado pasa por el checklist de emisión y se firma según la política (ADR-034). Se emite con la versión `V.NN - dd/MM/yyyy` y un token aleatorio para el futuro QR (el PDF depende de D11). Exige la fecha de certificación del expediente, y al emitirse reemplaza al certificado vigente anterior de la misma norma.
   - **IQC Global.** Se registra el código que envía India y la traducción.
   - **Entrega.** La entrega exige pagos conformes y la encuesta aplicada. Las registra Administración y logística (`entregas:gestionar`), porque la integración con pagos llegará en la Fase 3.
+- ADR-038: El histórico de la plataforma anterior de certificaciones (Laravel/MariaDB) se importa con el módulo `importacion`.
+  - **Origen:** lee un volcado SQL exportado por phpMyAdmin, guardado fuera del repositorio, y nunca se conecta a producción.
+  - **Dos modos:**
+    - INFORME analiza y escribe un informe de calidad junto al volcado;
+    - APLICAR escribe en una sola transacción, todo o nada.
+  - **Reejecución:** es reejecutable sin duplicar, gracias a `fuente_legado` + `id_legado` en clientes, expedientes y certificados.
+  - **Límites entre módulos:** escribe a través de las API públicas `ImportacionClientes` e `ImportacionCertificaciones`, que aplican las reglas del dominio (RUC, unicidad, estados), y no con SQL directo sobre tablas ajenas.
+  - **Reglas de limpieza:**
+    - `estado = 1` es un borrado lógico y no se importa;
+    - se fusionan los clientes con el mismo RUC;
+    - el esquema, la revisión, el ciclo, el año y la edición (letra `A`) se leen del código;
+    - de las cargas duplicadas se conserva la más reciente, y sus QR se redirigen a ella;
+    - cada grupo de certificados del mismo cliente, esquema, fecha y ciclo forma un expediente histórico `ENTREGADO`.
+  - **Vigilancias:** se importan como estaban; solo las futuras crean tareas.
+  - **QR:** los ya impresos se conservan en `qr_legado` (`encriptacion_id` → certificado), para mantener `consultas.iqcperu.com/<id>` (ADR-003).
+- ADR-039: Correcciones del código del certificado a partir de los certificados reales:
+  - una renovación conserva el año del otorgamiento original y sube el ciclo (`PE-INA-01520220132`);
+  - una edición puede agregar una letra al final (`ediciones_norma.sufijo_codigo`: ISO 37001:2025 → `A`);
+  - la unicidad del código es código + norma, porque en IQC Global un mismo código cubre varias normas de un sistema integrado.

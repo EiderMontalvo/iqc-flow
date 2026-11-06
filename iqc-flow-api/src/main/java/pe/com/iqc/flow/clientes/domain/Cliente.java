@@ -126,6 +126,12 @@ public class Cliente extends EntidadBase {
     this.estado = nuevoEstado;
   }
 
+  /**registra de qué sistema anterior proviene el cliente (importación)*/
+  public void marcarOrigenLegado(String fuente, String idLegado) {
+    this.fuenteLegado = fuente;
+    this.idLegado = idLegado;
+  }
+
   public void reasignar(UUID nuevoResponsable) { this.responsableUsuarioId = nuevoResponsable; }
 
   public void archivar(Instant ahora) {

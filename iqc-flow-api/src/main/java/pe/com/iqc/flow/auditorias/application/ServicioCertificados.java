@@ -126,8 +126,10 @@ public class ServicioCertificados {
       int anio = decision.getFechaDecision().getYear();
       switch (decision.getTipo()) {
         case RENOVACION -> {
+          // Como en los certificados reales: se conserva el año del otorgamiento original y sube el ciclo
           revision = anterior == null ? 1 : anterior.getRevisionAlcance();
           ciclo = anterior == null ? 2 : Math.min(anterior.getCiclo() + 1, 9);
+          if (anterior != null && anterior.getAnioDecision() != null) anio = anterior.getAnioDecision();
         }
         case AMPLIACION, REDUCCION -> {
           revision = anterior == null ? 1 : Math.min(anterior.getRevisionAlcance() + 1, 9);
@@ -141,7 +143,7 @@ public class ServicioCertificados {
         }
       }
       String codigo = codigo(e, pais, norma, anio, revision, ciclo);
-      exigirCodigoLibre(e.getOrganizacionId(), codigo, null);
+      exigirCodigoLibre(e.getOrganizacionId(), codigo, norma.normaCodigo(), null);
       String alcance = decision.getTipo() == TipoDecision.REDUCCION ? decision.getNuevoAlcance() : e.getAlcance();
       creados.add(certificados.save(Certificado.borrador(e, norma, codigo, anio, revision, ciclo, alcance,
           decision.getId(), anterior)));
@@ -170,7 +172,7 @@ public class ServicioCertificados {
     String pais = organizaciones.obtener(e.getOrganizacionId()).codigoPais();
     String codigo = codigo(e, pais, new NormaExpediente(c.getNormaCodigo(), c.getEdicion()), c.getAnioDecision(),
         revision, ciclo);
-    exigirCodigoLibre(e.getOrganizacionId(), codigo, c.getId());
+    exigirCodigoLibre(e.getOrganizacionId(), codigo, c.getNormaCodigo(), c.getId());
     String anterior = c.getCodigo();
     c.corregirBorrador(revision, ciclo, ServicioExpedientes.opcional(s.alcance(), c.getAlcance()), codigo);
     certificados.flush();
@@ -279,7 +281,7 @@ public class ServicioCertificados {
       throw new ConflictoException("CERTIFICADO_DUPLICADO", "El expediente ya tiene un certificado de " + s.norma() + ".");
     }
     String codigo = s.codigo().trim().toUpperCase();
-    exigirCodigoLibre(e.getOrganizacionId(), codigo, null);
+    exigirCodigoLibre(e.getOrganizacionId(), codigo, s.norma(), null);
     UUID traduccion = s.traduccionDocumentoId() == null ? null : documentos.exigir(e.getOrganizacionId(),
         s.traduccionDocumentoId(), CategoriaDocumento.TRADUCCION_CERTIFICADO).id();
     Certificado c = Certificado.externo(e, norma, codigo, s.fechaEmision(),
@@ -373,13 +375,13 @@ public class ServicioCertificados {
         .orElseThrow(() -> new ReglaNegocioException("NORMA_INVALIDA", "La norma " + norma.normaCodigo() + " no está en el catálogo."));
     if (anio == null) throw new ReglaNegocioException("ANIO_DECISION_REQUERIDO", "El certificado no tiene año de decisión.");
     return CodigoCertificado.generar(pais, e.getEsquemaCodigo(), e.getNumeroContrato(), anio, edicion.codigoSistema(),
-        revision, ciclo);
+        revision, ciclo, edicion.sufijoCodigo());
   }
 
-  private void exigirCodigoLibre(UUID organizacionId, String codigo, UUID excluido) {
-    if (certificados.existeCodigoActivo(organizacionId, codigo, excluido == null ? new UUID(0, 0) : excluido)) {
+  private void exigirCodigoLibre(UUID organizacionId, String codigo, String norma, UUID excluido) {
+    if (certificados.existeCodigoActivo(organizacionId, codigo, norma, excluido == null ? new UUID(0, 0) : excluido)) {
       throw new ConflictoException("CODIGO_DUPLICADO",
-          "Ya existe un certificado activo con el código " + codigo + ". Revisa el contrato, la revisión o el ciclo.");
+          "Ya existe un certificado activo de " + norma + " con el código " + codigo + ". Revisa el contrato, la revisión o el ciclo.");
     }
   }
 

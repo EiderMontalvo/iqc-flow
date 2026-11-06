@@ -30,6 +30,11 @@ public class ServicioOrganizaciones {
         .orElseThrow(() -> new RecursoNoEncontradoException("Organización", id));
   }
 
+  @Transactional(readOnly = true)
+  public java.util.Optional<OrganizacionResumen> buscarPorCodigo(String codigo) {
+    return repositorio.findByCodigo(codigo).map(OrganizacionResumen::de);
+  }
+
   /**devuelve la organización con ese código, creándola si todavía no existe*/
   @Transactional
   public OrganizacionResumen asegurarExistencia(String codigo, String nombre) {
