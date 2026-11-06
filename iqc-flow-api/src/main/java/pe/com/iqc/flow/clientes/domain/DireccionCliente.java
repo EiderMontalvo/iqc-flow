@@ -52,8 +52,10 @@ public class DireccionCliente extends EntidadBase {
   public void actualizar(TipoDireccion tipo, String nombre, String direccion, String distrito, String provincia,
       String departamento, String codigoPais, String ubigeo, String referencia) {
     String pais = ValidadorDocumento.normalizarPais(codigoPais);
-    if (ubigeo != null && !"PE".equals(pais)) {
-      throw new ReglaNegocioException("UBIGEO_SOLO_PERU", "El ubigeo solo aplica a direcciones en Perú.");
+    // Código de ubicación de 6 dígitos: ubigeo INEI en Perú; código DPA del INEC (provincia, cantón, parroquia) en Ecuador
+    if (ubigeo != null && !"PE".equals(pais) && !"EC".equals(pais)) {
+      throw new ReglaNegocioException("UBIGEO_NO_APLICA",
+          "El código de ubicación solo aplica a direcciones en Perú (ubigeo) y Ecuador (código DPA).");
     }
     this.tipo = tipo;
     this.nombre = nombre;

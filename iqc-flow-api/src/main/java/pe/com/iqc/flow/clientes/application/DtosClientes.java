@@ -180,6 +180,8 @@ public final class DtosClientes {
       boolean valido,
       String numeroNormalizado,
       String mensaje,
-      ClienteResumen existente) {
+      ClienteResumen existente,
+      /**avisos que no impiden registrar (p. ej. dígito verificador dudoso de un RUC ecuatoriano)*/
+      List<String> advertencias) {
   }
 }

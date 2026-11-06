@@ -14,6 +14,9 @@ PostgreSQL 18 y Flyway. Desarrollo en Windows 10, sin Docker.
 - **Incremento 3 (seguimientos):** tareas con responsable y fecha límite, historial, actividades con
   clientes, Centro de seguimientos (hoy, atrasadas, próximas, en espera, clientes sin movimiento) y avisos
   internos de tareas vencidas o asignadas.
+- **Multipaís:** clientes de Perú y Ecuador (RUC ecuatoriano validado), direcciones con niveles según el
+  país y catálogos de países (moneda e impuesto), esquemas de acreditación (INACAL, SAE, IQC Global) y
+  normas con su código de sistema y ediciones.
 - Siguiente: motor de automatizaciones y expediente de certificación. Ver el plan en
   [docs/architecture/plan-tecnico-inicial.md](docs/architecture/plan-tecnico-inicial.md).
 
@@ -150,6 +153,22 @@ vez al responsable de cada tarea vencida (`iqc.seguimientos.revision-vencidas`).
 
 Los errores siguen RFC 9457 (`application/problem+json`) con `codigo` estable e `idCorrelacion`.
 
+### Multipaís y catálogos
+
+| Método y ruta | Permiso |
+|---|---|
+| `GET /api/v1/catalogos/paises` | sesión |
+| `GET /api/v1/catalogos/esquemas-acreditacion` | sesión |
+| `GET /api/v1/catalogos/normas` | sesión |
+
+- **RUC:** Perú, 11 dígitos con dígito verificador SUNAT obligatorio. Ecuador, 13 dígitos con provincia, tipo de
+  contribuyente y establecimiento obligatorios; el dígito verificador del SRI solo genera una advertencia en
+  `verificacion-documento` (campo `advertencias`).
+- **Direcciones:** los campos `departamento`, `provincia` y `distrito` corresponden en Ecuador a provincia, cantón y
+  parroquia; `ubigeo` admite el código DPA de 6 dígitos. Las etiquetas por país están en `/catalogos/paises`.
+- **Normas:** código de sistema 01–05 del procedimiento DDC-PRO-003 (parte E del código del certificado) y la
+  abreviatura del cuadro de control (`9`, `14`, `45`, `27`, `37`).
+
 ### Roles iniciales
 
 | Rol | Permisos |
@@ -188,6 +207,7 @@ Abre `http://localhost:5173` y pulsa «Comprobar conexión». La interfaz de ini
 | `V2__roles_y_permisos_iniciales.sql` | 5 roles del sistema y 4 permisos; no crea usuarios |
 | `V3__clientes.sql` | clientes (código `CLI-000001`), contactos, direcciones y 5 permisos `clientes:*` |
 | `V4__seguimientos_y_notificaciones.sql` | tipos de tarea, tareas, historial, actividades, notificaciones y 4 permisos `seguimientos:*` |
+| `V5__catalogos_multipais.sql` | países (PE, EC), esquemas de acreditación (INACAL, SAE, IQC Global), normas y ediciones |
 
 Una migración aplicada nunca se modifica: los cambios se hacen con una nueva versión.
 
