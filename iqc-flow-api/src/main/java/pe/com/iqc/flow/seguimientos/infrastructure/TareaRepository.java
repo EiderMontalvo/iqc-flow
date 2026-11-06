@@ -20,6 +20,9 @@ import pe.com.iqc.flow.seguimientos.domain.TareaSeguimiento;
 public interface TareaRepository extends JpaRepository<TareaSeguimiento, UUID>, JpaSpecificationExecutor<TareaSeguimiento> {
   Optional<TareaSeguimiento> findByIdAndOrganizacionId(UUID id, UUID organizacionId);
 
+  Optional<TareaSeguimiento> findFirstByOrganizacionIdAndClaveDeduplicacionAndEstadoIn(UUID organizacionId,
+      String claveDeduplicacion, Collection<EstadoTarea> estados);
+
   /**
    *tareas abiertas ya vencidas que aún no se notificaron. SKIP LOCKED: si dos servidores revisan a la vez,
    *cada tarea la procesa solo uno

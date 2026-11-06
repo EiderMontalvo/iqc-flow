@@ -20,4 +20,10 @@ public interface ConsultaClientes {
   List<ClienteReferencia> listarVigentes(UUID organizacionId, UUID responsableIdOpcional);
 
   boolean contactoPerteneceACliente(UUID clienteId, UUID contactoId);
+
+  /**direcciones (fiscal, sedes, correspondencia) del cliente, indexadas por id*/
+  Map<UUID, DireccionReferencia> direccionesDeCliente(UUID clienteId);
+
+  record DireccionReferencia(UUID id, String tipo, String nombre, String direccion, String codigoPais) {
+  }
 }

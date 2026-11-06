@@ -58,13 +58,15 @@ import pe.com.iqc.flow.seguimientos.domain.OrigenTarea;
 import pe.com.iqc.flow.seguimientos.domain.PrioridadTarea;
 import pe.com.iqc.flow.seguimientos.domain.TareaSeguimiento;
 import pe.com.iqc.flow.seguimientos.domain.TipoTarea;
+import pe.com.iqc.flow.seguimientos.ProgramadorTareas;
+import pe.com.iqc.flow.compartido.bitacora.TipoActor;
 import pe.com.iqc.flow.seguimientos.infrastructure.HistorialTareaRepository;
 import pe.com.iqc.flow.seguimientos.infrastructure.TareaRepository;
 import pe.com.iqc.flow.seguimientos.infrastructure.TipoTareaRepository;
 
 /**creación, consulta y ciclo de vida de las tareas de seguimiento*/
 @Service
-public class ServicioTareas {
+public class ServicioTareas implements ProgramadorTareas {
   static final String ENTIDAD = "TAREA";
   static final String SUJETO_CLIENTE = "CLIENTE";
 
@@ -263,6 +265,35 @@ public class ServicioTareas {
     registrar(tarea, EventoHistorial.CREADA, null, tarea.getTitulo(), null);
     if (!responsable.equals(actor.id())) avisarAsignacion(tarea);
     return tarea;
+  }
+
+  @Override
+  @Transactional
+  public UUID crearTareaAutomatica(NuevaTareaAutomatica solicitud) {
+    var existente = tareas.findFirstByOrganizacionIdAndClaveDeduplicacionAndEstadoIn(solicitud.organizacionId(),
+        solicitud.claveDeduplicacion(), TareaSeguimiento.ABIERTAS);
+    if (existente.isPresent()) return existente.get().getId();
+    TipoTarea tipo = tipos.findById(solicitud.tipoCodigo()).filter(TipoTarea::isActivo)
+        .orElseThrow(() -> new IllegalArgumentException("Tipo de tarea desconocido: " + solicitud.tipoCodigo()));
+    UUID responsable = directorio.buscarActivo(solicitud.organizacionId(), solicitud.responsableId())
+        .map(UsuarioResumen::id)
+        .orElseThrow(() -> new ReglaNegocioException("RESPONSABLE_INVALIDO",
+            "El responsable de la tarea automática no existe o está deshabilitado."));
+    LocalDate hoy = LocalDate.now(reloj);
+    LocalDate fecha = solicitud.fechaLimite().isBefore(hoy) ? hoy : solicitud.fechaLimite();
+    TareaSeguimiento tarea = tareas.save(TareaSeguimiento.nueva(solicitud.organizacionId(), solicitud.titulo(),
+        solicitud.descripcion(), tipo.getCodigo(), solicitud.sujetoTipo(), solicitud.sujetoId(), solicitud.clienteId(),
+        responsable, tipo.getPrioridadPorDefecto(), fecha, null, OrigenTarea.AUTOMATIZACION,
+        solicitud.claveDeduplicacion(), null));
+    historial.save(new HistorialTarea(tarea.getId(), EventoHistorial.CREADA, null, tarea.getTitulo(),
+        "Creada automáticamente", null, Instant.now(reloj)));
+    bitacora.registrar(EntradaBitacora.accion("TAREA_CREADA")
+        .entidad(ENTIDAD, tarea.getId())
+        .organizacion(solicitud.organizacionId())
+        .actor(null, TipoActor.AUTOMATIZACION)
+        .estadoNuevo(valor(tarea.getTitulo()))
+        .motivo("Clave " + solicitud.claveDeduplicacion()));
+    return tarea.getId();
   }
 
   private UUID resolverResponsable(UUID solicitado, UsuarioAutenticado actor) {

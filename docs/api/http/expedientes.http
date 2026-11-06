@@ -1,0 +1,142 @@
+### IQC Flow — Expedientes, auditorías y auditores (extensión REST Client de VS Code)
+# Credenciales en docs/api/http/.env. Requiere un usuario con expedientes:gestionar (MASTER, ADMINISTRADOR
+# o COORDINADOR_AUDITORIAS). Pon en @clienteId el id de un cliente (créalo con clientes.http).
+
+@api = http://localhost:8080/api/v1
+@correo = {{$dotenv IQC_CORREO}}
+@contrasena = {{$dotenv IQC_CONTRASENA}}
+@clienteId = PEGA_AQUI_EL_ID_DE_UN_CLIENTE
+
+### 1. Token CSRF
+# @name csrf
+GET {{api}}/autenticacion/csrf
+
+### 2. Iniciar sesión
+POST {{api}}/autenticacion/inicio-sesion
+Content-Type: application/x-www-form-urlencoded
+X-XSRF-TOKEN: {{csrf.response.body.$.token}}
+
+correo={{correo}}&contrasena={{contrasena}}
+
+### 3. Token CSRF de la sesión
+# @name sesion
+GET {{api}}/autenticacion/csrf
+
+### 4. Registrar un auditor líder
+# @name lider
+POST {{api}}/auditores
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "nombreCompleto": "Auditor Líder de Prueba",
+  "correo": "lider@ejemplo.pe",
+  "roles": ["LIDER", "AUDITOR"],
+  "normas": ["ISO_9001", "ISO_45001"]
+}
+
+### 5. Registrar un experto técnico (T.E)
+# @name experto
+POST {{api}}/auditores
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "nombreCompleto": "Experto Técnico de Prueba",
+  "roles": ["EXPERTO_TECNICO"],
+  "normas": []
+}
+
+### 6. Registrar un aliado comercial (SPONSOR)
+# @name aliado
+POST {{api}}/aliados-comerciales
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "codigo": "XX",
+  "nombre": "Aliado de prueba",
+  "comisionPorcentaje": 10
+}
+
+### 7. Abrir un expediente INACAL de certificación inicial (ISO 9001 + ISO 45001)
+# @name expediente
+POST {{api}}/expedientes
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "clienteId": "{{clienteId}}",
+  "esquema": "INACAL",
+  "tipoServicio": "CERTIFICACION_INICIAL",
+  "normas": [
+    {"norma": "ISO_9001", "edicion": "2015"},
+    {"norma": "ISO_45001", "edicion": "2018"}
+  ],
+  "alcance": "Construcción de obras civiles",
+  "aliadoId": "{{aliado.response.body.$.id}}",
+  "numeroContrato": "001-2026"
+}
+
+### 8. Programar la Etapa 2
+# @name etapa2
+POST {{api}}/expedientes/{{expediente.response.body.$.id}}/auditorias
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "tipo": "ETAPA_2",
+  "fechaInicioPlan": "{{$datetime 'YYYY-MM-DD' 15 d}}",
+  "fechaFinPlan": "{{$datetime 'YYYY-MM-DD' 16 d}}",
+  "diasAuditor": 2.5,
+  "modalidad": "PRESENCIAL"
+}
+
+### 9. Asignar el equipo auditor (líder + experto técnico)
+PUT {{api}}/expedientes/{{expediente.response.body.$.id}}/auditorias/{{etapa2.response.body.$.id}}/equipo
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "miembros": [
+    {"auditorId": "{{lider.response.body.$.id}}", "rol": "LIDER"},
+    {"auditorId": "{{experto.response.body.$.id}}", "rol": "EXPERTO_TECNICO"}
+  ],
+  "version": {{etapa2.response.body.$.version}}
+}
+
+### 10. Ficha del expediente (auditorías, equipo, historial y transiciones permitidas)
+GET {{api}}/expedientes/{{expediente.response.body.$.id}}
+
+### 11. Avanzar de estado (repite con la versión que devuelve cada respuesta)
+POST {{api}}/expedientes/{{expediente.response.body.$.id}}/transicion
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "estado": "ETAPA1_REALIZADA",
+  "version": {{expediente.response.body.$.version}}
+}
+
+### 12. Cuando el expediente esté EMITIDO: registrar la certificación (crea vigilancias y tareas)
+# Cambia la versión por la actual
+POST {{api}}/expedientes/{{expediente.response.body.$.id}}/certificacion
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "fechaCertificacion": "{{$datetime 'YYYY-MM-DD'}}",
+  "version": 5
+}
+
+### 13. Vigilancias de los próximos 60 días y vencidas
+GET {{api}}/expedientes/vigilancias?vista=PROXIMAS&dias=60
+
+###
+GET {{api}}/expedientes/vigilancias?vista=VENCIDAS
+
+### 14. Auditorías sin equipo y resumen para el panel
+GET {{api}}/expedientes/auditorias-sin-equipo
+
+###
+GET {{api}}/expedientes/resumen

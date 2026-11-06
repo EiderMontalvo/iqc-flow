@@ -57,6 +57,15 @@ public class ServicioCatalogos {
     return normas.findByCodigoOperaciones(abreviatura == null ? "" : abreviatura.trim()).map(ServicioCatalogos::norma);
   }
 
+  /**edición concreta de una norma, con los datos de la norma; vacío si no existe*/
+  @Transactional(readOnly = true)
+  public Optional<NormaEdicion> buscarEdicion(String normaCodigo, String edicion) {
+    return normas.findById(normaCodigo == null ? "" : normaCodigo)
+        .flatMap(n -> n.getEdiciones().stream().filter(e -> e.getEdicion().equals(edicion)).findFirst()
+            .map(e -> new NormaEdicion(n.getCodigo(), n.getNombreCorto(), n.getCodigoSistema(), e.getEdicion(),
+                n.getNombreCorto() + ":" + e.getEdicion(), e.isVigente())));
+  }
+
   private static PaisCatalogo pais(Pais p) {
     return new PaisCatalogo(p.getCodigo(), p.getNombre(), p.getDocumentoFiscal(), p.getMoneda(),
         p.getNombreImpuesto(), p.getTasaImpuesto(),
@@ -98,5 +107,9 @@ public class ServicioCatalogos {
 
   /**designacion: "ISO 9001:2015"*/
   public record EdicionCatalogo(String edicion, String designacion, boolean vigente, String notas) {
+  }
+
+  public record NormaEdicion(String normaCodigo, String nombreCorto, String codigoSistema, String edicion,
+      String designacion, boolean vigente) {
   }
 }

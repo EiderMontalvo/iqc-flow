@@ -16,6 +16,7 @@ import pe.com.iqc.flow.clientes.domain.Cliente;
 import pe.com.iqc.flow.clientes.domain.EstadoCliente;
 import pe.com.iqc.flow.clientes.infrastructure.ClienteRepository;
 import pe.com.iqc.flow.clientes.infrastructure.ContactoClienteRepository;
+import pe.com.iqc.flow.clientes.infrastructure.DireccionClienteRepository;
 
 @Service
 class ConsultaClientesJpa implements ConsultaClientes {
@@ -23,10 +24,22 @@ class ConsultaClientesJpa implements ConsultaClientes {
 
   private final ClienteRepository clientes;
   private final ContactoClienteRepository contactos;
+  private final DireccionClienteRepository direcciones;
 
-  ConsultaClientesJpa(ClienteRepository clientes, ContactoClienteRepository contactos) {
+  ConsultaClientesJpa(ClienteRepository clientes, ContactoClienteRepository contactos,
+      DireccionClienteRepository direcciones) {
     this.clientes = clientes;
     this.contactos = contactos;
+    this.direcciones = direcciones;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Map<UUID, DireccionReferencia> direccionesDeCliente(UUID clienteId) {
+    return direcciones.findByClienteIdOrderByTipoAscNombreAsc(clienteId).stream()
+        .map(d -> new DireccionReferencia(d.getId(), d.getTipo().name(), d.getNombre(), d.getDireccion(),
+            d.getCodigoPais()))
+        .collect(Collectors.toMap(DireccionReferencia::id, Function.identity()));
   }
 
   @Override
