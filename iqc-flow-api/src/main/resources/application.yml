@@ -62,6 +62,10 @@ iqc:
     duracion-bloqueo: 15m
     limite-ip-intentos: 20
     limite-ip-ventana: 15m
+  # Anticipación (días) de las tareas automáticas del ciclo de certificación
+  expedientes:
+    dias-anticipacion-vigilancia: 60
+    dias-anticipacion-recertificacion: 120
   # Arranque inicial: crea el primer usuario MASTER (ver README)
   master-inicial:
     habilitado: ${IQC_MASTER_INICIAL:false}

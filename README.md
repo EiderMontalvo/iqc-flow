@@ -17,7 +17,10 @@ PostgreSQL 18 y Flyway. Desarrollo en Windows 10, sin Docker.
 - **Multipaís:** clientes de Perú y Ecuador (RUC ecuatoriano validado), direcciones con niveles según el
   país y catálogos de países (moneda e impuesto), esquemas de acreditación (INACAL, SAE, IQC Global) y
   normas con su código de sistema y ediciones.
-- Siguiente: motor de automatizaciones y expediente de certificación. Ver el plan en
+- **Incremento 5 (expedientes):** expediente de certificación (cliente, esquema, tipo CI/RC/AMP, varias normas
+  con edición, sedes, aliado comercial), flujo con India o INACAL/SAE, auditorías con equipo auditor, ciclo
+  automático de vigilancias con tareas de seguimiento, auditores y aliados comerciales.
+- Siguiente: decisiones de certificación y certificados (Incremento 6). Ver el plan en
   [docs/architecture/plan-tecnico-inicial.md](docs/architecture/plan-tecnico-inicial.md).
 
 ```text
@@ -169,15 +172,40 @@ Los errores siguen RFC 9457 (`application/problem+json`) con `codigo` estable e 
 - **Normas:** código de sistema 01–05 del procedimiento DDC-PRO-003 (parte E del código del certificado) y la
   abreviatura del cuadro de control (`9`, `14`, `45`, `27`, `37`).
 
+### Endpoints del Incremento 5 (expedientes, auditorías, auditores)
+
+| Método y ruta | Permiso |
+|---|---|
+| `GET /api/v1/expedientes` (texto, clienteId, esquema, estado, tipoServicio, responsableId), `GET /{id}` | `expedientes:leer` |
+| `GET /api/v1/expedientes/resumen`, `/vigilancias?vista=PROXIMAS\|VENCIDAS&dias=`, `/auditorias-sin-equipo` | `expedientes:leer` |
+| `POST /api/v1/expedientes`, `PATCH /{id}`, `POST /{id}/transicion`, `POST /{id}/certificacion` | `expedientes:gestionar` |
+| `POST /api/v1/expedientes/{id}/auditorias`, `PATCH /{id}/auditorias/{auditoriaId}`, `PUT …/equipo` | `expedientes:gestionar` |
+| `GET /api/v1/auditores`, `GET /api/v1/aliados-comerciales` | `auditores:leer` |
+| `POST\|PUT /api/v1/auditores[/{id}]`, `POST\|PUT /api/v1/aliados-comerciales[/{id}]` | `auditores:gestionar` |
+
+- **Flujo según el esquema:**
+  - IQC Global (decide India): `SOLICITUD_ENVIADA → PROPOSAL_RECIBIDO → PROPOSAL_FIRMADO → PAQUETE_FASE1_RECIBIDO →
+    PAQUETE_FASE1_ENVIADO → PAQUETE_FASE2_RECIBIDO → PAQUETE_FASE2_ENVIADO → (OBSERVADO ↔ reenvío) →
+    CERTIFICADO_RECIBIDO → TRADUCIDO → ENTREGADO`.
+  - INACAL / SAE: `EN_PLANIFICACION → ETAPA1_REALIZADA → ETAPA2_REALIZADA → EXPEDIENTE_VERIFICADO → EN_DECISION →
+    EMITIDO → ENTREGADO`.
+  - Una recertificación o ampliación puede omitir la Etapa 1. Cancelar exige un motivo.
+- **Ciclo:** `POST /{id}/certificacion` registra la fecha de otorgamiento (solo con el certificado emitido o
+  recibido) y crea las vigilancias 1 y 2 (antes de los aniversarios), la expiración a los 3 años y tareas
+  automáticas «Programar vigilancia» (60 días antes) y «Preparar recertificación» (120 días antes), sin duplicados.
+- **Equipo:** cada auditor debe poder cumplir el rol asignado (líder, auditor, experto técnico, observador, en
+  entrenamiento) y hay un solo líder. La respuesta avisa, sin bloquear, si falta un líder o si un auditor no tiene
+  competencia registrada en alguna norma del expediente.
+
 ### Roles iniciales
 
 | Rol | Permisos |
 |---|---|
 | `MASTER` | todos |
-| `ADMINISTRADOR` | `usuarios:leer`, `bitacora:leer`, todos los de `clientes:*` y `seguimientos:*` |
-| `COMERCIAL` | `clientes:leer`, `clientes:escribir` (ve todos los clientes; edita los suyos), `seguimientos:leer`, `seguimientos:escribir` |
-| `COORDINADOR_AUDITORIAS` | `clientes:leer`, `seguimientos:leer`, `seguimientos:escribir`, `seguimientos:asignar` |
-| `RESPONSABLE_CERTIFICACIONES` | `clientes:leer`, `seguimientos:leer`, `seguimientos:escribir` |
+| `ADMINISTRADOR` | `usuarios:leer`, `bitacora:leer`, todos los de `clientes:*`, `seguimientos:*`, `expedientes:*` y `auditores:*` |
+| `COMERCIAL` | `clientes:leer`, `clientes:escribir` (ve todos los clientes; edita los suyos), `seguimientos:leer`, `seguimientos:escribir`, `expedientes:leer`, `auditores:leer` |
+| `COORDINADOR_AUDITORIAS` (Jefe de Operaciones) | `clientes:leer`, `seguimientos:leer`, `seguimientos:escribir`, `seguimientos:asignar`, `expedientes:*`, `auditores:*` |
+| `RESPONSABLE_CERTIFICACIONES` (Jefe Técnico) | `clientes:leer`, `seguimientos:leer`, `seguimientos:escribir`, `expedientes:leer`, `auditores:leer` |
 
 ## 4. Pruebas
 
@@ -208,6 +236,7 @@ Abre `http://localhost:5173` y pulsa «Comprobar conexión». La interfaz de ini
 | `V3__clientes.sql` | clientes (código `CLI-000001`), contactos, direcciones y 5 permisos `clientes:*` |
 | `V4__seguimientos_y_notificaciones.sql` | tipos de tarea, tareas, historial, actividades, notificaciones y 4 permisos `seguimientos:*` |
 | `V5__catalogos_multipais.sql` | países (PE, EC), esquemas de acreditación (INACAL, SAE, IQC Global), normas y ediciones |
+| `V6__expedientes_y_auditorias.sql` | auditores y competencias, aliados comerciales, expedientes (normas, sedes, historial), auditorías y equipo auditor; IQC Global: decide India |
 
 Una migración aplicada nunca se modifica: los cambios se hacen con una nueva versión.
 
