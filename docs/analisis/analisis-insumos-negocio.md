@@ -195,3 +195,42 @@ Las cartas de suspensión y la emisión de certificados son **decisiones oficial
 7. **Libro `# Certificados`:** ¿es el registro de certificados del panel Laravel o un Excel aparte? ¿Podemos recibirlo?
 8. **Firmante y numeración de cartas:** ¿siempre firma la Gerencia General? ¿Las cartas llevan número correlativo?
 9. **Datos institucionales:** ¿cuál es el correo oficial para cartas y cuál la dirección del membrete?
+
+---
+
+## 6. Respuestas de IQC Perú (Gerencia General, 6 de noviembre de 2026)
+
+### 6.1 Glosario resuelto
+
+| Pregunta | Respuesta | Decisión en IQC Flow |
+|---|---|---|
+| TIPO | `CI` y `C` = certificación inicial (preferir `CI`); `RC` = recertificación; `AMP` = ampliación | Tipos de servicio `CERTIFICACION_INICIAL`, `RECERTIFICACION`, `AMPLIACION`; al importar, `C` → `CI` |
+| SPONSOR | **Aliado comercial** que refiere al cliente; la comisión es variable (a veces hay y a veces no) | Entidad *aliado comercial* asociada al servicio, con comisión opcional (porcentaje o monto) por servicio |
+| T.E | **Expertos técnicos**: forman parte del equipo auditor, siempre en la Fase II; aportan conocimiento especializado (tecnología, ciberseguridad, procesos industriales, idioma) | Rol `EXPERTO_TECNICO` en la asignación del equipo auditor de la Etapa 2. **Cuenta para la regla de imparcialidad** (no puede decidir sobre ese cliente) |
+| Flujo con India | Application (solicitud) → India envía el *proposal* (contrato comercial) → se devuelve firmado con las fechas planificadas → India envía los paquetes de auditoría de Fase I y Fase II → los auditores los completan → se reenvían → India envía observaciones, o el certificado o la carta de continuidad → IQC Perú traduce el certificado al español | En el esquema **IQC Global decide y emite India**; IQC Perú gestiona el flujo. Estados del expediente: solicitud enviada, proposal recibido, proposal firmado, paquete Fase I/II recibido, completado, enviado, observado, certificado recibido, traducción emitida |
+| Código del certificado | India lo envía predefinido; con INACAL y SAE lo genera IQC Perú | IQC Global: código externo registrado tal como llega. INACAL/SAE: código generado según DDC-PRO-003 |
+| Detalle de pago | `FACTURADO` (factura) o `RXH` (recibo por honorarios); *monto + IGV* = cotización × 1,18; *pagos* = porcentaje cobrado | Comprobantes de pago tipificados; el impuesto depende del tipo de comprobante (un RXH no lleva IGV) |
+| Ciclo de vigilancias | 1ra vigilancia antes de los 12 meses, 2da antes de los 24, recertificación antes del vencimiento a los 3 años. **Igual en IQC Global, INACAL y SAE** | Regla única de ciclo en los tres esquemas (ya configurada: 3 años, 2 vigilancias) |
+| Libro `# Certificados` | Ya no se usa: los datos se llenan a mano | IQC Flow reemplaza esa vinculación manual |
+| Cartas | Siempre firma la Gerencia General; **no tienen número correlativo** | Firmante configurable (Gerencia General por defecto); se propone numerarlas (pedido de `PROCESO COMERCIAL.xlsx`, Hoja2 n.º 6) |
+| Datos institucionales | Correo oficial `administracion@iqcperu.com`, pero conviene contemplar ambos correos y ambas direcciones | La organización tendrá varios correos y direcciones (fiscal en Lima, oficina en Huancayo), con uno marcado como principal para el membrete |
+
+### 6.2 Requisitos nuevos
+
+1. **Registro de facturación con hitos de pago.** El ejemplo compartido muestra una tabla con estas columnas:
+   - periodo, día y número de factura (`0001-313`);
+   - RUC, cliente y dirección;
+   - valor, IGV y total;
+   - descripción por hito (por ejemplo, *"Hito 1: 50 % servicios de certificación en las normas ISO 37001:2016 INACAL"*);
+   - código, estado (`Pagado`) y fecha de depósito.
+
+   Es decir, **los servicios se cobran por hitos** (por ejemplo, 50 % y 50 %).
+2. **Guardar los comprobantes de pago** (archivos adjuntos). El área de administración lo pidió para tener respaldo de todo.
+3. **Información para estados financieros** (balance general, estado de resultados).
+
+> **Alcance a acordar sobre el punto 3:** IQC Flow puede registrar con orden todos los **ingresos** de los servicios (facturas, RXH, hitos, cobros, comprobantes) y exportarlos para el contador. Pero un balance general y un estado de resultados completos requieren **contabilidad de doble partida**: gastos, planilla, activos, impuestos y asientos contables, que hoy están fuera del alcance del proyecto. La propuesta es cubrir los ingresos en IQC Flow con exportaciones listas para contabilidad, y decidir después si se integra con un sistema contable.
+
+### 6.3 Datos confirmados por la factura de ejemplo
+
+- La edición de ISO 37001 facturada es **2016**, y figura como vigente en el catálogo.
+- El IGV se calcula al 18 % sobre el valor (`3.000 + 540 = 3.540`).

@@ -113,15 +113,17 @@ public class ServicioClientes {
     try {
       normalizado = ValidadorDocumento.normalizar(pais, tipo, numero);
     } catch (ReglaNegocioException ex) {
-      return new VerificacionDocumento(false, null, ex.getMessage(), null);
+      return new VerificacionDocumento(false, null, ex.getMessage(), null, List.of());
     }
+    String paisNormalizado = ValidadorDocumento.normalizarPais(pais);
     ClienteResumen existente = clientes.buscarVigentePorDocumento(actorActual.requerido().organizacionId(),
-            ValidadorDocumento.normalizarPais(pais), tipo, normalizado)
+            paisNormalizado, tipo, normalizado)
         .map(this::resumen).orElse(null);
     String mensaje = existente == null
         ? "Documento válido y disponible."
         : "Ya existe el cliente " + existente.codigo() + " (" + existente.razonSocial() + ") con este documento.";
-    return new VerificacionDocumento(true, normalizado, mensaje, existente);
+    return new VerificacionDocumento(true, normalizado, mensaje, existente,
+        ValidadorDocumento.advertencias(paisNormalizado, tipo, normalizado));
   }
 
   @Transactional
