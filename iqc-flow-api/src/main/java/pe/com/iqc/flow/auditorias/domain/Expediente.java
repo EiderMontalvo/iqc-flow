@@ -81,6 +81,18 @@ public class Expediente extends EntidadBase {
   @Column(name = "creado_por", updatable = false)
   private UUID creadoPor;
 
+  @Column(name = "pagos_conformes", nullable = false)
+  private boolean pagosConformes;
+
+  @Column(name = "encuesta_aplicada", nullable = false)
+  private boolean encuestaAplicada;
+
+  @Column(name = "condiciones_por")
+  private UUID condicionesPor;
+
+  @Column(name = "condiciones_en")
+  private Instant condicionesEn;
+
   @ElementCollection
   @CollectionTable(name = "expedientes_normas", joinColumns = @JoinColumn(name = "expediente_id"))
   private Set<NormaExpediente> normas = new HashSet<>();
@@ -134,11 +146,33 @@ public class Expediente extends EntidadBase {
     this.notas = notas;
   }
 
+  /**transición manual (POST /transicion): no permite los estados que asigna el sistema*/
   public void cambiarEstado(EstadoExpediente nuevo, boolean decideIndia, Instant ahora) {
+    FlujoExpediente.validarManual(estado, nuevo, decideIndia, tipoServicio);
+    this.estado = nuevo;
+    this.estadoCambiadoEn = ahora;
+  }
+
+  /**transición que hace el sistema como efecto de una decisión, una firma o la entrega*/
+  public void avanzarPorSistema(EstadoExpediente nuevo, boolean decideIndia, Instant ahora) {
     FlujoExpediente.validar(estado, nuevo, decideIndia, tipoServicio);
     this.estado = nuevo;
     this.estadoCambiadoEn = ahora;
   }
+
+  /**conformidad de pagos y encuesta de satisfacción: ambas son requisito para entregar (DDC-PRO-003)*/
+  public void definirCondicionesEntrega(boolean pagosConformes, boolean encuestaAplicada, UUID actor, Instant ahora) {
+    exigirAbierto();
+    this.pagosConformes = pagosConformes;
+    this.encuestaAplicada = encuestaAplicada;
+    this.condicionesPor = actor;
+    this.condicionesEn = ahora;
+  }
+
+  public boolean puedeEntregarse() { return pagosConformes && encuestaAplicada; }
+
+  /**una decisión de reducción cambia el alcance certificado*/
+  public void reducirAlcance(String nuevoAlcance) { this.alcance = nuevoAlcance; }
 
   public void registrarCertificacion(CicloCertificacion ciclo) {
     if (!FlujoExpediente.CON_CERTIFICADO.contains(estado)) {
@@ -152,10 +186,10 @@ public class Expediente extends EntidadBase {
     this.fechaExpiracion = ciclo.expiracion();
   }
 
-  public boolean estaCerrado() { return estado == EstadoExpediente.CANCELADO; }
+  public boolean estaCerrado() { return estado == EstadoExpediente.CANCELADO || estado == EstadoExpediente.RECHAZADO; }
 
   public void exigirAbierto() {
-    if (estaCerrado()) throw new ReglaNegocioException("EXPEDIENTE_CANCELADO", "El expediente está cancelado.");
+    if (estaCerrado()) throw new ReglaNegocioException("EXPEDIENTE_CERRADO", "El expediente está " + (estado == EstadoExpediente.RECHAZADO ? "rechazado." : "cancelado."));
   }
 
   public UUID getOrganizacionId() { return organizacionId; }
@@ -175,6 +209,10 @@ public class Expediente extends EntidadBase {
   public LocalDate getFechaExpiracion() { return fechaExpiracion; }
   public String getNotas() { return notas; }
   public UUID getCreadoPor() { return creadoPor; }
+  public boolean isPagosConformes() { return pagosConformes; }
+  public boolean isEncuestaAplicada() { return encuestaAplicada; }
+  public UUID getCondicionesPor() { return condicionesPor; }
+  public Instant getCondicionesEn() { return condicionesEn; }
   public Set<NormaExpediente> getNormas() { return Set.copyOf(normas); }
   public Set<UUID> getSedes() { return Set.copyOf(sedes); }
 }

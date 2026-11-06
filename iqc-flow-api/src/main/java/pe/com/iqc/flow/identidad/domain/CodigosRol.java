@@ -7,6 +7,7 @@ public final class CodigosRol {
   public static final String COMERCIAL = "COMERCIAL";
   public static final String COORDINADOR_AUDITORIAS = "COORDINADOR_AUDITORIAS";
   public static final String RESPONSABLE_CERTIFICACIONES = "RESPONSABLE_CERTIFICACIONES";
+  public static final String ADMINISTRACION_LOGISTICA = "ADMINISTRACION_LOGISTICA";
 
   private CodigosRol() {
   }

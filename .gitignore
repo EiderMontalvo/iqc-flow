@@ -22,3 +22,11 @@ docs/*.docx
 docs/*.doc
 docs/*.pdf
 docs/insumos/
+
+# Almacén local de documentos adjuntos de la API
+iqc-flow-api/datos/
+
+# Volcados de bases de datos (contienen datos reales): nunca dentro del repositorio
+*.sql.gz
+**/volcados/
+iqc_prod_db*.sql

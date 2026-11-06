@@ -296,6 +296,26 @@ public class ServicioTareas implements ProgramadorTareas {
     return tarea.getId();
   }
 
+  @Override
+  @Transactional
+  public boolean cancelarTareaAutomatica(UUID organizacionId, String claveDeduplicacion, String motivo) {
+    var abierta = tareas.findFirstByOrganizacionIdAndClaveDeduplicacionAndEstadoIn(organizacionId, claveDeduplicacion,
+        TareaSeguimiento.ABIERTAS);
+    if (abierta.isEmpty()) return false;
+    TareaSeguimiento tarea = abierta.get();
+    String anterior = tarea.getEstado().name();
+    Instant ahora = Instant.now(reloj);
+    tarea.cancelar(motivo, ahora, null);
+    historial.save(new HistorialTarea(tarea.getId(), EventoHistorial.CANCELADA, anterior, EstadoTarea.CANCELADA.name(),
+        motivo, null, ahora));
+    bitacora.registrar(EntradaBitacora.accion("TAREA_CANCELADA")
+        .entidad(ENTIDAD, tarea.getId())
+        .organizacion(organizacionId)
+        .actor(null, TipoActor.AUTOMATIZACION)
+        .motivo(motivo));
+    return true;
+  }
+
   private UUID resolverResponsable(UUID solicitado, UsuarioAutenticado actor) {
     if (solicitado == null || solicitado.equals(actor.id())) return actor.id();
     if (!actorActual.tienePermiso(AccesoTareas.ASIGNAR)) {

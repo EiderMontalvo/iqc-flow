@@ -1,6 +1,7 @@
 package pe.com.iqc.flow.identidad.application;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.com.iqc.flow.identidad.DirectorioUsuarios;
 import pe.com.iqc.flow.identidad.UsuarioResumen;
+import pe.com.iqc.flow.identidad.domain.EstadoUsuario;
 import pe.com.iqc.flow.identidad.domain.Usuario;
 import pe.com.iqc.flow.identidad.infrastructure.UsuarioRepository;
 
@@ -35,6 +37,13 @@ class DirectorioUsuariosJpa implements DirectorioUsuarios {
         .filter(usuario -> usuario.getOrganizacionId().equals(organizacionId))
         .map(DirectorioUsuariosJpa::resumir)
         .collect(Collectors.toMap(UsuarioResumen::id, Function.identity()));
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<UsuarioResumen> activosConPermiso(UUID organizacionId, String permiso) {
+    return usuarios.activosConPermiso(organizacionId, permiso, EstadoUsuario.ACTIVO).stream()
+        .map(DirectorioUsuariosJpa::resumir).toList();
   }
 
   private static UsuarioResumen resumir(Usuario usuario) {

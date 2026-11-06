@@ -122,11 +122,16 @@ class ExpedientesIT extends PruebaIntegracion {
   @Test
   void registrarLaCertificacionCreaLasVigilanciasYSusTareasSinDuplicarlas() throws Exception {
     String id = JsonPath.read(enviar(post("/api/v1/expedientes"), sesion, expediente("INACAL", "CERTIFICACION_INICIAL"), 201), "$.id");
-    String[] pasos = {"ETAPA1_REALIZADA", "ETAPA2_REALIZADA", "EXPEDIENTE_VERIFICADO", "EN_DECISION", "EMITIDO"};
+    String[] pasos = {"ETAPA1_REALIZADA", "ETAPA2_REALIZADA", "EXPEDIENTE_VERIFICADO", "EN_DECISION"};
     for (int i = 0; i < pasos.length; i++) {
       enviar(post("/api/v1/expedientes/" + id + "/transicion"), sesion,
           "{\"estado\": \"%s\", \"version\": %d}".formatted(pasos[i], i), 200);
     }
+    // EN_DECISION → EN_EMISION solo con una decisión favorable (Incremento 6)
+    crearUsuario("jefe.tecnico@iqcperu.com", false, CodigosRol.RESPONSABLE_CERTIFICACIONES);
+    enviar(post("/api/v1/expedientes/" + id + "/decisiones"), iniciarSesion("jefe.tecnico@iqcperu.com"),
+        "{\"tipo\": \"OTORGAMIENTO\", \"clasificacion\": \"CONFORME\", \"via\": \"DECISOR\", \"fechaDecision\": \"%s\", \"fundamento\": \"Informes conformes\", \"version\": 4}"
+            .formatted(HOY), 201);
     LocalDate certificacion = HOY.minusMonths(11);
 
     mvc.perform(post("/api/v1/expedientes/{id}/certificacion", id).session(sesion).with(csrf())
@@ -153,7 +158,7 @@ class ExpedientesIT extends PruebaIntegracion {
         .andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$[0].cliente.razonSocial").value("Constructora Andina SAC"));
     mvc.perform(get("/api/v1/expedientes/resumen").session(sesion))
-        .andExpect(jsonPath("$.porEstado.EMITIDO").value(1))
+        .andExpect(jsonPath("$.porEstado.EN_EMISION").value(1))
         .andExpect(jsonPath("$.vigilanciasProximas30Dias").value(1))
         .andExpect(jsonPath("$.auditoriasSinEquipo").value(2));
   }

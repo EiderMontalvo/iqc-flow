@@ -1,0 +1,119 @@
+### IQC Flow — Imparcialidad, decisiones, certificados y entrega (extensión REST Client de VS Code)
+# Credenciales en docs/api/http/.env. Con el usuario MASTER se recorre todo el flujo: decide, gestiona y firma
+# como Gerencia, y registra la entrega. Prepara antes un expediente INACAL en EN_DECISION con expedientes.http
+# (con número de contrato) y pega su id en @expedienteId. Para adjuntar documentos, pon en @pdf la ruta de un PDF.
+
+@api = http://localhost:8080/api/v1
+@correo = {{$dotenv IQC_CORREO}}
+@contrasena = {{$dotenv IQC_CONTRASENA}}
+@expedienteId = PEGA_AQUI_EL_ID_DEL_EXPEDIENTE
+@pdf = C:/ruta/a/un/documento.pdf
+
+### 1. Token CSRF
+# @name csrf
+GET {{api}}/autenticacion/csrf
+
+### 2. Iniciar sesión
+POST {{api}}/autenticacion/inicio-sesion
+Content-Type: application/x-www-form-urlencoded
+X-XSRF-TOKEN: {{csrf.response.body.$.token}}
+
+correo={{correo}}&contrasena={{contrasena}}
+
+### 3. Token CSRF de la sesión
+# @name sesion
+GET {{api}}/autenticacion/csrf
+
+### 4. Política de firma (por defecto FIRMA_GERENCIA)
+GET {{api}}/organizacion/parametros
+
+### 5. (Opcional) Exigir también la firma del Jefe Técnico
+PUT {{api}}/organizacion/parametros/POLITICA_FIRMA_CERTIFICADOS
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{"valor": "FIRMA_GERENCIA_Y_JEFE_TECNICO"}
+
+### 6. Decisores autorizados y si están habilitados para este cliente
+GET {{api}}/expedientes/{{expedienteId}}/decisores
+
+### 7. Adjuntar un documento (acta del comité, declaración firmada, checklist, traducción)
+# @name documento
+POST {{api}}/documentos?categoria=ACTA_COMITE_IMPARCIALIDAD
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+Content-Type: multipart/form-data; boundary=limite
+
+--limite
+Content-Disposition: form-data; name="archivo"; filename="acta.pdf"
+Content-Type: application/pdf
+
+< {{pdf}}
+--limite--
+
+### 8. Ficha del expediente (para la versión actual)
+# @name ficha
+GET {{api}}/expedientes/{{expedienteId}}
+
+### 9. Registrar la decisión de otorgamiento (genera un borrador de certificado por norma)
+# Si el decisor tiene conflicto: "via": "COMITE_IMPARCIALIDAD" y "actaDocumentoId": "{{documento.response.body.$.id}}"
+# @name decision
+POST {{api}}/expedientes/{{expedienteId}}/decisiones
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "tipo": "OTORGAMIENTO",
+  "clasificacion": "CONFORME",
+  "via": "DECISOR",
+  "fechaDecision": "{{$datetime 'YYYY-MM-DD'}}",
+  "fundamento": "Informes de Etapa 1 y 2 conformes; no conformidades cerradas",
+  "version": {{ficha.response.body.$.version}}
+}
+
+### 10. Registrar la fecha de certificación (calcula vigilancias y expiración que mostrará el certificado)
+POST {{api}}/expedientes/{{expedienteId}}/certificacion
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "fechaCertificacion": "{{$datetime 'YYYY-MM-DD'}}",
+  "version": {{decision.response.body.$.versionExpediente}}
+}
+
+### 11. Certificados del expediente
+# @name certificados
+GET {{api}}/expedientes/{{expedienteId}}/certificados
+
+### 12. Checklist de emisión conforme (primer certificado)
+POST {{api}}/expedientes/{{expedienteId}}/certificados/{{certificados.response.body.$[0].id}}/revision
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{"checklistConforme": true, "version": {{certificados.response.body.$[0].version}}}
+
+### 13. Firma de Gerencia (con la política por defecto, emite el certificado). Usa la versión que devolvió el paso 12
+POST {{api}}/expedientes/{{expedienteId}}/certificados/{{certificados.response.body.$[0].id}}/firma
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{"tipo": "GERENCIA", "version": 1}
+
+### 14. Qué falta para entregar
+GET {{api}}/expedientes/{{expedienteId}}/condiciones-entrega
+
+### 15. Pagos conformes y encuesta aplicada (Administración). Cambia la versión por la actual del expediente
+PUT {{api}}/expedientes/{{expedienteId}}/condiciones-entrega
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{"pagosConformes": true, "encuestaAplicada": true, "version": 7}
+
+### 16. Entrega digital de todos los certificados (expediente → ENTREGADO). Cambia la versión por la actual
+POST {{api}}/expedientes/{{expedienteId}}/entrega
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{"medio": "DIGITAL", "version": 8}
+
+### 17. Historial de decisiones
+GET {{api}}/expedientes/{{expedienteId}}/decisiones

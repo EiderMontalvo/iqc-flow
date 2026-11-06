@@ -39,6 +39,19 @@ class FlujoExpedienteTest {
   }
 
   @Test
+  void laDecisionLaFirmaYLaEntregaNoSonTransicionesManuales() {
+    assertThat(FlujoExpediente.siguientes(EN_DECISION, false, TipoServicio.CERTIFICACION_INICIAL))
+        .containsExactlyInAnyOrder(EN_EMISION, RECHAZADO, CANCELADO);
+    assertThat(FlujoExpediente.siguientesManuales(EN_DECISION, false, TipoServicio.CERTIFICACION_INICIAL))
+        .containsExactly(CANCELADO);
+    assertThatThrownBy(() -> FlujoExpediente.validarManual(EN_DECISION, EN_EMISION, false,
+        TipoServicio.CERTIFICACION_INICIAL)).hasFieldOrPropertyWithValue("codigo", "TRANSICION_AUTOMATICA");
+    assertThatThrownBy(() -> FlujoExpediente.validarManual(TRADUCIDO, ENTREGADO, true,
+        TipoServicio.CERTIFICACION_INICIAL)).hasFieldOrPropertyWithValue("codigo", "TRANSICION_AUTOMATICA");
+    assertThat(FlujoExpediente.siguientes(RECHAZADO, false, TipoServicio.CERTIFICACION_INICIAL)).isEmpty();
+  }
+
+  @Test
   void elCicloDeTresAniosColocaLasVigilanciasEnLosAniversarios() {
     CicloCertificacion ciclo = CicloCertificacion.calcular(LocalDate.of(2024, 8, 26), 3, 2);
 

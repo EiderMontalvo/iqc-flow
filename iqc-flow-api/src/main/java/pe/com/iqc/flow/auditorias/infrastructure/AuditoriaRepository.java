@@ -28,6 +28,17 @@ public interface AuditoriaRepository extends JpaRepository<Auditoria, UUID> {
   List<Auditoria> pendientesEntre(UUID organizacionId, Collection<TipoAuditoria> tipos,
       Collection<EstadoAuditoria> pendientes, LocalDate desde, LocalDate hasta);
 
+  /**
+   *auditores asignados a cualquier auditoría no cancelada de cualquier expediente del cliente: base del
+   *control de imparcialidad (DDC-PRO-003: quien participó en la auditoría de ese cliente no puede decidir)
+   */
+  @Query("""
+      select distinct m.auditorId from Auditoria a join a.equipo m, Expediente e
+      where a.expedienteId = e.id and e.organizacionId = :organizacionId and e.clienteId = :clienteId
+        and a.estado <> pe.com.iqc.flow.auditorias.domain.EstadoAuditoria.CANCELADA
+      """)
+  List<UUID> auditoresDelCliente(UUID organizacionId, UUID clienteId);
+
   /**auditorías por programar o programadas que aún no tienen ningún auditor asignado*/
   @Query("""
       select a from Auditoria a, Expediente e
