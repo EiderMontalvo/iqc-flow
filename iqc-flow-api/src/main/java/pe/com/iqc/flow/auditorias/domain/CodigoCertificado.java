@@ -6,7 +6,8 @@ import pe.com.iqc.flow.compartido.domain.ReglaNegocioException;
 /**
  *código único del certificado según DDC-PRO-003: A país del organismo · B acreditación · C tres primeros dígitos
  *del contrato · D año de la decisión · E sistema (01–05) · F revisión del alcance · G ciclo.
- *Ejemplo: PE-INA-00120210111 = PE · INA · 001 · 2021 · 01 · 1 · 1
+ *Ejemplo: PE-INA-00120210111 = PE · INA · 001 · 2021 · 01 · 1 · 1. Una edición puede agregar una letra al final
+ *(ISO 37001:2025 → PE-SAE-02120260111A). En una renovación el año se mantiene y sube el ciclo (…0132)
  */
 public final class CodigoCertificado {
   private static final Map<String, String> ACREDITACION = Map.of("INACAL", "INA", "SAE", "SAE");
@@ -15,7 +16,7 @@ public final class CodigoCertificado {
   }
 
   public static String generar(String paisOrganismo, String esquema, String numeroContrato, int anioDecision,
-      String codigoSistema, int revisionAlcance, int ciclo) {
+      String codigoSistema, int revisionAlcance, int ciclo, String sufijoEdicion) {
     String acreditacion = ACREDITACION.get(esquema);
     if (acreditacion == null) {
       throw new ReglaNegocioException("ESQUEMA_SIN_CODIGO",
@@ -33,6 +34,6 @@ public final class CodigoCertificado {
       throw new ReglaNegocioException("REVISION_O_CICLO_INVALIDO", "La revisión del alcance y el ciclo van de 1 a 9.");
     }
     return paisOrganismo + "-" + acreditacion + "-" + digitos.substring(0, 3) + anioDecision + codigoSistema
-        + revisionAlcance + ciclo;
+        + revisionAlcance + ciclo + (sufijoEdicion == null ? "" : sufijoEdicion);
   }
 }

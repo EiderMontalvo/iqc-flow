@@ -93,6 +93,12 @@ public class Expediente extends EntidadBase {
   @Column(name = "condiciones_en")
   private Instant condicionesEn;
 
+  @Column(name = "fuente_legado", updatable = false, length = 40)
+  private String fuenteLegado;
+
+  @Column(name = "id_legado", updatable = false, length = 120)
+  private String idLegado;
+
   @ElementCollection
   @CollectionTable(name = "expedientes_normas", joinColumns = @JoinColumn(name = "expediente_id"))
   private Set<NormaExpediente> normas = new HashSet<>();
@@ -117,6 +123,25 @@ public class Expediente extends EntidadBase {
     expediente.responsableUsuarioId = responsable;
     expediente.creadoPor = creadoPor;
     return expediente;
+  }
+
+  /**
+   *expediente histórico importado de la plataforma anterior: ya entregado, con su ciclo tal como se registró
+   *allá (sin recalcularlo) y con las normas de sus certificados
+   */
+  public static Expediente historico(UUID organizacionId, UUID clienteId, String esquemaCodigo, TipoServicio tipoServicio,
+      Collection<NormaExpediente> normas, String alcance, LocalDate fechaCertificacion, LocalDate fechaExpiracion,
+      UUID responsable, String fuenteLegado, String idLegado, Instant ahora) {
+    Expediente e = nuevo(organizacionId, clienteId, esquemaCodigo, tipoServicio, EstadoExpediente.ENTREGADO, responsable,
+        null, ahora);
+    e.normas.addAll(normas);
+    e.alcance = alcance;
+    e.fechaCertificacion = fechaCertificacion;
+    e.fechaExpiracion = fechaExpiracion;
+    e.fuenteLegado = fuenteLegado;
+    e.idLegado = idLegado;
+    e.notas = "Importado de la plataforma anterior de certificaciones.";
+    return e;
   }
 
   public void definirNormas(Collection<NormaExpediente> nuevas) {
@@ -213,6 +238,8 @@ public class Expediente extends EntidadBase {
   public boolean isEncuestaAplicada() { return encuestaAplicada; }
   public UUID getCondicionesPor() { return condicionesPor; }
   public Instant getCondicionesEn() { return condicionesEn; }
+  public String getFuenteLegado() { return fuenteLegado; }
+  public String getIdLegado() { return idLegado; }
   public Set<NormaExpediente> getNormas() { return Set.copyOf(normas); }
   public Set<UUID> getSedes() { return Set.copyOf(sedes); }
 }

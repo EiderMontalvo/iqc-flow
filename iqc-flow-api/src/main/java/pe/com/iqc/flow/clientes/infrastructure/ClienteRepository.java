@@ -14,6 +14,8 @@ import pe.com.iqc.flow.clientes.domain.TipoDocumento;
 public interface ClienteRepository extends JpaRepository<Cliente, UUID>, JpaSpecificationExecutor<Cliente> {
   Optional<Cliente> findByIdAndOrganizacionId(UUID id, UUID organizacionId);
 
+  Optional<Cliente> findByOrganizacionIdAndFuenteLegadoAndIdLegado(UUID organizacionId, String fuenteLegado, String idLegado);
+
   /**cliente vigente (no archivado) con ese documento, si existe. */
   @Query("""
       select c from Cliente c

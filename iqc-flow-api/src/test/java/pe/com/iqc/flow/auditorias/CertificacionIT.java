@@ -361,6 +361,39 @@ class CertificacionIT extends PruebaIntegracion {
         .andExpect(content().bytes(PDF));
   }
 
+  @Test
+  void laRenovacionConservaElAnioOriginalYLaEdicion2025AgregaLaLetra() throws Exception {
+    String inicial = expedienteEmitido();
+    // Como si el otorgamiento original hubiera sido en 2022 (certificado real PE-INA-01520220132)
+    jdbc.update("UPDATE certificados SET anio_decision = 2022 WHERE expediente_id = ?::uuid", inicial);
+
+    String rc = JsonPath.read(enviar(post("/api/v1/expedientes"), operaciones,
+        expediente("INACAL").replace("CERTIFICACION_INICIAL", "RECERTIFICACION"), 201), "$.id");
+    String[] pasos = {"ETAPA2_REALIZADA", "EXPEDIENTE_VERIFICADO", "EN_DECISION"};
+    for (int i = 0; i < pasos.length; i++) {
+      enviar(post("/api/v1/expedientes/" + rc + "/transicion"), operaciones,
+          "{\"estado\": \"%s\", \"version\": %d}".formatted(pasos[i], i), 200);
+    }
+    mvc.perform(post("/api/v1/expedientes/{id}/decisiones", rc).session(jefeTecnico).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(decision("RENOVACION", "CONFORME", 3)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.certificados[*].codigo", contains("PE-INA-00120220512", "PE-INA-00120220212")))
+        .andExpect(jsonPath("$.certificados[0].ciclo").value(2));
+
+    String antisoborno = JsonPath.read(enviar(post("/api/v1/expedientes"), operaciones, """
+        {"clienteId": "%s", "esquema": "SAE", "tipoServicio": "CERTIFICACION_INICIAL",
+         "normas": [{"norma": "ISO_37001", "edicion": "2025"}], "numeroContrato": "021"}
+        """.formatted(clienteId), 201), "$.id");
+    String[] etapas = {"ETAPA1_REALIZADA", "ETAPA2_REALIZADA", "EXPEDIENTE_VERIFICADO", "EN_DECISION"};
+    for (int i = 0; i < etapas.length; i++) {
+      enviar(post("/api/v1/expedientes/" + antisoborno + "/transicion"), operaciones,
+          "{\"estado\": \"%s\", \"version\": %d}".formatted(etapas[i], i), 200);
+    }
+    mvc.perform(post("/api/v1/expedientes/{id}/decisiones", antisoborno).session(jefeTecnico).with(csrf())
+            .contentType(MediaType.APPLICATION_JSON).content(decision("OTORGAMIENTO", "CONFORME", 4)))
+        .andExpect(jsonPath("$.certificados[0].codigo").value("PE-SAE-021" + HOY.getYear() + "0111A"));
+  }
+
   /**expediente con ISO 9001 y 45001, llevado hasta EN_DECISION (versión 4)*/
   private String expedienteEnDecision(String esquema) throws Exception {
     String id = JsonPath.read(enviar(post("/api/v1/expedientes"), operaciones, expediente(esquema), 201), "$.id");

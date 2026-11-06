@@ -27,6 +27,10 @@ public class EdicionNorma {
   @Column(length = 500)
   private String notas;
 
+  /** letra que la edición agrega al código del certificado (ISO 37001:2025 → "A")*/
+  @Column(name = "sufijo_codigo", length = 2)
+  private String sufijoCodigo;
+
   protected EdicionNorma() {
   }
 
@@ -35,4 +39,5 @@ public class EdicionNorma {
   public String getEdicion() { return edicion; }
   public boolean isVigente() { return vigente; }
   public String getNotas() { return notas; }
+  public String getSufijoCodigo() { return sufijoCodigo; }
 }

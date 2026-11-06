@@ -125,6 +125,15 @@ public class Certificado extends EntidadBase {
   @Column(name = "medio_entrega", length = 10)
   private MedioEntrega medioEntrega;
 
+  @Column(name = "fuente_legado", updatable = false, length = 40)
+  private String fuenteLegado;
+
+  @Column(name = "id_legado", updatable = false, length = 60)
+  private String idLegado;
+
+  @Column(name = "url_documento_legado", updatable = false, length = 2048)
+  private String urlDocumentoLegado;
+
   protected Certificado() {
   }
 
@@ -174,6 +183,33 @@ public class Certificado extends EntidadBase {
     c.fechaExpiracion = fechaExpiracion;
     c.versionDocumento = "V.01 - " + fechaEmision.format(FORMATO_VERSION);
     c.traduccionDocumentoId = traduccionDocumentoId;
+    return c;
+  }
+
+  /**
+   *certificado histórico importado de la plataforma anterior, con su código original (sin regenerarlo), su estado
+   *administrativo y la URL de su PDF, que sigue en el almacén anterior (ADR-005)
+   */
+  public static Certificado historico(Expediente expediente, NormaExpediente norma, String codigo, Estado estado,
+      int revisionAlcance, int ciclo, Integer anioDecision, boolean emitidoPorIndia, String alcance,
+      LocalDate fechaOtorgamiento, LocalDate fechaEmision, LocalDate fechaExpiracion, String urlDocumento,
+      String fuenteLegado, String idLegado) {
+    if (!VIGENTES.contains(estado) && estado != Estado.RETIRADO) {
+      throw new ReglaNegocioException("ESTADO_CERTIFICADO", "Un certificado histórico debe estar emitido, suspendido o retirado.");
+    }
+    Certificado c = new Certificado(expediente, norma, codigo);
+    c.estado = estado;
+    c.revisionAlcance = revisionAlcance;
+    c.ciclo = ciclo;
+    c.anioDecision = anioDecision;
+    c.emitidoPorIndia = emitidoPorIndia;
+    c.alcance = alcance;
+    c.fechaOtorgamiento = fechaOtorgamiento;
+    c.fechaEmision = fechaEmision;
+    c.fechaExpiracion = fechaExpiracion;
+    c.urlDocumentoLegado = urlDocumento;
+    c.fuenteLegado = fuenteLegado;
+    c.idLegado = idLegado;
     return c;
   }
 
@@ -300,4 +336,7 @@ public class Certificado extends EntidadBase {
   public UUID getTraduccionDocumentoId() { return traduccionDocumentoId; }
   public Instant getEntregadoEn() { return entregadoEn; }
   public MedioEntrega getMedioEntrega() { return medioEntrega; }
+  public String getFuenteLegado() { return fuenteLegado; }
+  public String getIdLegado() { return idLegado; }
+  public String getUrlDocumentoLegado() { return urlDocumentoLegado; }
 }
