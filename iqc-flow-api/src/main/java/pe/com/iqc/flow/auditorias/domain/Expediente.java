@@ -144,6 +144,23 @@ public class Expediente extends EntidadBase {
     return e;
   }
 
+  /**
+   *expediente de un certificado registrado directamente en el panel (emitido por India, atrasado o corrección),
+   *sin pasar por el flujo completo: queda entregado, con las fechas del ciclo indicadas
+   */
+  public static Expediente registroDirecto(UUID organizacionId, UUID clienteId, String esquemaCodigo,
+      TipoServicio tipoServicio, Collection<NormaExpediente> normas, String alcance, LocalDate fechaCertificacion,
+      LocalDate fechaExpiracion, UUID responsable, UUID creadoPor, String motivo, Instant ahora) {
+    Expediente e = nuevo(organizacionId, clienteId, esquemaCodigo, tipoServicio, EstadoExpediente.ENTREGADO, responsable,
+        creadoPor, ahora);
+    e.normas.addAll(normas);
+    e.alcance = alcance;
+    e.fechaCertificacion = fechaCertificacion;
+    e.fechaExpiracion = fechaExpiracion;
+    e.notas = "Registro directo en el panel de certificados: " + motivo;
+    return e;
+  }
+
   public void definirNormas(Collection<NormaExpediente> nuevas) {
     if (fechaCertificacion != null) {
       throw new ReglaNegocioException("EXPEDIENTE_CERTIFICADO",

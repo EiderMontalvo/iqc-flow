@@ -38,12 +38,16 @@ class MultipaisIT extends PruebaIntegracion {
   void cadaPaisTieneSuMonedaImpuestoYNivelesDeDireccion() throws Exception {
     mvc.perform(get("/api/v1/catalogos/paises").session(sesion))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(2)))
+        .andExpect(jsonPath("$", hasSize(4)))
         .andExpect(jsonPath("$[?(@.codigo == 'PE')].moneda", hasItem("PEN")))
         .andExpect(jsonPath("$[?(@.codigo == 'PE')].nombreImpuesto", hasItem("IGV")))
         .andExpect(jsonPath("$[?(@.codigo == 'EC')].moneda", hasItem("USD")))
         .andExpect(jsonPath("$[?(@.codigo == 'EC')].tasaImpuesto", hasItem(15.0)))
-        .andExpect(jsonPath("$[?(@.codigo == 'EC')].etiquetasDireccion.nivel2", hasItem("Cantón")));
+        .andExpect(jsonPath("$[?(@.codigo == 'EC')].etiquetasDireccion.nivel2", hasItem("Cantón")))
+        // IQC LATAM: Colombia y Panamá (Incremento 8a)
+        .andExpect(jsonPath("$[?(@.codigo == 'CO')].documentoFiscal", hasItem("NIT")))
+        .andExpect(jsonPath("$[?(@.codigo == 'CO')].moneda", hasItem("COP")))
+        .andExpect(jsonPath("$[?(@.codigo == 'PA')].nombreImpuesto", hasItem("ITBMS")));
   }
 
   @Test

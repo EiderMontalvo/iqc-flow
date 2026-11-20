@@ -14,3 +14,10 @@ iqc:
 
   documentos:
     directorio: target/documentos-prueba
+
+  # La base pública de prueba es el esquema "consultas" de iqc_flow_test
+  consultas:
+    url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/iqc_flow_test}
+    usuario: ${TEST_DB_USERNAME:iqc_dev}
+    clave: ${TEST_DB_PASSWORD:${DB_PASSWORD:${iqc.local.clave-bd:}}}
+    esquema: consultas

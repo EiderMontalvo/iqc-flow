@@ -125,6 +125,18 @@ public class GestorDocumentos implements ServicioDocumentos {
     return documento;
   }
 
+  @Override
+  @Transactional(readOnly = true)
+  public byte[] leerContenido(UUID organizacionId, UUID documentoId) {
+    Documento documento = documentos.findByIdAndOrganizacionId(documentoId, organizacionId)
+        .orElseThrow(() -> new RecursoNoEncontradoException("Documento", documentoId));
+    try (InputStream entrada = almacen.abrir(documento.getRutaAlmacen())) {
+      return entrada.readAllBytes();
+    } catch (IOException e) {
+      throw new UncheckedIOException("No se encontró el contenido del documento " + documentoId, e);
+    }
+  }
+
   private Documento cargar(UUID id) {
     return documentos.findByIdAndOrganizacionId(id, actorActual.requerido().organizacionId())
         .orElseThrow(() -> new RecursoNoEncontradoException("Documento", id));

@@ -134,6 +134,14 @@ public class Certificado extends EntidadBase {
   @Column(name = "url_documento_legado", updatable = false, length = 2048)
   private String urlDocumentoLegado;
 
+  /**marca elegida a mano (código de país); nula = la del país del cliente*/
+  @Column(name = "pais_marca", length = 2)
+  private String paisMarca;
+
+  /**PDF vigente del certificado (su historial está en certificados_pdf)*/
+  @Column(name = "documento_pdf_id")
+  private UUID documentoPdfId;
+
   protected Certificado() {
   }
 
@@ -212,6 +220,35 @@ public class Certificado extends EntidadBase {
     c.idLegado = idLegado;
     return c;
   }
+
+  /**certificado registrado directamente en el panel, ya emitido, con el código que figura en el documento*/
+  public static Certificado registroDirecto(Expediente expediente, NormaExpediente norma, String codigo,
+      boolean emitidoPorIndia, int revisionAlcance, int ciclo, Integer anioDecision, String alcance,
+      LocalDate fechaOtorgamiento, LocalDate fechaEmision, LocalDate fechaExpiracion) {
+    Certificado c = new Certificado(expediente, norma, codigo);
+    c.estado = Estado.EMITIDO;
+    c.emitidoPorIndia = emitidoPorIndia;
+    c.revisionAlcance = revisionAlcance;
+    c.ciclo = ciclo;
+    c.anioDecision = anioDecision;
+    c.alcance = alcance;
+    c.fechaOtorgamiento = fechaOtorgamiento;
+    c.fechaEmision = fechaEmision;
+    c.fechaExpiracion = fechaExpiracion;
+    c.versionDocumento = "V.01 - " + fechaEmision.format(FORMATO_VERSION);
+    return c;
+  }
+
+  /**un certificado cancelado o reemplazado ya no cambia de documento*/
+  public void asignarPdf(UUID documentoId) {
+    if (estado == Estado.CANCELADO || estado == Estado.REEMPLAZADO) {
+      throw new ReglaNegocioException("ESTADO_CERTIFICADO", "No se cambia el PDF de un certificado " + estado + ".");
+    }
+    this.documentoPdfId = documentoId;
+  }
+
+  /**nulo vuelve a la marca del país del cliente*/
+  public void cambiarMarca(String codigoPais) { this.paisMarca = codigoPais; }
 
   /**en borrador se pueden corregir la revisión, el ciclo (p. ej. clientes con historia previa) y el alcance*/
   public void corregirBorrador(int revisionAlcance, int ciclo, String alcance, String nuevoCodigo) {
@@ -339,4 +376,6 @@ public class Certificado extends EntidadBase {
   public String getFuenteLegado() { return fuenteLegado; }
   public String getIdLegado() { return idLegado; }
   public String getUrlDocumentoLegado() { return urlDocumentoLegado; }
+  public String getPaisMarca() { return paisMarca; }
+  public UUID getDocumentoPdfId() { return documentoPdfId; }
 }

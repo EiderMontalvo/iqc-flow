@@ -20,6 +20,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <springdoc.version>3.2.0</springdoc.version>
     <spring-modulith.version>2.1.2</spring-modulith.version>
+    <zxing.version>3.5.3</zxing.version>
+    <poi.version>5.4.1</poi.version>
   </properties>
 
   <dependencyManagement>
@@ -78,6 +80,18 @@
     <dependency>
       <groupId>org.springframework.modulith</groupId>
       <artifactId>spring-modulith-api</artifactId>
+    </dependency>
+    <!-- Códigos QR de los certificados -->
+    <dependency>
+      <groupId>com.google.zxing</groupId>
+      <artifactId>javase</artifactId>
+      <version>${zxing.version}</version>
+    </dependency>
+    <!-- Exportación a Excel del panel de certificados (y, más adelante, plantillas DOCX) -->
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>${poi.version}</version>
     </dependency>
 
     <dependency>

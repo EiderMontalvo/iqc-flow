@@ -249,7 +249,7 @@ public class ServicioCertificados {
   }
 
   /**al emitirse, el certificado sustituye a los anteriores vigentes del cliente para la misma norma y esquema*/
-  private void sustituirAnteriores(Certificado nuevo) {
+  void sustituirAnteriores(Certificado nuevo) {
     for (Certificado anterior : certificados.findByClienteIdAndEsquemaCodigoAndNormaCodigoAndEstadoIn(
         nuevo.getClienteId(), nuevo.getEsquemaCodigo(), nuevo.getNormaCodigo(), Certificado.VIGENTES)) {
       if (!anterior.getId().equals(nuevo.getId())) {
@@ -378,7 +378,7 @@ public class ServicioCertificados {
         revision, ciclo, edicion.sufijoCodigo());
   }
 
-  private void exigirCodigoLibre(UUID organizacionId, String codigo, String norma, UUID excluido) {
+  void exigirCodigoLibre(UUID organizacionId, String codigo, String norma, UUID excluido) {
     if (certificados.existeCodigoActivo(organizacionId, codigo, norma, excluido == null ? new UUID(0, 0) : excluido)) {
       throw new ConflictoException("CODIGO_DUPLICADO",
           "Ya existe un certificado activo de " + norma + " con el código " + codigo + ". Revisa el contrato, la revisión o el ciclo.");

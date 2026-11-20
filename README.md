@@ -228,6 +228,32 @@ Los errores siguen RFC 9457 (`application/problem+json`) con `codigo` estable e 
   `./datos/documentos`, ignorado por git). Respáldalo junto con la base de datos.
 - Ejemplos: `docs/api/http/certificacion.http`.
 
+### Endpoints del Incremento 8a (panel de certificados, marcas por país, QR y publicación)
+
+| Método y ruta | Permiso |
+|---|---|
+| `GET /api/v1/certificados?texto=&esquema=&norma=&pais=&estado=&vigencia=&pagina=&tamano=` | `expedientes:leer` |
+| `GET /api/v1/certificados/exportacion` (mismos filtros, Excel), `GET /{id}`, `GET /{id}/pdf/versiones` | `expedientes:leer` |
+| `POST /api/v1/certificados/registro-directo`, `PUT /{id}/pdf`, `PUT /{id}/marca` | `certificados:gestionar` |
+| `GET /api/v1/certificados/{id}/consulta`, `GET /{id}/qr?tamano=&logo=` (PNG) | `expedientes:leer` |
+| `GET /api/v1/marcas`, `PUT /api/v1/marcas/{pais}` | autenticado / `organizacion:configurar` |
+| `GET /api/v1/publicacion`, `POST /api/v1/publicacion?forzar=` | `expedientes:leer` / `certificados:gestionar` |
+
+- **Panel:** busca en todas las marcas y países por código, razón social o documento (cada palabra en cualquier
+  parte), esquema, norma, país de la marca, estado y vigencia (`VIGENTE`, `POR_VENCER` en 90 días, `VENCIDO`). La
+  vigencia sale de la fecha de expiración, no del estado.
+- **Registro directo:** como en el panel anterior, registra certificados ya emitidos (de India, atrasados o
+  correcciones) con su código y su PDF. Crea un expediente `ENTREGADO`, las vigilancias indicadas y las tareas de las
+  futuras. Exige un motivo, que queda en la bitácora. Las suspensiones y retiros siguen siendo decisiones del
+  expediente.
+- **PDF:** se sube como documento `CERTIFICADO_PDF` y se asigna con `PUT /{id}/pdf`; cada cambio es una versión nueva.
+- **Marcas:** cada país muestra su marca (IQC Perú, IQC Ecuador, IQC Colombia, IQC Panamá) y su QR apunta a su
+  consulta: Perú a `https://consultas.iqcperu.com/` (fija, impresa en los PDF) y LATAM a
+  `https://consultas.iqc-latam.com/`. El certificado toma la marca del país del cliente, salvo que se elija otra.
+- **QR:** los certificados importados conservan el identificador de su QR impreso; los nuevos usan su token.
+- **Publicación:** cada minuto se copia a la base pública solo lo que cambió (ver «Base pública de consulta»).
+- Ejemplos: `docs/api/http/panel-certificados.http`.
+
 ### Roles iniciales
 
 | Rol | Permisos |
@@ -288,8 +314,35 @@ posibles duplicados.
 | `V6__expedientes_y_auditorias.sql` | auditores y competencias, aliados comerciales, expedientes (normas, sedes, historial), auditorías y equipo auditor; IQC Global: decide India |
 | `V7__decisiones_y_certificados.sql` | documentos, parámetros de la organización, declaraciones de conflicto, decisiones, certificados, condiciones de entrega, rol `ADMINISTRACION_LOGISTICA` y 7 permisos |
 | `V8__correcciones_codigo_e_importacion_legado.sql` | letra de edición en el código, unicidad código + norma, origen legado en expedientes y certificados, tabla `qr_legado` |
+| `V9__panel_certificados_marcas_y_publicacion.sql` | países CO y PA, categorías `CERTIFICADO_PDF` y `LOGO_MARCA`, marcas por país, PDF versionado y marca de cada certificado, estado de la publicación |
 
 Una migración aplicada nunca se modifica: los cambios se hacen con una nueva versión.
+
+La base pública de consulta tiene sus propias migraciones en `src/main/resources/db/consultas` (`V1__certificados_publicos.sql`),
+que aplica el panel al arrancar.
+
+## Base pública de consulta
+
+La consulta pública (`consultas.iqcperu.com` y `consultas.iqc-latam.com`) no lee la base interna. Lee una base
+aparte que solo contiene lo que se muestra: titular, norma, alcance, fechas, estado, marca, QR y PDF. La escribe
+únicamente el panel, y el servicio de consulta (Incremento 8b) la lee con un usuario de solo lectura.
+
+- **Desarrollo y pruebas:** usa el esquema `consultas` de `iqc_flow` y de `iqc_flow_test`, sin configurar nada.
+- **Producción:** crea una base propia, de preferencia en otro servidor, con dos usuarios:
+
+```sql
+CREATE DATABASE iqc_consultas;
+CREATE USER iqc_publicador WITH PASSWORD '...';   -- lo usa el panel (escribe)
+CREATE USER iqc_consulta WITH PASSWORD '...';     -- lo usa el servicio de consulta (solo lee)
+\c iqc_consultas
+GRANT CREATE, USAGE ON SCHEMA public TO iqc_publicador;
+ALTER DEFAULT PRIVILEGES FOR ROLE iqc_publicador IN SCHEMA public GRANT SELECT ON TABLES TO iqc_consulta;
+GRANT USAGE ON SCHEMA public TO iqc_consulta;
+```
+
+  y configura el panel con `IQC_CONSULTAS_URL`, `IQC_CONSULTAS_USUARIO` y `IQC_CONSULTAS_CLAVE`
+  (`IQC_CONSULTAS_ESQUEMA`, por defecto `public`). Sin `IQC_CONSULTAS_URL` no se publica nada.
+- **Restaurar la base pública:** `POST /api/v1/publicacion?forzar=true` vuelve a escribir todos los certificados.
 
 ## Seguridad
 

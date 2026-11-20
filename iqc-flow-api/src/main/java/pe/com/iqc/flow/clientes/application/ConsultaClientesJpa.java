@@ -14,6 +14,7 @@ import pe.com.iqc.flow.clientes.ClienteReferencia;
 import pe.com.iqc.flow.clientes.ConsultaClientes;
 import pe.com.iqc.flow.clientes.domain.Cliente;
 import pe.com.iqc.flow.clientes.domain.EstadoCliente;
+import pe.com.iqc.flow.clientes.domain.NormalizadorTexto;
 import pe.com.iqc.flow.clientes.infrastructure.ClienteRepository;
 import pe.com.iqc.flow.clientes.infrastructure.ContactoClienteRepository;
 import pe.com.iqc.flow.clientes.infrastructure.DireccionClienteRepository;
@@ -79,8 +80,31 @@ class ConsultaClientesJpa implements ConsultaClientes {
     return contactos.findByIdAndClienteId(contactoId, clienteId).isPresent();
   }
 
+  @Override
+  @Transactional(readOnly = true)
+  public Set<UUID> idsPorTexto(UUID organizacionId, String texto) {
+    String normalizado = NormalizadorTexto.normalizar(texto);
+    if (normalizado.isEmpty()) return Set.of();
+    // Cada palabra puede estar en cualquier parte: "pesquera pacifico" encuentra "Pesquera del Pacífico S.A."
+    Set<UUID> resultado = null;
+    for (String palabra : normalizado.split(" ")) {
+      Set<UUID> conPalabra = new java.util.HashSet<>(clientes.idsPorTexto(organizacionId, palabra));
+      if (resultado == null) resultado = conPalabra;
+      else resultado.retainAll(conPalabra);
+      if (resultado.isEmpty()) break;
+    }
+    return Set.copyOf(resultado);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Set<UUID> idsPorPais(UUID organizacionId, String codigoPais) {
+    return Set.copyOf(clientes.idsPorPais(organizacionId, codigoPais));
+  }
+
   private static ClienteReferencia referencia(Cliente cliente) {
     return new ClienteReferencia(cliente.getId(), cliente.getCodigo(), cliente.getRazonSocial(),
-        cliente.getResponsableUsuarioId(), cliente.estaArchivado(), cliente.getCreadoEn());
+        cliente.getResponsableUsuarioId(), cliente.estaArchivado(), cliente.getCreadoEn(), cliente.getCodigoPais(),
+        cliente.getTipoDocumento() == null ? null : cliente.getTipoDocumento().name(), cliente.getNumeroDocumento());
   }
 }

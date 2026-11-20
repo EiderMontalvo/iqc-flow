@@ -74,6 +74,14 @@ iqc:
   documentos:
     directorio: ${IQC_DOCUMENTOS_DIR:./datos/documentos}
     tamano-maximo: 15MB
+  # Base pública de la consulta de certificados (consultas.iqcperu.com, consultas.iqc-latam.com). Solo la escribe el
+  # panel; en desarrollo usa el esquema "consultas" de la base local, en producción una base propia (ver README)
+  consultas:
+    url: ${IQC_CONSULTAS_URL:jdbc:postgresql://localhost:5432/iqc_flow}
+    usuario: ${IQC_CONSULTAS_USUARIO:iqc_dev}
+    clave: ${IQC_CONSULTAS_CLAVE:${iqc.local.clave-bd:}}
+    esquema: ${IQC_CONSULTAS_ESQUEMA:consultas}
+    intervalo: PT1M
   # Arranque inicial: crea el primer usuario MASTER (ver README)
   master-inicial:
     habilitado: ${IQC_MASTER_INICIAL:false}

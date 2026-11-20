@@ -19,6 +19,11 @@ public interface ConsultaClientes {
   /**prospectos y clientes activos no archivados; con responsable, solo los suyos*/
   List<ClienteReferencia> listarVigentes(UUID organizacionId, UUID responsableIdOpcional);
 
+  /**clientes cuya razón social, nombre comercial o documento contienen todas las palabras del texto (sin tildes ni mayúsculas)*/
+  Set<UUID> idsPorTexto(UUID organizacionId, String texto);
+
+  Set<UUID> idsPorPais(UUID organizacionId, String codigoPais);
+
   boolean contactoPerteneceACliente(UUID clienteId, UUID contactoId);
 
   /**direcciones (fiscal, sedes, correspondencia) del cliente, indexadas por id*/

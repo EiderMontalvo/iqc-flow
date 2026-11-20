@@ -49,7 +49,10 @@ public final class ValidadorDocumento {
       case RUC -> {
         if ("PE".equals(pais)) validarRucPeru(normalizado);
         else if ("EC".equals(pais)) validarEstructuraRucEcuador(normalizado);
-        else throw invalido("El RUC solo aplica a empresas de Perú (PE) y Ecuador (EC).");
+        // Panamá: el RUC tiene varias estructuras (natural, jurídica, extranjero); se valida el formato general
+        else if ("PA".equals(pais)) {
+          if (!FORMATO_GENERAL.matcher(normalizado).matches()) throw invalido("El RUC panameño debe tener de 3 a 30 letras, números o guiones.");
+        } else throw invalido("El RUC solo aplica a empresas de Perú (PE), Ecuador (EC) y Panamá (PA).");
       }
       case GSTIN -> {
         if (!FORMATO_GSTIN.matcher(normalizado).matches()) throw invalido("El GSTIN no tiene el formato oficial de 15 caracteres.");

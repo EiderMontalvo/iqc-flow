@@ -14,6 +14,9 @@ public interface ServicioDocumentos {
   /**devuelve el documento o lanza un error de negocio si no existe, es de otra organización u otra categoría*/
   DocumentoReferencia exigir(UUID organizacionId, UUID documentoId, CategoriaDocumento categoria);
 
+  /**contenido del archivo, para procesos del sistema (publicación, QR). No aplica permisos: los aplica quien lo usa*/
+  byte[] leerContenido(UUID organizacionId, UUID documentoId);
+
   record DocumentoReferencia(UUID id, CategoriaDocumento categoria, String nombreOriginal, String tipoContenido,
       long tamanoBytes, String sha256, UUID subidoPor, Instant creadoEn) {
   }
