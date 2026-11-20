@@ -1,0 +1,111 @@
+### IQC Flow — Panel de certificados, marcas por país, QR y publicación (extensión REST Client de VS Code)
+# Credenciales en docs/api/http/.env. Con el usuario MASTER se puede todo. Pega en @clienteId el id de un cliente
+# (clientes.http) y en @pdf la ruta de un PDF de certificado.
+
+@api = http://localhost:8080/api/v1
+@correo = {{$dotenv IQC_CORREO}}
+@contrasena = {{$dotenv IQC_CONTRASENA}}
+@clienteId = PEGA_AQUI_EL_ID_DEL_CLIENTE
+@pdf = C:/ruta/a/un/certificado.pdf
+
+### 1. Token CSRF
+# @name csrf
+GET {{api}}/autenticacion/csrf
+
+### 2. Iniciar sesión
+POST {{api}}/autenticacion/inicio-sesion
+Content-Type: application/x-www-form-urlencoded
+X-XSRF-TOKEN: {{csrf.response.body.$.token}}
+
+correo={{correo}}&contrasena={{contrasena}}
+
+### 3. Token CSRF de la sesión
+# @name sesion
+GET {{api}}/autenticacion/csrf
+
+### 4. Marcas por país (IQC Perú → consultas.iqcperu.com; LATAM → consultas.iqc-latam.com)
+GET {{api}}/marcas
+
+### 5. Configurar la marca de Colombia (version nula mientras sea la predeterminada)
+PUT {{api}}/marcas/CO
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{"nombre": "IQC Colombia", "urlConsulta": "https://consultas.iqc-latam.com/", "sitioWeb": "https://colombia.iqc-latam.com"}
+
+### 6. Subir el PDF del certificado
+# @name pdfCertificado
+POST {{api}}/documentos?categoria=CERTIFICADO_PDF
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+Content-Type: multipart/form-data; boundary=limite
+
+--limite
+Content-Disposition: form-data; name="archivo"; filename="certificado.pdf"
+Content-Type: application/pdf
+
+< {{pdf}}
+--limite--
+
+### 7. Registro directo (como en el panel anterior): certificados ya emitidos, uno por norma
+# @name registro
+POST {{api}}/certificados/registro-directo
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{
+  "clienteId": "{{clienteId}}",
+  "esquema": "INACAL",
+  "alcance": "Diseño y construcción de obras civiles",
+  "fechaOtorgamiento": "2025-03-10",
+  "fechaEmision": "2025-03-12",
+  "fechaExpiracion": "2028-03-09",
+  "limiteVigilancia1": "2026-03-09",
+  "limiteVigilancia2": "2027-03-09",
+  "motivo": "Certificado emitido antes de IQC Flow",
+  "certificados": [
+    {"norma": "ISO_9001", "edicion": "2015", "codigo": "PE-INA-01220250211", "documentoPdfId": "{{pdfCertificado.response.body.$.id}}"}
+  ]
+}
+
+### 8. Buscar: texto (código, razón social o RUC), país de la marca, vigencia
+GET {{api}}/certificados?texto=constructora&vigencia=VIGENTE&pagina=0&tamano=25
+
+### 9. Por vencer en los próximos 60 días, solo LATAM Ecuador
+GET {{api}}/certificados?pais=EC&vigencia=POR_VENCER&diasPorVencer=60
+
+### 10. Exportar a Excel (mismos filtros)
+GET {{api}}/certificados/exportacion?vigencia=VIGENTE
+
+### 11. Ficha del certificado
+# @name certificado
+GET {{api}}/certificados/{{registro.response.body.$.certificados[0].id}}
+
+### 12. Nueva versión del PDF (sube antes otro PDF con el paso 6)
+PUT {{api}}/certificados/{{certificado.response.body.$.id}}/pdf
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{"documentoId": "{{pdfCertificado.response.body.$.id}}", "motivo": "Corrección del alcance", "version": {{certificado.response.body.$.version}}}
+
+### 13. Historial del PDF
+GET {{api}}/certificados/{{certificado.response.body.$.id}}/pdf/versiones
+
+### 14. Elegir a mano la marca (pais null vuelve a la del país del cliente)
+PUT {{api}}/certificados/{{certificado.response.body.$.id}}/marca
+Content-Type: application/json
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}
+
+{"pais": "EC", "motivo": "Lo atiende IQC Ecuador", "version": {{certificado.response.body.$.version}}}
+
+### 15. Dirección de consulta que lleva el QR
+GET {{api}}/certificados/{{certificado.response.body.$.id}}/consulta
+
+### 16. QR en PNG (con el logo de la marca, si está configurado)
+GET {{api}}/certificados/{{certificado.response.body.$.id}}/qr?tamano=600
+
+### 17. Estado de la publicación a la base pública
+GET {{api}}/publicacion
+
+### 18. Publicar ahora (forzar=true vuelve a escribir todo)
+POST {{api}}/publicacion?forzar=false
+X-XSRF-TOKEN: {{sesion.response.body.$.token}}

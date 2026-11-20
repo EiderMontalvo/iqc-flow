@@ -10,5 +10,9 @@ public enum CategoriaDocumento {
   CHECKLIST_SUSPENSION,
   /**traducción al español del certificado emitido por India (IQC Global)*/
   TRADUCCION_CERTIFICADO,
+  /**PDF del certificado emitido (el que se publica en la consulta pública)*/
+  CERTIFICADO_PDF,
+  /**logo de una marca (IQC Perú, IQC Ecuador...) para el QR, la consulta y los documentos; PNG o JPEG*/
+  LOGO_MARCA,
   OTRO
 }

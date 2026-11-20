@@ -12,6 +12,14 @@ springdoc:
   swagger-ui:
     enabled: false
 
+iqc:
+  # En producción la base pública es otra base (de preferencia otro servidor). Sin IQC_CONSULTAS_URL no se publica
+  consultas:
+    url: ${IQC_CONSULTAS_URL:}
+    usuario: ${IQC_CONSULTAS_USUARIO:}
+    clave: ${IQC_CONSULTAS_CLAVE:}
+    esquema: ${IQC_CONSULTAS_ESQUEMA:public}
+
 logging:
   structured:
     format:

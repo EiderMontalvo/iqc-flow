@@ -7,6 +7,9 @@ iqc-flow-api/config/local.yml
 **/target/
 **/node_modules/
 **/dist/
+**/*.tsbuildinfo
+**/.npm-cache/
+.taste-skill/
 
 # IDE y sistema
 .idea/

@@ -7,4 +7,6 @@ import pe.com.iqc.flow.auditorias.domain.QrLegado;
 
 public interface QrLegadoRepository extends JpaRepository<QrLegado, String> {
   List<QrLegado> findByCertificadoId(UUID certificadoId);
+
+  List<QrLegado> findByCertificadoIdInAndActivoTrue(java.util.Collection<UUID> certificadosIds);
 }

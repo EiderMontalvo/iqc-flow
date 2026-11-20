@@ -51,4 +51,5 @@ public class QrLegado {
   public String getIdQr() { return idQr; }
   public UUID getCertificadoId() { return certificadoId; }
   public boolean isActivo() { return activo; }
+  public Instant getRegistradoEn() { return registradoEn; }
 }

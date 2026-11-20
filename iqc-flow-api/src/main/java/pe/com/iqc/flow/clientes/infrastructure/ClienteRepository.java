@@ -38,4 +38,14 @@ public interface ClienteRepository extends JpaRepository<Cliente, UUID>, JpaSpec
       order by c.razonSocial
       """)
   List<Cliente> listarVigentes(UUID organizacionId, Collection<EstadoCliente> estados);
+
+  /**texto ya normalizado (NormalizadorTexto); incluye archivados porque sus certificados siguen existiendo*/
+  @Query("""
+      select c.id from Cliente c
+      where c.organizacionId = :organizacionId and c.textoBusqueda like concat('%', :texto, '%')
+      """)
+  List<UUID> idsPorTexto(UUID organizacionId, String texto);
+
+  @Query("select c.id from Cliente c where c.organizacionId = :organizacionId and c.codigoPais = :codigoPais")
+  List<UUID> idsPorPais(UUID organizacionId, String codigoPais);
 }

@@ -81,3 +81,18 @@
   - una renovación conserva el año del otorgamiento original y sube el ciclo (`PE-INA-01520220132`);
   - una edición puede agregar una letra al final (`ediciones_norma.sufijo_codigo`: ISO 37001:2025 → `A`);
   - la unicidad del código es código + norma, porque en IQC Global un mismo código cubre varias normas de un sistema integrado.
+- ADR-040: Una sola organización con una marca por país. IQC Perú y las empresas de IQC LATAM (IQC Ecuador, IQC Colombia y, más adelante, IQC Panamá) comparten el panel, los clientes y la configuración, pero cada país se muestra con su propia marca.
+  - **Qué define la marca:** nombre visible, logo, membrete (sitio, correo, teléfono, dirección) y la dirección de consulta que lleva el QR. Se configura en `marcas_pais`; sin fila se usa la predeterminada (`MarcasPredeterminadas`).
+  - **Direcciones de consulta:** Perú usa `https://consultas.iqcperu.com/`, que no puede cambiar porque está impresa en los PDF y QR emitidos. Los países de LATAM usan `https://consultas.iqc-latam.com/`. Un país nuevo es una fila de configuración, no un sistema nuevo.
+  - **Marca de cada certificado:** la del país del cliente, salvo que se elija otra a mano (`certificados.pais_marca`, con motivo en la bitácora).
+  - **QR:** los certificados importados conservan el identificador de su QR ya impreso (ADR-003); los nuevos usan su `token_verificacion` aleatorio. Con logo, el QR usa la corrección de errores H y el logo ocupa a lo sumo el 20 % del ancho.
+- ADR-041: La consulta pública lee una base propia, separada de la interna.
+  - **Contenido:** solo lo que se muestra (titular, norma, alcance, fechas, estado, marca, QR y PDF), en `certificados_publicos`, `qr_publicos` y `documentos_publicos` (migraciones en `db/consultas`). No tiene expedientes, contactos, auditorías ni usuarios: si se vulnera el portal, no expone datos internos, y sigue respondiendo aunque el panel esté en mantenimiento.
+  - **Escritura:** la escribe solo el panel, con su propio usuario; el servicio de consulta (Incremento 8b) la lee con un usuario de solo lectura. La conexión no se registra como `DataSource` de Spring para no interferir con la base interna.
+  - **Publicación por huella:** cada minuto (`iqc.consultas.intervalo`) el panel calcula la huella SHA-256 de lo publicable de cada certificado emitido alguna vez y escribe solo lo que cambió (un dato del certificado, del cliente, de la marca o el PDF). No depende de eventos: un cambio que falló se reintenta en la siguiente pasada y los errores quedan en `publicaciones_certificados`. `forzar` vuelve a escribir todo, por ejemplo tras restaurar la base pública.
+  - **Una sola instancia:** la pasada se protege con un bloqueo en memoria; si algún día hay varias instancias del panel, habrá que pasar a un bloqueo en la base.
+- ADR-042: Panel de certificados (reemplaza al panel de la plataforma anterior).
+  - **Búsqueda general:** en todas las marcas, por código, razón social o documento (cada palabra en cualquier parte), esquema, norma, país de la marca, estado y vigencia. La vigencia sale de la fecha de expiración (ADR-037). Se exporta a Excel con los mismos filtros.
+  - **Registro directo:** registra certificados ya emitidos (de India, atrasados o correcciones) sin el flujo del expediente. Crea un expediente `ENTREGADO` con sus vigilancias y las tareas de las futuras, exige un motivo y respeta la unicidad código + norma (ADR-039).
+  - **PDF versionado:** el PDF del certificado es un documento `CERTIFICADO_PDF`; cada cambio crea una versión en `certificados_pdf` y la vigente es la que se publica.
+  - **Suspender, levantar y retirar** no se duplican en el panel: siguen siendo decisiones del expediente, con su checklist y su control de imparcialidad (ADR-036).

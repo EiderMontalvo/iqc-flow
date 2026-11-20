@@ -45,6 +45,12 @@ class ValidadorDocumentoTest {
   }
 
   @Test
+  void panamaTambienUsaRucYColombiaNit() {
+    assertThat(ValidadorDocumento.normalizar("PA", TipoDocumento.RUC, "155-704321-2-2021")).isEqualTo("1557043212" + "2021");
+    assertThat(ValidadorDocumento.normalizar("CO", TipoDocumento.NIT, "900.123.456-8")).isEqualTo("9001234568");
+  }
+
+  @Test
   void validaElFormatoDelGstinDeIndia() {
     assertThat(ValidadorDocumento.normalizar("IN", TipoDocumento.GSTIN, "27aapfu0939f1zv")).isEqualTo("27AAPFU0939F1ZV");
     assertThatThrownBy(() -> ValidadorDocumento.normalizar("IN", TipoDocumento.GSTIN, "27AAPFU0939F1"))

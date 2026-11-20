@@ -5,10 +5,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import pe.com.iqc.flow.auditorias.domain.Certificado;
 
-public interface CertificadoRepository extends JpaRepository<Certificado, UUID> {
+public interface CertificadoRepository extends JpaRepository<Certificado, UUID>, JpaSpecificationExecutor<Certificado> {
+  Optional<Certificado> findByIdAndOrganizacionId(UUID id, UUID organizacionId);
+
+  /**certificados que pueden mostrarse en la consulta pública (ya emitidos alguna vez)*/
+  List<Certificado> findByEstadoIn(Collection<Certificado.Estado> estados);
+
   List<Certificado> findByExpedienteIdOrderByNormaCodigoAscCreadoEnAsc(UUID expedienteId);
 
   Optional<Certificado> findByIdAndExpedienteId(UUID id, UUID expedienteId);
