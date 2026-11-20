@@ -35,7 +35,7 @@ iqc-flow/
 └── scripts/          Scripts de apoyo (base de datos local)
 ```
 
-## Requisitos en Windows 10
+## Requisitos en Windows
 
 | Herramienta | Comprobación |
 |---|---|
@@ -283,7 +283,17 @@ npm install
 npm run dev
 ```
 
-Abre `http://localhost:5173` y pulsa «Comprobar conexión». La interfaz de inicio de sesión llega en el Incremento 5.
+Abre `http://localhost:5173`. El frontend incluye inicio de sesión, cambio obligatorio de contraseña
+en el primer acceso, panel con cifras reales de clientes y seguimientos, búsqueda y gestión de clientes,
+contactos y direcciones, tareas, actividades, usuarios y notificaciones. Las acciones visibles se ajustan
+a los permisos del usuario; la API vuelve a validarlos en cada solicitud.
+
+La apariencia tiene modos claro, oscuro y «Sistema». La elección se guarda en el navegador; el modo
+«Sistema» sigue la preferencia del sistema operativo. Los colores se definen como tokens semánticos en
+`iqc-flow-web/src/theme.css`.
+
+La sesión usa la cookie del servidor y las operaciones de escritura obtienen el token CSRF antes de
+enviar la solicitud. Para probar el acceso necesitas el usuario `MASTER` inicial o uno creado por la API.
 
 ## Importar el histórico de la plataforma anterior
 
