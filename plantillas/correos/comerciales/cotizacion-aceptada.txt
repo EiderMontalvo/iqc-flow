@@ -1,0 +1,18 @@
+Asunto: Gracias por confiar en {{marcaNombre}} – Próximos pasos ({{numero}})
+
+Estimado(a) {{contactoNombre}}:
+
+Gracias por aceptar nuestra propuesta {{numero}}. Es un gusto acompañar a {{razonSocial}} en la {{tipoServicio}} en {{normas}}.
+
+Próximos pasos:
+1. Le enviaremos el contrato de servicios para su revisión y firma.
+2. Una vez firmado, coordinaremos el pago inicial según las condiciones acordadas: {{condicionesPago}}.
+3. Programaremos juntos las fechas de auditoría.
+
+Para preparar el contrato, por favor confírmenos los datos del representante legal (nombre completo y documento de identidad).
+
+Atentamente,
+
+{{responsableNombre}}
+{{marcaNombre}}
+{{responsableCorreo}} · {{responsableTelefono}}

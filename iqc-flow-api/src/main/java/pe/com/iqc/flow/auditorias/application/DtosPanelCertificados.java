@@ -27,6 +27,11 @@ public final class DtosPanelCertificados {
       Vigencia vigencia, Integer diasPorVencer) {
   }
 
+  /**vigentes incluye a los que están por vencer; retirados incluye los anulados (cancelados)*/
+  public record ResumenMarca(String codigoPais, long vigentes, long porVencer, long vencidos, long suspendidos,
+      long retirados) {
+  }
+
   public record TitularResumen(UUID id, String razonSocial, String tipoDocumento, String numeroDocumento,
       String codigoPais) {
   }

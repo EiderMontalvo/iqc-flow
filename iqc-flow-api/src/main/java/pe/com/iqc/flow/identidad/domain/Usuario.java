@@ -103,6 +103,15 @@ public class Usuario extends EntidadBase {
     this.contrasenaCambiadaEn = ahora;
   }
 
+  /**contraseña temporal puesta por un administrador: quita el bloqueo y obliga a cambiarla al ingresar*/
+  public void asignarContrasenaTemporal(String nuevoHash, Instant ahora) {
+    this.hashContrasena = nuevoHash;
+    this.debeCambiarContrasena = true;
+    this.intentosFallidos = 0;
+    this.bloqueadoHasta = null;
+    this.contrasenaCambiadaEn = ahora;
+  }
+
   public void renombrar(String nombre) { this.nombre = nombre.trim(); }
 
   public void cambiarEstado(EstadoUsuario estado) { this.estado = estado; }

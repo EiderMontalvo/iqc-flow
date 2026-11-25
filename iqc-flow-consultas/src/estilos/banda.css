@@ -1,0 +1,61 @@
+/* Cabecera negra: fondo con el símbolo IQC, barra con logo, antetítulo, título y sus modos portada y compacto */
+
+.banda { position: relative; overflow: hidden; background: var(--iqc-negro); color: var(--iqc-blanco); isolation: isolate; }
+
+/* Fondo: negro con el símbolo IQC; relleno casi imperceptible y contorno fino con el degradado. En la portada se dibuja una vez al cargar */
+.fondo { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: var(--iqc-negro); }
+.fondo .simbolo { position: absolute; right: -20%; top: 48%; height: 112%; width: auto; transform: translateY(-50%); overflow: visible; }
+.fondo .relleno { opacity: .07; }
+.fondo .trazo { stroke-width: .55; stroke-linejoin: miter; opacity: .85; }
+.fondo.portada .trazo { stroke-dasharray: 1; animation: trazar 2.4s .2s var(--salida) both; }
+.fondo.portada .relleno { animation: aparecer 1.6s 1.2s ease-out both; }
+@keyframes trazar { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes aparecer { from { opacity: 0; } }
+/* Resplandor muy tenue del degradado detrás del símbolo, para que el negro no sea plano */
+.fondo::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 45% 60% at 82% 50%, rgb(103 1 224 / .16), transparent 70%); }
+.fondo .luz { stroke: #c9b6ff; stroke-width: 1.1; stroke-linecap: round; stroke-dasharray: .07 .93; opacity: 0; filter: drop-shadow(0 0 3px #8f6bff); }
+.fondo.portada .luz { animation: recorrer 11s 2.6s linear infinite; }
+@keyframes recorrer { 0% { stroke-dashoffset: 1; opacity: 0; } 4% { opacity: .9; } 96% { opacity: .9; } 100% { stroke-dashoffset: 0; opacity: 0; } }
+/* Pantallas anchas: el símbolo al centro, detrás del contenido, como en el celular */
+@media (min-width: 861px) {
+  .banda.inicio .fondo .simbolo { right: auto; left: 56%; top: 50%; height: 118%; transform: translate(-50%, -50%); }
+  .banda.inicio .fondo .trazo { opacity: .55; }
+  .banda.inicio .fondo::after { background: radial-gradient(ellipse 50% 60% at 56% 50%, rgb(103 1 224 / .16), transparent 70%); }
+}
+.banda.compacta .fondo .simbolo { height: 260%; right: -2%; top: 70%; }
+.banda.compacta .fondo .trazo { opacity: .5; }
+
+.banda-contenido { max-width: 1040px; margin: 0 auto; padding: 20px 24px 40px; }
+.barra { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 40px; }
+.marca { display: inline-flex; border-radius: 4px; }
+.marca:focus-visible { outline-color: var(--foco-cromo); outline-offset: 4px; }
+.marca img { display: block; height: 64px; width: auto; }
+/* Mientras el logo descarga, el navegador pinta el texto alternativo: se vuelve invisible (sigue disponible para lectores de pantalla) */
+.marca img { color: transparent; }
+.sitio { display: inline-flex; align-items: center; gap: 4px; color: #d5d9e2; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 3px; transition: color .2s var(--salida); }
+.sitio:hover { color: var(--iqc-blanco); text-decoration: underline; }
+.sitio:focus-visible { outline-color: var(--foco-cromo); }
+/* Antetítulo: deja claro desde el primer vistazo que el portal sirve para ambos tipos.
+   Filete sólido en el azul IQC del botón «Verificar»: une el encabezado con la acción, sin el degradado. */
+.antetitulo { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 18px; font-size: 13px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #c4c9d6; }
+.antetitulo::before { content: ""; width: 32px; height: 3px; border-radius: 2px; background: var(--iqc-azul-vivo); }
+
+.banda h1 { font-size: clamp(1.75rem, 1.2rem + 2.2vw, 2.6rem); line-height: 1.12; font-weight: 700; letter-spacing: -.02em; max-width: 20ch; }
+.bajada { margin-top: 12px; max-width: 60ch; color: #b8bfcd; font-size: 1.0625rem; }
+
+/* Portada sin tarjeta: el título y el formulario directamente sobre el fondo, ocupando la pantalla */
+.pagina:has(.banda.inicio) .banda.inicio { flex: 1; display: flex; }
+.banda.inicio .banda-contenido { flex: 1; width: 100%; display: flex; flex-direction: column; padding-bottom: 48px; }
+.banda.inicio .barra { margin-bottom: 0; }
+.banda.inicio .marca img { height: 92px; }
+.banda.inicio .cuerpo { margin-block: auto; padding-top: 40px; max-width: 880px; }
+.banda.inicio h1 { font-size: clamp(2.1rem, 1.3rem + 3vw, 3.4rem); line-height: 1.05; letter-spacing: -.025em; max-width: 16ch; }
+.banda.inicio .bajada { margin-top: 20px; font-size: 1.125rem; max-width: 52ch; color: #a9b0bf; }
+.banda.inicio .buscador { margin-top: 44px; }
+
+/* Tras verificar, la banda se compacta: el certificado pasa a ser lo principal */
+.banda.compacta .banda-contenido { padding-bottom: 24px; }
+.banda.compacta .barra { margin-bottom: 20px; }
+.banda.compacta h1, .banda.compacta .bajada { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.banda.compacta .buscador, .banda.compacta .nueva { margin-top: 0; }
+.banda.compacta .marca img { height: 60px; }

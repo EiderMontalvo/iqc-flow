@@ -1,0 +1,20 @@
+/*
+ * Lo que dibuja el navegador, con la paleta del sistema: selección de texto, cursor de escritura, foco, barras de
+ * desplazamiento y cifras. Sin esto cada app hereda los valores por defecto, que no pertenecen a ningún diseño.
+ */
+
+::selection { background: #cdd3ff; color: var(--iqc-tinta); }
+:root[data-theme="dark"] ::selection { background: #3a43a8; color: #ffffff; }
+
+input, textarea { caret-color: var(--accion); }
+
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; border-radius: 3px; }
+
+* { scrollbar-width: thin; scrollbar-color: var(--borde-fuerte) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--borde-fuerte); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* Cifras que se comparan en columnas: todas del mismo ancho */
+.tabular, td, dd { font-variant-numeric: tabular-nums; }

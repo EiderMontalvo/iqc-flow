@@ -3,12 +3,13 @@ package pe.com.iqc.flow.certificaciones.application;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.com.iqc.flow.certificaciones.application.PublicadorCertificados.ResultadoPublicacion;
-import pe.com.iqc.flow.certificaciones.infrastructure.BaseConsultas;
+import pe.com.iqc.flow.certificaciones.infrastructure.BasesConsultas;
 import pe.com.iqc.flow.certificaciones.infrastructure.PublicacionCertificadoRepository;
 import pe.com.iqc.flow.compartido.bitacora.Bitacora;
 import pe.com.iqc.flow.compartido.bitacora.EntradaBitacora;
@@ -18,32 +19,33 @@ import pe.com.iqc.flow.compartido.bitacora.EntradaBitacora;
 public class ServicioPublicacion {
   private final PublicadorCertificados publicador;
   private final PublicacionCertificadoRepository publicaciones;
-  private final BaseConsultas base;
+  private final BasesConsultas bases;
   private final Bitacora bitacora;
 
   public ServicioPublicacion(PublicadorCertificados publicador, PublicacionCertificadoRepository publicaciones,
-      BaseConsultas base, Bitacora bitacora) {
+      BasesConsultas bases, Bitacora bitacora) {
     this.publicador = publicador;
     this.publicaciones = publicaciones;
-    this.base = base;
+    this.bases = bases;
     this.bitacora = bitacora;
   }
 
   public record ErrorPublicacion(UUID certificadoId, int intentos, String error, Instant ultimoIntentoEn) {
   }
 
-  public record EstadoPublicacion(boolean habilitada, long publicados, List<ErrorPublicacion> errores,
+  /**paises: los que tienen base de consulta configurada; sus certificados son los únicos que se publican*/
+  public record EstadoPublicacion(boolean habilitada, Set<String> paises, long publicados, List<ErrorPublicacion> errores,
       ResultadoPublicacion ultimaPasada) {
   }
 
   @Transactional(readOnly = true)
-  @PreAuthorize("hasAuthority('expedientes:leer')")
+  @PreAuthorize("hasAnyAuthority('expedientes:leer', 'certificados:leer')")
   public EstadoPublicacion estado() {
     List<ErrorPublicacion> errores = publicaciones.findByIntentosFallidosGreaterThanOrderByUltimoIntentoEnDesc(0).stream()
         .limit(50)
         .map(p -> new ErrorPublicacion(p.getCertificadoId(), p.getIntentosFallidos(), p.getUltimoError(), p.getUltimoIntentoEn()))
         .toList();
-    return new EstadoPublicacion(base.habilitada(), publicaciones.countByHuellaIsNotNull(), errores,
+    return new EstadoPublicacion(bases.habilitada(), bases.paises(), publicaciones.countByHuellaIsNotNull(), errores,
         publicador.ultima().orElse(null));
   }
 

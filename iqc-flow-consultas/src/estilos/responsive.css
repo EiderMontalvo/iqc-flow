@@ -1,0 +1,74 @@
+/* Ajustes por ancho y por alto de pantalla. La portada debe caber sin desplazarse en todos los tamaños medidos (ver README) */
+
+/* ---------- Pantallas medianas y móviles ---------- */
+
+@media (max-width: 860px) {
+  .buscador { grid-template-columns: 1fr 1fr; }
+  .buscador .verificar { grid-column: 1 / -1; }
+  .campos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lineas.grilla { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 560px) {
+  .banda.inicio .banda-contenido { padding-bottom: 28px; }
+  .banda.inicio .cuerpo { padding-top: 24px; }
+  .banda.inicio .bajada { font-size: 1rem; }
+  .banda.inicio .buscador { margin-top: 24px; }
+  .banda.inicio .verificar { width: 100%; }
+  .banda-contenido { padding: 16px 16px 28px; }
+  .barra { margin-bottom: 28px; }
+  .marca img { height: 46px; }
+  .banda.inicio .marca img { height: 68px; }
+  .banda.compacta .marca img { height: 50px; }
+  .fondo .simbolo { height: 92%; right: -38%; top: 52%; }
+  .fondo .trazo { opacity: .45; }
+  .sitio { font-size: 13px; }
+  .antetitulo { font-size: 11px; letter-spacing: .05em; margin-bottom: 12px; gap: 8px; white-space: nowrap; }
+  .antetitulo::before { width: 16px; flex: none; }
+  .bajada { font-size: 1rem; }
+  .buscador { grid-template-columns: 1fr; }
+  .contenido { padding: 24px 16px 48px; gap: 32px; }
+  .hoja { padding: 24px 20px; }
+  .hoja-cabecera { grid-template-areas: "sello veredicto" "titulo titulo"; column-gap: 16px; row-gap: 18px; padding-bottom: 22px; }
+  .hoja-cabecera .veredicto { align-self: center; display: grid; gap: 2px; }
+  .sello { width: 100px; height: 100px; }
+  .dato.es-codigo { grid-column: 1 / -1; }
+  .dato.es-codigo .codigo { white-space: normal; }
+  .campos { grid-template-columns: 1fr 1fr; gap: 18px 20px; padding: 22px 0; }
+  .acciones .boton { flex: 1 1 100%; }
+}
+
+/* Celulares de pantalla baja: todo el acceso cabe sin desplazarse */
+@media (max-width: 560px) and (max-height: 760px) {
+  .banda.inicio .cuerpo { padding-top: 12px; }
+  .banda.inicio h1 { font-size: 1.8rem; }
+  .banda.inicio .bajada { display: none; }
+  .banda.inicio .buscador { margin-top: 16px; }
+  .banda.inicio .marca img { height: 56px; }
+  .buscador { gap: 10px; }
+  .buscador label { gap: 4px; }
+  .buscador input, .verificar { height: 46px; }
+}
+
+/* Laptops y ventanas bajas: la portada entera cabe sin desplazarse */
+@media (min-width: 561px) and (max-height: 720px) {
+  .banda-contenido { padding-top: 14px; }
+  .marca img { height: 52px; }
+  .banda.inicio .marca img { height: 72px; }
+  .banda.inicio .buscador { margin-top: 24px; }
+  .banda.inicio .banda-contenido { padding-bottom: 24px; }
+  .banda.inicio .cuerpo { padding-top: 16px; }
+  .banda.inicio h1 { max-width: none; font-size: clamp(2rem, 1.4rem + 2vw, 2.75rem); }
+  .banda.inicio .bajada { margin-top: 10px; font-size: 1.0625rem; }
+  .buscador label { gap: 6px; }
+  .buscador input, .verificar { height: 48px; }
+}
+@media (min-width: 561px) and (max-height: 560px) {
+  .banda.inicio .bajada { display: none; }
+}
+
+/* En el celular el toast aparece abajo, cerca del pulgar y sin tapar el logo */
+@media (max-width: 560px) {
+  .toasts { top: auto; bottom: 44px; right: 16px; left: 16px; width: auto; }
+  @keyframes toast { from { opacity: 0; transform: translateY(8px); } }
+}

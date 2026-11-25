@@ -1,0 +1,146 @@
+/*
+ * Tokens del sistema de diseño IQC. Los usan el portal de consultas y el panel.
+ *
+ * Tres capas:
+ *  1. Primitivos de marca (--iqc-*): los colores de IQC tal cual. No cambian con el tema.
+ *  2. Semánticos (--fondo, --texto, --accion, --ok…): lo que significa cada color en la interfaz. Cambian con el tema.
+ *  3. Escalas (--tam-*, --e*, --radio-*, --sombra-*, --salida): tipografía, espacios, formas y movimiento.
+ *
+ * Claro por defecto. Oscuro con <html data-theme="dark"> (lo usa el panel; el portal es solo claro).
+ * Las apps solo usan las capas 2 y 3; la capa 1 se usa para lo que es marca en sí (cromo negro, degradado del logo).
+ */
+
+:root {
+  /* ---------- 1. Primitivos de marca ---------- */
+  --iqc-negro: #000000;            /* cabecera de iqcperu.com: portada del portal, carril y acceso del panel */
+  --iqc-blanco: #ffffff;
+  --iqc-tinta: #1a1a2e;            /* color de marca obligatorio */
+  --iqc-navy: #00192d;             /* color de marca obligatorio */
+  --iqc-azul: #0019d2;             /* azul IQC */
+  --iqc-azul-hover: #0013a3;
+  --iqc-azul-vivo: #1a33e0;        /* azul IQC para botones sobre negro y acción principal */
+  --iqc-azul-vivo-hover: #1428bd;
+  --iqc-rojo: #d90435;             /* degradado del logo: rojo → magenta → violeta → azul */
+  --iqc-magenta: #9002ae;
+  --iqc-violeta: #6701e0;
+  --iqc-degradado: linear-gradient(90deg, #d90435 0%, #9002ae 38%, #6701e0 66%, #0019d2 100%);
+
+  /* ---------- 2. Semánticos (claro) ---------- */
+  --fondo: #f2f4f7;                /* papel: fondo del área de trabajo y de la zona de resultados */
+  --superficie: #ffffff;           /* hojas, paneles, tablas */
+  --superficie-2: #f7f8fb;         /* barras de herramientas, filas al pasar el mouse */
+  --superficie-hundida: #eceef3;   /* campos deshabilitados, esqueletos */
+  --borde: #d5dbe4;
+  --borde-suave: #e6eaf0;
+  --borde-fuerte: #c2c9d6;
+  --texto: #1a1a2e;
+  --texto-suave: #343a4d;
+  --texto-2: #434b5e;              /* textos secundarios */
+  --texto-3: #59627a;              /* etiquetas y ayudas (≥ 4.5:1 sobre --fondo) */
+
+  --accion: #1a33e0;
+  --accion-hover: #1428bd;
+  --accion-texto: #ffffff;
+  --accion-suave: #eceffe;
+  --foco: #1a33e0;
+  --foco-anillo: rgb(26 51 224 / .3);
+  --enlace: #0019d2;
+
+  /* Tintas de estado (las del sello del portal) */
+  --ok: #0d6b44;      --ok-suave: #e8f4ee;
+  --alerta: #9a5800;  --alerta-suave: #fbf1e1;   /* por vencer */
+  --mal: #b42318;     --mal-suave: #fbeceb;      /* vencido, anulado, error */
+  --pausa: #a0480a;   --pausa-suave: #fdecdc;    /* suspendido, en espera */
+  --neutro: #4a5568;  --neutro-suave: #eef1f5;   /* reemplazado, sin fecha, archivado */
+  --senal: #9002ae;                              /* la marca de «hoy» en la barra de ciclo */
+
+  /* Cromo: las zonas negras de marca (portada, carril, acceso). Igual en ambos temas */
+  --cromo: #000000;
+  --cromo-texto: #ffffff;
+  --cromo-texto-2: #a3abbd;
+  --cromo-hover: rgb(255 255 255 / .07);
+  --cromo-activo: rgb(255 255 255 / .11);
+  --cromo-borde: rgb(255 255 255 / .1);
+  --foco-cromo: #8f9bff;
+
+  /* Gráficos: una serie, un tono (validado con la skill de visualización contra cada superficie) */
+  --grafico: #1a33e0;
+  --grafico-hover: #0019d2;
+  --rejilla: #e6eaf0;
+  /* Categórica (partes de un total), en orden fijo; validada con la skill de visualización (CVD ΔE ≥ 9) */
+  --serie-1: #1a33e0; --serie-2: #eb6834; --serie-3: #1baf7a;
+
+  --sombra-hoja: 0 1px 2px rgb(0 25 45 / .06), 0 12px 32px -12px rgb(0 25 45 / .22);
+  --sombra-flotante: 0 8px 24px -4px rgb(0 25 45 / .16);
+  --sombra-lateral: -12px 0 32px rgb(0 25 45 / .16);
+  --velo: rgb(5 6 12 / .48);
+
+  /* ---------- 3. Escalas ---------- */
+  --fuente: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fuente-documento: "Source Serif 4", Georgia, serif;   /* solo el nombre del titular */
+
+  /* Escala fija de producto (1.2 sobre 14 px); el portal usa además tamaños fluidos en su portada */
+  --tam-xs: .75rem;
+  --tam-sm: .8125rem;
+  --tam-md: .875rem;
+  --tam-lg: 1rem;
+  --tam-xl: 1.1875rem;
+  --tam-2xl: 1.4375rem;
+  --tam-3xl: 1.75rem;
+
+  /* Rejilla de 4 px */
+  --e1: 4px; --e2: 8px; --e3: 12px; --e4: 16px; --e5: 20px; --e6: 24px; --e8: 32px; --e10: 40px; --e12: 48px;
+
+  --radio-sm: 6px;
+  --radio: 8px;
+  --radio-lg: 10px;
+
+  --salida: cubic-bezier(.16, 1, .3, 1);
+  --rapido: 150ms;
+  --normal: 220ms;
+
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --fondo: #0b0c10;
+  --superficie: #14151c;
+  --superficie-2: #1a1b23;
+  --superficie-hundida: #101116;
+  --borde: #2a2c38;
+  --borde-suave: #22232d;
+  --borde-fuerte: #3b3e4d;
+  --texto: #f2f3f7;
+  --texto-suave: #d4d7e1;
+  --texto-2: #aeb2c2;
+  --texto-3: #959aad;
+
+  --accion: #8f9bff;
+  --accion-hover: #aab3ff;
+  --accion-texto: #0b0c10;
+  --accion-suave: rgb(143 155 255 / .14);
+  --foco: #8f9bff;
+  --foco-anillo: rgb(143 155 255 / .4);
+  --enlace: #a9b2ff;
+
+  --ok: #56d2a4;      --ok-suave: rgb(86 210 164 / .13);
+  --alerta: #f1b54f;  --alerta-suave: rgb(241 181 79 / .13);
+  --mal: #ff8395;     --mal-suave: rgb(255 131 149 / .13);
+  --pausa: #f7a35c;   --pausa-suave: rgb(247 163 92 / .13);
+  --neutro: #a3a8ba;  --neutro-suave: rgb(163 168 186 / .13);
+  --senal: #d27bff;
+
+  --cromo-borde: rgb(255 255 255 / .08);
+
+  --grafico: #6b7bff;
+  --grafico-hover: #8f9bff;
+  --rejilla: #22232d;
+  --serie-1: #6b7bff; --serie-2: #d95926; --serie-3: #199e70;
+
+  --sombra-hoja: 0 1px 2px rgb(0 0 0 / .4), 0 12px 32px -12px rgb(0 0 0 / .6);
+  --sombra-flotante: 0 8px 24px -4px rgb(0 0 0 / .55);
+  --sombra-lateral: -12px 0 32px rgb(0 0 0 / .5);
+  --velo: rgb(0 0 0 / .62);
+
+  color-scheme: dark;
+}

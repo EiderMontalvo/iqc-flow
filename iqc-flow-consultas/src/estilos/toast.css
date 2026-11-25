@@ -1,0 +1,20 @@
+/* Toast: aviso pequeño y oscuro en una esquina, sin mover el formulario */
+
+.toasts { position: fixed; top: 24px; right: 24px; z-index: 50; width: min(380px, calc(100vw - 32px)); pointer-events: none; }
+.toast {
+  pointer-events: auto; display: flex; gap: 10px; align-items: flex-start; padding: 12px 10px 12px 14px;
+  background: rgb(18 19 26 / .96); border: 1px solid rgb(255 255 255 / .1); border-radius: 8px;
+  box-shadow: 0 12px 32px -8px rgb(0 0 0 / .7); color: #e6e8ee; font-size: .875rem; line-height: 1.45;
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); animation: toast .35s var(--salida) both;
+}
+.toast > svg { flex: none; margin-top: 1px; color: #ff7a8a; }
+.toast p { flex: 1; display: grid; gap: 2px; }
+.toast b { font-weight: 600; color: var(--iqc-blanco); }
+.toast span { color: #aab1c0; }
+.toast button {
+  flex: none; display: grid; place-items: center; width: 28px; height: 28px; margin: -4px 0 -4px 4px; border: 0; border-radius: 6px;
+  background: none; color: #9aa3b5; cursor: pointer; transition: background-color .2s var(--salida), color .2s var(--salida);
+}
+.toast button:hover { background: rgb(255 255 255 / .08); color: var(--iqc-blanco); }
+.toast button:focus-visible { outline-color: var(--foco-cromo); }
+@keyframes toast { from { opacity: 0; transform: translateY(-8px) scale(.98); } }

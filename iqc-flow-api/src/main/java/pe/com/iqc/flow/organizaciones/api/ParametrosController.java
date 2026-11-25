@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.util.List;
+import java.util.UUID;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -26,6 +28,9 @@ public class ParametrosController {
   public record SolicitudParametro(@NotBlank String valor) {
   }
 
+  public record SolicitudPersona(@NotNull Boolean habilitado) {
+  }
+
   @GetMapping
   @Operation(summary = "Parámetros con su valor vigente y los valores admitidos")
   public List<ParametroRespuesta> listar() { return parametros.listar(); }
@@ -35,5 +40,12 @@ public class ParametrosController {
   public ParametroRespuesta cambiar(@PathVariable ParametroOrganizacion clave,
       @Valid @RequestBody SolicitudParametro solicitud) {
     return parametros.cambiar(clave, solicitud.valor());
+  }
+
+  @PutMapping("/{clave}/personas/{usuarioId}")
+  @Operation(summary = "Apaga o devuelve una opción a una persona concreta (organizacion:configurar); queda en la bitácora")
+  public ParametroRespuesta cambiarParaPersona(@PathVariable ParametroOrganizacion clave, @PathVariable UUID usuarioId,
+      @Valid @RequestBody SolicitudPersona solicitud) {
+    return parametros.cambiarParaPersona(clave, usuarioId, solicitud.habilitado());
   }
 }

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import pe.com.iqc.flow.auditorias.application.DtosPanelCertificados;
 import pe.com.iqc.flow.auditorias.application.DtosPanelCertificados.CertificadoPanel;
 import pe.com.iqc.flow.auditorias.application.DtosPanelCertificados.FiltroCertificados;
 import pe.com.iqc.flow.auditorias.application.DtosPanelCertificados.RegistroDirectoRespuesta;
@@ -65,6 +66,10 @@ public class PanelCertificadosController {
             .filename("certificados-" + LocalDate.now() + ".xlsx").build().toString())
         .body(excel);
   }
+
+  @GetMapping("/resumen")
+  @Operation(summary = "Certificados empresariales por marca (país): vigentes, por vencer, vencidos, suspendidos y retirados")
+  public List<DtosPanelCertificados.ResumenMarca> resumen() { return panel.resumenPorMarca(); }
 
   @GetMapping("/{id}")
   public CertificadoPanel obtener(@PathVariable UUID id) { return panel.obtener(id); }

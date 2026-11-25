@@ -39,7 +39,7 @@ import pe.com.iqc.flow.certificaciones.application.PublicadorCertificados;
 import pe.com.iqc.flow.certificaciones.application.PublicadorCertificados.ResultadoPublicacion;
 import pe.com.iqc.flow.identidad.domain.CodigosRol;
 
-/**Incremento 8a: marcas por país, QR y publicación a la base pública de consulta (esquema "consultas" en pruebas)*/
+/**marcas por país, QR y publicación a la base pública de cada país (esquemas consultas_pe, _ec... en pruebas)*/
 class PublicacionIT extends PruebaIntegracion {
   private static final LocalDate HOY = LocalDate.now(ZoneId.of("America/Lima"));
   private static final byte[] PDF = "%PDF-1.4\n% certificado de prueba\n%%EOF".getBytes(StandardCharsets.US_ASCII);
@@ -117,7 +117,8 @@ class PublicacionIT extends PruebaIntegracion {
 
     ResultadoPublicacion primera = publicador.publicar(false);
     assertThat(primera.publicados()).isEqualTo(1);
-    Map<String, Object> fila = jdbc.queryForMap("SELECT * FROM consultas.certificados_publicos WHERE id = ?::uuid", certificado);
+    Map<String, Object> fila = jdbc.queryForMap("SELECT * FROM consultas_latam.certificados_publicos WHERE id = ?::uuid",
+        certificado);
     assertThat(fila).containsEntry("marca_nombre", "IQC Ecuador")
         .containsEntry("url_consulta", "https://consultas.iqc-latam.com/")
         .containsEntry("codigo", "PE-SAE-00620240211")
@@ -127,10 +128,14 @@ class PublicacionIT extends PruebaIntegracion {
         .containsEntry("titular_numero_documento", "0991234567001")
         .containsEntry("estado", "EMITIDO")
         .containsEntry("tiene_pdf", true);
-    assertThat(jdbc.queryForObject("SELECT origen FROM consultas.qr_publicos WHERE token = ?", String.class, token))
+    assertThat(jdbc.queryForObject("SELECT origen FROM consultas_latam.qr_publicos WHERE token = ?", String.class, token))
         .isEqualTo("SISTEMA");
-    assertThat(jdbc.queryForObject("SELECT contenido FROM consultas.documentos_publicos WHERE certificado_id = ?::uuid",
+    assertThat(jdbc.queryForObject("SELECT contenido FROM consultas_latam.documentos_publicos WHERE certificado_id = ?::uuid",
         byte[].class, certificado)).isEqualTo(PDF);
+
+    // Solo en la base de su país
+    assertThat(contar("pe", certificado)).isZero();
+    assertThat(contar("pe", certificado)).isZero();
 
     // Sin cambios no se vuelve a escribir
     assertThat(publicador.publicar(false).sinCambios()).isEqualTo(1);
@@ -144,22 +149,74 @@ class PublicacionIT extends PruebaIntegracion {
     enviar(put("/api/v1/certificados/" + certificado + "/marca"), master,
         "{\"pais\": \"PE\", \"motivo\": \"Lo atiende IQC Perú\", \"version\": 1}", 200);
     assertThat(publicador.publicar(false).publicados()).isEqualTo(1);
-    assertThat(jdbc.queryForMap("SELECT titular_razon_social, marca_nombre, url_consulta FROM consultas.certificados_publicos"))
+    // Pasa a la base de Perú y sale de la de Ecuador, con su QR y su PDF
+    assertThat(contar("latam", certificado)).isZero();
+    assertThat(jdbc.queryForObject("SELECT count(*) FROM consultas_latam.qr_publicos", Integer.class)).isZero();
+    assertThat(jdbc.queryForObject("SELECT count(*) FROM consultas_latam.documentos_publicos", Integer.class)).isZero();
+    assertThat(jdbc.queryForObject("SELECT certificado_id::text FROM consultas_pe.qr_publicos WHERE token = ?",
+        String.class, token)).isEqualTo(certificado);
+    assertThat(jdbc.queryForMap("SELECT titular_razon_social, marca_nombre, url_consulta FROM consultas_pe.certificados_publicos"))
         .containsEntry("titular_razon_social", "Pesquera del Pacífico Sur S.A.")
         .containsEntry("marca_nombre", "IQC Perú")
         .containsEntry("url_consulta", "https://consultas.iqcperu.com/");
 
     // Nada interno llega a la base pública
-    assertThat(jdbc.queryForList("SELECT table_name FROM information_schema.tables WHERE table_schema = 'consultas' "
+    assertThat(jdbc.queryForList("SELECT table_name FROM information_schema.tables WHERE table_schema = 'consultas_pe' "
         + "AND table_name NOT LIKE 'flyway%' ORDER BY 1", String.class))
-        .containsExactly("certificados_publicos", "documentos_publicos", "qr_publicos");
+        .containsExactly("certificados_publicos", "documentos_personales_publicos", "documentos_publicos", "personales_publicos",
+            "qr_publicos", "qr_redirecciones");
 
     mvc.perform(get("/api/v1/publicacion").session(master))
         .andExpect(jsonPath("$.habilitada").value(true))
+        .andExpect(jsonPath("$.paises", contains("CO", "EC", "PA", "PE")))
         .andExpect(jsonPath("$.publicados").value(1));
     enviar(post("/api/v1/publicacion"), comercial, "", 403);
     mvc.perform(post("/api/v1/publicacion").param("forzar", "true").session(master).with(csrf()))
         .andExpect(jsonPath("$.publicados").value(1));
+  }
+
+  @Test
+  void elQrImpresoConLaConsultaDePeruSeReenviaAlPortalLatam() throws Exception {
+    String certificado = registrar(clienteEcuador, "PE-SAE-00720240211", null);
+    // El panel anterior imprimió consultas.iqcperu.com también en los QR de Ecuador
+    jdbc.update("INSERT INTO qr_legado (encriptacion_id, id_qr, organizacion_id, certificado_id, activo, registrado_en) "
+        + "VALUES ('9b2c-legado-q', '9b2c-legado', ?, ?::uuid, TRUE, now())", organizacionId, certificado);
+
+    publicador.publicar(false);
+    assertThat(contar("latam", certificado)).isEqualTo(1);
+    assertThat(jdbc.queryForObject("SELECT origen FROM consultas_latam.qr_publicos WHERE token = '9b2c-legado-q'",
+        String.class)).isEqualTo("LEGADO");
+    // La base de Perú no tiene el certificado, solo a dónde reenviar su QR impreso
+    assertThat(contar("pe", certificado)).isZero();
+    assertThat(jdbc.queryForMap("SELECT marca_pais, url_destino FROM consultas_pe.qr_redirecciones WHERE token = ?",
+        "9b2c-legado-q"))
+        .containsEntry("marca_pais", "EC")
+        .containsEntry("url_destino", "https://consultas.iqc-latam.com/9b2c-legado-q");
+
+    // Si pasa a la marca de Perú, el portal de Perú lo resuelve directamente y la redirección sobra
+    int version = JsonPath.read(enviarGet("/api/v1/certificados/" + certificado), "$.version");
+    enviar(put("/api/v1/certificados/" + certificado + "/marca"), master,
+        "{\"pais\": \"PE\", \"motivo\": \"Lo atiende IQC Perú\", \"version\": %d}".formatted(version), 200);
+    publicador.publicar(false);
+    assertThat(jdbc.queryForObject("SELECT count(*) FROM consultas_pe.qr_redirecciones", Integer.class)).isZero();
+    assertThat(contar("pe", certificado)).isEqualTo(1);
+    assertThat(contar("latam", certificado)).isZero();
+  }
+
+  @Test
+  void cambiarDeMarcaEntrePaisesDeLatamNoLoRetiraDeLaBaseCompartida() throws Exception {
+    String certificado = registrar(clienteEcuador, "PE-SAE-00820240211", null);
+    publicador.publicar(false);
+    assertThat(contar("latam", certificado)).isEqualTo(1);
+    int version = JsonPath.read(enviarGet("/api/v1/certificados/" + certificado), "$.version");
+    enviar(put("/api/v1/certificados/" + certificado + "/marca"), master,
+        "{\"pais\": \"CO\", \"motivo\": \"Lo atiende IQC Colombia\", \"version\": %d}".formatted(version), 200);
+    publicador.publicar(false);
+    assertThat(contar("latam", certificado)).isEqualTo(1);
+    assertThat(jdbc.queryForObject("SELECT marca_pais FROM consultas_latam.certificados_publicos WHERE id = ?::uuid",
+        String.class, certificado)).isEqualTo("CO");
+    assertThat(jdbc.queryForObject("SELECT pais_publicado FROM publicaciones_certificados WHERE certificado_id = ?::uuid",
+        String.class, certificado)).isEqualTo("CO");
   }
 
   @Test
@@ -178,6 +235,11 @@ class PublicacionIT extends PruebaIntegracion {
         .formatted(cliente, HOY.minusYears(1), HOY.minusYears(1), HOY.plusYears(2), codigo,
             pdf == null ? "" : ", \"documentoPdfId\": \"" + pdf + "\"");
     return JsonPath.read(enviar(post("/api/v1/certificados/registro-directo"), master, cuerpo, 201), "$.certificados[0].id");
+  }
+
+  private int contar(String pais, String certificado) {
+    return jdbc.queryForObject("SELECT count(*) FROM consultas_" + pais + ".certificados_publicos WHERE id = ?::uuid",
+        Integer.class, certificado);
   }
 
   private byte[] qr(String certificado) throws Exception {

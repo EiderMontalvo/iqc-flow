@@ -24,6 +24,7 @@ import pe.com.iqc.flow.identidad.application.DtosIdentidad.SolicitudActualizarUs
 import pe.com.iqc.flow.identidad.application.DtosIdentidad.SolicitudAsignarRoles;
 import pe.com.iqc.flow.identidad.application.DtosIdentidad.SolicitudCrearUsuario;
 import pe.com.iqc.flow.identidad.application.DtosIdentidad.UsuarioRespuesta;
+import pe.com.iqc.flow.identidad.application.ServicioRecuperacionAcceso;
 import pe.com.iqc.flow.identidad.application.ServicioUsuarios;
 
 @RestController
@@ -31,8 +32,12 @@ import pe.com.iqc.flow.identidad.application.ServicioUsuarios;
 @Tag(name = "Usuarios y roles")
 public class UsuariosController {
   private final ServicioUsuarios servicio;
+  private final ServicioRecuperacionAcceso recuperacion;
 
-  public UsuariosController(ServicioUsuarios servicio) { this.servicio = servicio; }
+  public UsuariosController(ServicioUsuarios servicio, ServicioRecuperacionAcceso recuperacion) {
+    this.servicio = servicio;
+    this.recuperacion = recuperacion;
+  }
 
   @GetMapping("/usuarios")
   @Operation(summary = "Lista los usuarios de la organización (permiso usuarios:leer)")
@@ -64,6 +69,15 @@ public class UsuariosController {
   @Operation(summary = "Reemplaza los roles de un usuario (permiso roles:asignar)")
   public UsuarioRespuesta asignarRoles(@PathVariable UUID id, @Valid @RequestBody SolicitudAsignarRoles solicitud) {
     return servicio.asignarRoles(id, solicitud);
+  }
+
+  public record SolicitudContrasenaTemporal(@jakarta.validation.constraints.NotBlank String contrasenaTemporal, long version) {
+  }
+
+  @PostMapping("/usuarios/{id}/contrasena-temporal")
+  @Operation(summary = "Asigna una contraseña temporal (usuarios:gestionar); la persona debe cambiarla al ingresar")
+  public UsuarioRespuesta contrasenaTemporal(@PathVariable UUID id, @Valid @RequestBody SolicitudContrasenaTemporal solicitud) {
+    return recuperacion.asignarTemporal(id, solicitud.contrasenaTemporal(), solicitud.version());
   }
 
   @GetMapping("/roles")

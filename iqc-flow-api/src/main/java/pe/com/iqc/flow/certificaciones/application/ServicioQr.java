@@ -39,7 +39,7 @@ public class ServicioQr {
   }
 
   @Transactional(readOnly = true)
-  @PreAuthorize("hasAuthority('expedientes:leer')")
+  @PreAuthorize("hasAnyAuthority('expedientes:leer', 'certificados:leer')")
   public EnlaceConsulta enlace(UUID certificadoId) {
     UUID org = actorActual.requerido().organizacionId();
     CertificadoPublicable c = cargar(org, certificadoId);
@@ -49,7 +49,7 @@ public class ServicioQr {
   }
 
   @Transactional(readOnly = true)
-  @PreAuthorize("hasAuthority('expedientes:leer')")
+  @PreAuthorize("hasAnyAuthority('expedientes:leer', 'certificados:leer')")
   public byte[] png(UUID certificadoId, int tamano, boolean conLogo) {
     UUID org = actorActual.requerido().organizacionId();
     CertificadoPublicable c = cargar(org, certificadoId);

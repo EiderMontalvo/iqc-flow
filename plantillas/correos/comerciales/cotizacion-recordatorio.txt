@@ -1,0 +1,13 @@
+Asunto: Seguimiento a la propuesta {{numero}} – {{razonSocial}}
+
+Estimado(a) {{contactoNombre}}:
+
+Le escribimos para dar seguimiento a la propuesta {{numero}} que le enviamos el {{fechaEnvio}} para la {{tipoServicio}} en {{normas}}.
+
+¿Pudo revisarla? Si tiene dudas sobre el alcance, los días de auditoría o las condiciones de pago, podemos coordinar una breve llamada. La propuesta está vigente hasta el {{fechaVencimiento}}.
+
+Atentamente,
+
+{{responsableNombre}}
+{{marcaNombre}}
+{{responsableCorreo}} · {{responsableTelefono}}

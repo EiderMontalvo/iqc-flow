@@ -46,9 +46,11 @@ public abstract class PruebaIntegracion {
   @BeforeEach
   void prepararBaseDeDatos() {
     // TRUNCATE no dispara el trigger que impide modificar la bitácora
-    jdbc.execute("TRUNCATE bitacora, publicaciones_certificados, certificados_pdf, marcas_pais, qr_legado, certificados, decisiones_normas, decisiones_certificacion, declaraciones_conflicto, documentos, parametros_organizacion, equipo_auditoria, auditorias, historial_expedientes, expedientes_sedes, expedientes_normas, expedientes, competencias_auditor, auditores, aliados_comerciales, notificaciones, actividades, historial_tareas, tareas_seguimiento, contactos_cliente, direcciones_cliente, clientes, usuarios_roles, usuarios");
+    jdbc.execute("TRUNCATE bitacora, parametros_desactivados_usuario, cotizaciones_items, cotizaciones, correlativos, publicaciones_personales, certificados_personales, personas_certificadas, publicaciones_certificados, certificados_pdf, marcas_pais, qr_legado, certificados, decisiones_normas, decisiones_certificacion, declaraciones_conflicto, documentos, parametros_organizacion, equipo_auditoria, auditorias, historial_expedientes, expedientes_sedes, expedientes_normas, expedientes, competencias_auditor, auditores, aliados_comerciales, notificaciones, actividades, historial_tareas, tareas_seguimiento, contactos_cliente, direcciones_cliente, clientes, usuarios_roles, usuarios");
     jdbc.update("DELETE FROM organizaciones");
-    jdbc.execute("TRUNCATE consultas.certificados_publicos CASCADE");
+    for (String pais : new String[] {"pe", "latam"}) {
+      jdbc.execute("TRUNCATE consultas_" + pais + ".certificados_publicos, consultas_" + pais + ".qr_redirecciones, consultas_" + pais + ".personales_publicos CASCADE");
+    }
     organizacionId = organizaciones.asegurarExistencia("IQC_PERU", "IQC Perú").id();
   }
 

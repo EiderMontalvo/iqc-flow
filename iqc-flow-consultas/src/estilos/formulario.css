@@ -1,0 +1,21 @@
+/* Formulario de verificación sobre la cabecera oscura */
+
+.buscador {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr) auto; gap: 12px; align-items: end;
+}
+.buscador label { display: grid; gap: 8px; }
+.buscador label > span { font-size: 14px; font-weight: 600; color: #e6e9f0; }
+.buscador input {
+  height: 52px; width: 100%; padding: 0 16px; border: 1px solid rgb(255 255 255 / .18); border-radius: var(--radio-sm);
+  background: rgb(8 10 14 / .72); color: var(--iqc-blanco); font: 500 1.0625rem var(--fuente); letter-spacing: .01em;
+  transition: border-color .2s var(--salida), background-color .2s var(--salida), box-shadow .2s var(--salida);
+}
+.buscador input::placeholder { color: #8a92a5; font-weight: 400; }
+.buscador input:hover { border-color: rgb(255 255 255 / .32); }
+.buscador input:focus { outline: none; background: rgb(8 10 14 / .85); border-color: #8f9bff; box-shadow: 0 0 0 3px rgb(143 155 255 / .25); }
+
+.verificar { height: 52px; padding: 0 28px; background: var(--iqc-azul-vivo); color: var(--iqc-blanco); font-weight: 700; }
+.verificar:hover:not(:disabled) { background: var(--iqc-azul-vivo-hover); }
+.verificar:focus-visible, .nueva:focus-visible { outline-color: var(--foco-cromo); }
+.nueva { margin-top: 28px; background: transparent; color: var(--iqc-blanco); border-color: rgb(255 255 255 / .45); }
+.nueva:hover { background: rgb(255 255 255 / .08); border-color: var(--iqc-blanco); }

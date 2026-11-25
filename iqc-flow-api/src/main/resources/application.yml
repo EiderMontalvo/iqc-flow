@@ -8,6 +8,16 @@ spring:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/iqc_flow}
     username: ${DB_USERNAME:iqc_dev}
     password: ${DB_PASSWORD:${iqc.local.clave-bd:}}
+    # Pool que crece con el uso y suelta conexiones inactivas: cada conexión es un proceso de PostgreSQL
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAXIMO:10}
+      minimum-idle: 2
+      idle-timeout: 300000
+  # Sesiones en PostgreSQL (ADR-044); las tablas las crea Flyway (V13)
+  session:
+    jdbc:
+      initialize-schema: never
+      cleanup-cron: "0 */5 * * * *"
   jpa:
     open-in-view: false
     hibernate:
@@ -29,6 +39,11 @@ spring:
     locale-resolver: fixed
 
 server:
+  tomcat:
+    threads:
+      # Uso interno de una oficina: 40 hilos sobran y ahorran memoria en picos
+      max: ${IQC_HILOS_MAXIMOS:40}
+      min-spare: 4
   port: 8080
   error:
     include-stacktrace: never
@@ -38,7 +53,8 @@ server:
       cookie:
         name: IQCFLOWSESSION
         http-only: true
-        same-site: lax
+        # lax si panel y API comparten dominio (panel.iqcperu.com y api.iqcperu.com); none si son dominios distintos
+        same-site: ${IQC_COOKIE_SAME_SITE:lax}
 
 management:
   endpoints:
@@ -66,6 +82,8 @@ iqc:
     duracion-bloqueo: 15m
     limite-ip-intentos: 20
     limite-ip-ventana: 15m
+    # Dominios del panel cuando se aloja aparte de la API, separados por comas (p. ej. https://panel.iqcperu.com)
+    origenes-permitidos: ${IQC_ORIGENES_PANEL:}
   # Anticipación (días) de las tareas automáticas del ciclo de certificación
   expedientes:
     dias-anticipacion-vigilancia: 60
@@ -74,14 +92,56 @@ iqc:
   documentos:
     directorio: ${IQC_DOCUMENTOS_DIR:./datos/documentos}
     tamano-maximo: 15MB
-  # Base pública de la consulta de certificados (consultas.iqcperu.com, consultas.iqc-latam.com). Solo la escribe el
-  # panel; en desarrollo usa el esquema "consultas" de la base local, en producción una base propia (ver README)
+    # LOCAL (disco) o S3 (AWS S3 o compatible: R2, Wasabi, MinIO), ADR-044
+    almacen: ${IQC_DOCUMENTOS_ALMACEN:LOCAL}
+    s3:
+      bucket: ${IQC_S3_BUCKET:}
+      region: ${IQC_S3_REGION:us-east-1}
+      endpoint: ${IQC_S3_ENDPOINT:}
+      prefijo: ${IQC_S3_PREFIJO:documentos/}
+      clave-acceso: ${IQC_S3_CLAVE_ACCESO:}
+      clave-secreta: ${IQC_S3_CLAVE_SECRETA:}
+      ruta-estilo: ${IQC_S3_RUTA_ESTILO:false}
+  # Bases públicas de consulta, una por país de marca (ADR-043). Solo las escribe el panel. Perú la lee
+  # consultas.iqcperu.com; Ecuador, Colombia y Panamá, el portal único consultas.iqc-latam.com. En desarrollo son
+  # esquemas de la base local; en producción, bases propias (ver README)
   consultas:
-    url: ${IQC_CONSULTAS_URL:jdbc:postgresql://localhost:5432/iqc_flow}
-    usuario: ${IQC_CONSULTAS_USUARIO:iqc_dev}
-    clave: ${IQC_CONSULTAS_CLAVE:${iqc.local.clave-bd:}}
-    esquema: ${IQC_CONSULTAS_ESQUEMA:consultas}
+    bases:
+      PE:
+        url: ${IQC_CONSULTAS_PE_URL:jdbc:postgresql://localhost:5432/iqc_flow}
+        usuario: ${IQC_CONSULTAS_PE_USUARIO:iqc_dev}
+        clave: ${IQC_CONSULTAS_PE_CLAVE:${iqc.local.clave-bd:}}
+        esquema: ${IQC_CONSULTAS_PE_ESQUEMA:consultas_pe}
+      EC:
+        url: ${IQC_CONSULTAS_EC_URL:jdbc:postgresql://localhost:5432/iqc_flow}
+        usuario: ${IQC_CONSULTAS_EC_USUARIO:iqc_dev}
+        clave: ${IQC_CONSULTAS_EC_CLAVE:${iqc.local.clave-bd:}}
+        esquema: ${IQC_CONSULTAS_EC_ESQUEMA:consultas_latam}
+      CO:
+        url: ${IQC_CONSULTAS_CO_URL:jdbc:postgresql://localhost:5432/iqc_flow}
+        usuario: ${IQC_CONSULTAS_CO_USUARIO:iqc_dev}
+        clave: ${IQC_CONSULTAS_CO_CLAVE:${iqc.local.clave-bd:}}
+        esquema: ${IQC_CONSULTAS_CO_ESQUEMA:consultas_latam}
+      PA:
+        url: ${IQC_CONSULTAS_PA_URL:jdbc:postgresql://localhost:5432/iqc_flow}
+        usuario: ${IQC_CONSULTAS_PA_USUARIO:iqc_dev}
+        clave: ${IQC_CONSULTAS_PA_CLAVE:${iqc.local.clave-bd:}}
+        esquema: ${IQC_CONSULTAS_PA_ESQUEMA:consultas_latam}
     intervalo: PT1M
+  # Portal público de consulta (Incremento 8b): lee las bases públicas con usuarios de SOLO LECTURA
+  portal-consultas:
+    consultas-por-minuto: 60
+    portales:
+      PE:
+        url: ${IQC_CONSULTAS_PE_URL:jdbc:postgresql://localhost:5432/iqc_flow}
+        usuario: ${IQC_LECTURA_PE_USUARIO:iqc_dev}
+        clave: ${IQC_LECTURA_PE_CLAVE:${iqc.local.clave-bd:}}
+        esquema: ${IQC_CONSULTAS_PE_ESQUEMA:consultas_pe}
+      LATAM:
+        url: ${IQC_CONSULTAS_EC_URL:jdbc:postgresql://localhost:5432/iqc_flow}
+        usuario: ${IQC_LECTURA_LATAM_USUARIO:iqc_dev}
+        clave: ${IQC_LECTURA_LATAM_CLAVE:${iqc.local.clave-bd:}}
+        esquema: ${IQC_CONSULTAS_EC_ESQUEMA:consultas_latam}
   # Arranque inicial: crea el primer usuario MASTER (ver README)
   master-inicial:
     habilitado: ${IQC_MASTER_INICIAL:false}

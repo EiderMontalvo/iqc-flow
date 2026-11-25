@@ -87,11 +87,13 @@ class ImportadorCertificacionesLegado implements ImportacionCertificaciones {
         "Importado de la plataforma anterior de certificaciones", null, ahora));
     int totalQr = 0;
     for (CertificadoLegado c : x.certificados()) {
-      Certificado certificado = certificados.save(Certificado.historico(e, normas.get(c.norma()).edicion().equals(c.edicion())
+      Certificado historico = Certificado.historico(e, normas.get(c.norma()).edicion().equals(c.edicion())
               ? normas.get(c.norma()) : new NormaExpediente(c.norma(), c.edicion()),
           c.codigo(), Certificado.Estado.valueOf(c.estado()), c.revisionAlcance(), c.ciclo(), c.anioDecision(),
           c.emitidoPorIndia(), recortar(c.alcance(), 4000), c.fechaOtorgamiento(), c.fechaEmision(), c.fechaExpiracion(),
-          c.urlDocumento(), x.fuente(), c.idLegado()));
+          c.urlDocumento(), x.fuente(), c.idLegado());
+      if (c.paisMarca() != null) historico.cambiarMarca(c.paisMarca());
+      Certificado certificado = certificados.save(historico);
       for (QrLegado qr : c.qrs() == null ? List.<QrLegado>of() : c.qrs()) {
         if (qrs.existsById(qr.encriptacionId())) continue;
         qrs.save(new pe.com.iqc.flow.auditorias.domain.QrLegado(qr.encriptacionId(), qr.idQr(), x.organizacionId(),

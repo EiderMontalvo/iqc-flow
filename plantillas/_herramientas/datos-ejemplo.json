@@ -1,0 +1,28 @@
+{
+  "_comentario": "Datos ficticios para la vista previa. _imagenes: rutas opcionales para {{firma}} y {{logo}}.",
+  "marcaNombre": "IQC Perú",
+  "marcaDireccion": "JR. ABANCAY NRO. 425 URB. SAN CARLOS (TERCER PISO, OFICINA 301) JUNÍN – HUANCAYO – PERÚ",
+  "marcaTelefono": "+51 980 923 270",
+  "marcaCorreo": "administracion@iqcperu.com",
+  "marcaRazonSocial": "IQC PERÚ S.A.C.",
+  "marcaRuc": "20604476691",
+  "marcaDireccionFiscal": "Av. Arequipa Nro. 2450 Int. 805, Lince – Lima",
+  "ciudad": "Lima",
+  "fechaTexto": "25 de noviembre de 2026",
+  "firmanteNombre": "Nombre de quien firma",
+  "firmanteCargo": "Gerente General",
+  "razonSocial": "EMPRESA DE PRUEBA S.A.C.",
+  "numeroDocumento": "20123456789",
+  "asunto": "Comunicación de prueba",
+  "tipoServicio": "recertificación",
+  "normas": "ISO 9001:2015 e ISO 14001:2015",
+  "normasSinEdicion": "ISO 9001 e ISO 14001",
+  "normasLista": [
+    { "codigo": "ISO 9001", "nombre": "Sistema de Gestión de la Calidad" },
+    { "codigo": "ISO 14001", "nombre": "Sistema de Gestión Ambiental" }
+  ],
+  "alcance": "Diseño, fabricación y comercialización de estructuras metálicas.",
+  "etapa": "1ra Vigilancia",
+  "sistema": "Sistema Integrado de Gestión",
+  "_imagenes": {}
+}

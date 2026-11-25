@@ -8,6 +8,8 @@ public final class CodigosRol {
   public static final String COORDINADOR_AUDITORIAS = "COORDINADOR_AUDITORIAS";
   public static final String RESPONSABLE_CERTIFICACIONES = "RESPONSABLE_CERTIFICACIONES";
   public static final String ADMINISTRACION_LOGISTICA = "ADMINISTRACION_LOGISTICA";
+  /**operación diaria de certificados empresariales y personales (V11)*/
+  public static final String CERTIFICADOS = "CERTIFICADOS";
 
   private CodigosRol() {
   }

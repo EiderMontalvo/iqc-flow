@@ -93,11 +93,11 @@ public class GestorDocumentos implements ServicioDocumentos {
   }
 
   @Transactional(readOnly = true)
-  @PreAuthorize("hasAuthority('expedientes:leer')")
+  @PreAuthorize("hasAnyAuthority('expedientes:leer', 'certificados:leer')")
   public DocumentoReferencia obtener(UUID id) { return referencia(cargar(id)); }
 
   @Transactional(readOnly = true)
-  @PreAuthorize("hasAuthority('expedientes:leer')")
+  @PreAuthorize("hasAnyAuthority('expedientes:leer', 'certificados:leer')")
   public ContenidoDocumento descargar(UUID id) {
     Documento documento = cargar(id);
     try {
@@ -138,8 +138,23 @@ public class GestorDocumentos implements ServicioDocumentos {
   }
 
   private Documento cargar(UUID id) {
-    return documentos.findByIdAndOrganizacionId(id, actorActual.requerido().organizacionId())
+    Documento documento = documentos.findByIdAndOrganizacionId(id, actorActual.requerido().organizacionId())
         .orElseThrow(() -> new RecursoNoEncontradoException("Documento", id));
+    // Quien solo lee certificados (rol Certificados) ve sus PDF y los logos de marca, nunca actas, declaraciones
+    // ni otros documentos de expedientes; se responde como inexistente para no revelar que existe
+    if (!lecturaCompleta() && !CATEGORIAS_CERTIFICADOS.contains(documento.getCategoria())) {
+      throw new RecursoNoEncontradoException("Documento", id);
+    }
+    return documento;
+  }
+
+  private static final java.util.Set<CategoriaDocumento> CATEGORIAS_CERTIFICADOS =
+      java.util.EnumSet.of(CategoriaDocumento.CERTIFICADO_PDF, CategoriaDocumento.LOGO_MARCA);
+
+  private static boolean lecturaCompleta() {
+    var autenticacion = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+    return autenticacion != null && autenticacion.getAuthorities().stream()
+        .anyMatch(a -> "expedientes:leer".equals(a.getAuthority()));
   }
 
   /**si la transacción se revierte, el archivo ya escrito no debe quedar huérfano en el almacén*/

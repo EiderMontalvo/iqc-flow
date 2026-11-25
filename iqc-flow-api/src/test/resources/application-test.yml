@@ -1,4 +1,10 @@
+# Las pruebas usan la sesión en memoria del contenedor (MockMvc la maneja con MockHttpSession); la sesión persistente
+# se verifica en el entorno de prueba real
 spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.session.jdbc.autoconfigure.JdbcSessionAutoConfiguration
+      - org.springframework.boot.session.autoconfigure.SessionAutoConfiguration
   datasource:
     url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/iqc_flow_test}
     username: ${TEST_DB_USERNAME:iqc_dev}
@@ -15,9 +21,40 @@ iqc:
   documentos:
     directorio: target/documentos-prueba
 
-  # La base pública de prueba es el esquema "consultas" de iqc_flow_test
+  # Bases públicas de prueba: consultas_pe para Perú y consultas_latam compartida por EC, CO y PA (como en producción)
   consultas:
-    url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/iqc_flow_test}
-    usuario: ${TEST_DB_USERNAME:iqc_dev}
-    clave: ${TEST_DB_PASSWORD:${DB_PASSWORD:${iqc.local.clave-bd:}}}
-    esquema: consultas
+    bases:
+      PE:
+        url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/iqc_flow_test}
+        usuario: ${TEST_DB_USERNAME:iqc_dev}
+        clave: ${TEST_DB_PASSWORD:${DB_PASSWORD:${iqc.local.clave-bd:}}}
+        esquema: consultas_pe
+      EC:
+        url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/iqc_flow_test}
+        usuario: ${TEST_DB_USERNAME:iqc_dev}
+        clave: ${TEST_DB_PASSWORD:${DB_PASSWORD:${iqc.local.clave-bd:}}}
+        esquema: consultas_latam
+      CO:
+        url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/iqc_flow_test}
+        usuario: ${TEST_DB_USERNAME:iqc_dev}
+        clave: ${TEST_DB_PASSWORD:${DB_PASSWORD:${iqc.local.clave-bd:}}}
+        esquema: consultas_latam
+      PA:
+        url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/iqc_flow_test}
+        usuario: ${TEST_DB_USERNAME:iqc_dev}
+        clave: ${TEST_DB_PASSWORD:${DB_PASSWORD:${iqc.local.clave-bd:}}}
+        esquema: consultas_latam
+
+  portal-consultas:
+    consultas-por-minuto: 1000
+    portales:
+      PE:
+        url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/iqc_flow_test}
+        usuario: ${TEST_DB_USERNAME:iqc_dev}
+        clave: ${TEST_DB_PASSWORD:${DB_PASSWORD:${iqc.local.clave-bd:}}}
+        esquema: consultas_pe
+      LATAM:
+        url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/iqc_flow_test}
+        usuario: ${TEST_DB_USERNAME:iqc_dev}
+        clave: ${TEST_DB_PASSWORD:${DB_PASSWORD:${iqc.local.clave-bd:}}}
+        esquema: consultas_latam

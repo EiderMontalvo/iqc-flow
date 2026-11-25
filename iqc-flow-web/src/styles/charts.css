@@ -1,0 +1,135 @@
+/*
+ * Gráficos del inicio de cada rol. Especificación de la skill de visualización: una serie por gráfico en --grafico
+ * (validado contra cada superficie), columnas de 24 px como máximo con la punta redondeada y la base recta, rejilla
+ * de 1 px discreta, textos con tokens de texto (nunca con el color de la serie), tooltip y vista de tabla.
+ */
+.indicadores { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; gap: var(--e5); margin-bottom: var(--e6); }
+/* Después de lo urgente, con la misma separación que entre paneles */
+.screen-body > .panel + .indicadores, .overview-grid + .indicadores { margin-top: var(--e5); }
+.panel-grafico { min-width: 0; }
+.panel-grafico.ancho { grid-column: 1 / -1; }
+.panel-grafico .panel-title { margin-bottom: var(--e3); }
+.panel-grafico-acciones { display: flex; align-items: center; gap: var(--e1); }
+.panel-grafico.ampliable { cursor: pointer; transition: border-color var(--rapido) var(--salida), box-shadow var(--rapido) var(--salida); }
+.panel-grafico.ampliable:hover { border-color: var(--borde-fuerte); box-shadow: 0 8px 24px -16px rgb(10 14 40 / .35); }
+.panel-grafico.ampliable .panel-title .icon-button { color: var(--texto-3); }
+.panel-grafico.ampliable:hover .panel-title .icon-button { color: var(--accion); }
+/* Año bajo el mes, solo en el primer periodo y cuando cambia */
+.eje-anio { fill: var(--texto-2); font-weight: 600; }
+
+/* Detalle de un gráfico (cajón ancho) */
+.dialog.detalle-grafico { width: min(920px, 100%); }
+.dialog-header p { margin-top: var(--e1); color: var(--texto-2); font-size: var(--tam-sm); }
+.detalle-grafico-resumen { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--e3); margin: var(--e5) var(--e6) 0; }
+.detalle-grafico-resumen div { padding: var(--e3) var(--e4); border-radius: var(--radio); background: var(--superficie-2); border: 1px solid var(--borde-suave); }
+.detalle-grafico-resumen dt { color: var(--texto-2); font-size: var(--tam-xs); font-weight: 600; }
+.detalle-grafico-resumen dd { margin-top: 2px; color: var(--texto); font-size: var(--tam-md); font-weight: 650; }
+.detalle-grafico-dibujo { margin: var(--e5) var(--e6); }
+.detalle-grafico .table-wrap { margin: 0 var(--e6) var(--e6); border: 1px solid var(--borde); border-radius: var(--radio); }
+.tabla-grafico td.sube { color: var(--ok); font-weight: 600; }
+.tabla-grafico td.baja { color: var(--mal); font-weight: 600; }
+
+/* Columnas por periodo */
+.grafico-columnas { position: relative; min-height: 200px; }
+.grafico-columnas svg { display: block; overflow: visible; font-family: var(--fuente); }
+.grafico-columnas .eje-y line { stroke: var(--rejilla); stroke-width: 1; shape-rendering: crispEdges; }
+.grafico-columnas .eje-y text, .grafico-columnas .eje-x { fill: var(--texto-3); font-size: 11px; font-variant-numeric: tabular-nums; }
+.grafico-columnas .valor { fill: var(--texto); font-size: 12px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.grafico-columnas .barra { cursor: default; outline: none; }
+.grafico-columnas .barra path { fill: var(--grafico); transition: fill var(--rapido) var(--salida); }
+.grafico-columnas .barra .zona { fill: transparent; }
+.grafico-columnas .barra.activa path { fill: var(--grafico-hover); }
+.grafico-columnas .barra.activa .zona { fill: var(--accion-suave); opacity: .5; }
+.grafico-columnas .barra:focus-visible .zona { fill: none; stroke: var(--foco); stroke-width: 2; }
+
+.grafico-tooltip {
+  position: absolute; z-index: 3; transform: translate(-50%, -100%); pointer-events: none;
+  display: grid; gap: 1px; padding: 6px 10px; border-radius: var(--radio-sm);
+  background: var(--iqc-negro); color: #fff; box-shadow: var(--sombra-flotante); white-space: nowrap;
+}
+.grafico-tooltip strong { font-size: var(--tam-lg); font-weight: 700; font-variant-numeric: tabular-nums; }
+.grafico-tooltip span { font-size: var(--tam-xs); color: var(--cromo-texto-2); }
+
+/* Barras horizontales ordenadas */
+.grafico-barras { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.grafico-barras li {
+  display: grid; grid-template-columns: minmax(96px, 34%) minmax(0, 1fr) auto; align-items: center; gap: var(--e3);
+  padding: 7px var(--e2); margin: 0 calc(var(--e2) * -1); border-radius: var(--radio-sm); outline: none;
+  transition: background-color var(--rapido) var(--salida);
+}
+.grafico-barras li:hover { background: var(--superficie-2); }
+.grafico-barras li:focus-visible { box-shadow: inset 0 0 0 2px var(--foco); }
+.grafico-barras .nombre { color: var(--texto-suave); font-size: var(--tam-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grafico-barras .pista { display: block; height: 14px; }
+.grafico-barras .barra { display: block; height: 100%; border-radius: 0 4px 4px 0; background: var(--grafico); transition: background-color var(--rapido) var(--salida); }
+.grafico-barras li:hover .barra, .grafico-barras li:focus-visible .barra { background: var(--grafico-hover); }
+.grafico-barras .cifra { min-width: 3ch; color: var(--texto); font-size: var(--tam-sm); font-weight: 650; text-align: right; font-variant-numeric: tabular-nums; }
+
+.grafico-cifra { padding: var(--e2) 0 var(--e3); color: var(--texto-2); font-size: var(--tam-md); }
+.grafico-cifra strong { margin-right: 6px; color: var(--texto); font-size: var(--tam-2xl); font-weight: 700; }
+/* Un gráfico sin datos no pesa lo mismo que uno con datos: va al final, compacto y a todo el ancho (sin dejar huecos) */
+.panel-grafico.vacio, .panel-grafico.compacto { grid-column: 1 / -1; padding-block: var(--e4); }
+.panel-grafico.compacto .panel-title { margin-bottom: 0; }
+.panel-grafico.compacto .grafico-cifra { padding: var(--e1) 0 0; }
+.panel-grafico.vacio .panel-title { margin-bottom: var(--e1); }
+.panel-grafico.vacio h2 { font-size: var(--tam-md); }
+.grafico-vacio { padding: 0; color: var(--texto-2); font-size: var(--tam-sm); max-width: 52ch; }
+.tabla-grafico .num, .tabla-grafico th.num { text-align: right; }
+
+/* Línea con área: tendencia en el tiempo */
+.grafico-area { position: relative; min-height: 200px; }
+.grafico-area svg { display: block; overflow: visible; font-family: var(--fuente); outline: none; border-radius: var(--radio-sm); }
+.grafico-area svg:focus-visible { box-shadow: 0 0 0 2px var(--foco); }
+.grafico-area .eje-y line { stroke: var(--rejilla); stroke-width: 1; shape-rendering: crispEdges; }
+.grafico-area .eje-y text, .grafico-area .eje-x { fill: var(--texto-3); font-size: 11px; font-variant-numeric: tabular-nums; }
+.grafico-area .velo { fill: var(--grafico); opacity: .1; }
+.grafico-area .linea { fill: none; stroke: var(--grafico); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.grafico-area .punto { fill: var(--grafico); stroke: var(--superficie); stroke-width: 2; }
+.grafico-area .valor { fill: var(--texto); font-size: 12px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.grafico-area .cursor line { stroke: var(--texto-3); stroke-width: 1; shape-rendering: crispEdges; }
+
+/* Barra segmentada alta: un total partido en partes */
+.barra-segmentada { display: grid; gap: var(--e4); padding-top: var(--e2); }
+.barra-segmentada .segmentos { display: flex; gap: 2px; height: 28px; }
+.barra-segmentada .segmento { position: relative; display: flex; align-items: center; min-width: 4px; padding: 0 8px; border-radius: 4px; outline: none; cursor: default; transition: filter var(--rapido) var(--salida); }
+.barra-segmentada .segmento span { color: #fff; font-size: var(--tam-xs); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.barra-segmentada .segmento.serie-2 span, .barra-segmentada .segmento.serie-3 span { color: #0b0d1a; }
+:root[data-theme="dark"] .barra-segmentada .segmento span { color: #0b0d1a; }
+.barra-segmentada .segmento.activo { filter: brightness(1.1); }
+.barra-segmentada .segmento:focus-visible { box-shadow: 0 0 0 2px var(--superficie), 0 0 0 4px var(--foco); }
+.barra-segmentada .grafico-tooltip { left: 50%; top: -8px; }
+.serie-1 { background: var(--serie-1); } .serie-2 { background: var(--serie-2); } .serie-3 { background: var(--serie-3); }
+.barra-segmentada .leyenda { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--e2); }
+.barra-segmentada .leyenda li { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; align-items: center; gap: var(--e2); padding-bottom: var(--e2); border-bottom: 1px solid var(--borde-suave); font-size: var(--tam-sm); color: var(--texto-suave); }
+.barra-segmentada .leyenda li:last-child { border-bottom: 0; padding-bottom: 0; }
+.barra-segmentada .muestra { width: 12px; height: 12px; border-radius: 3px; }
+.barra-segmentada .leyenda strong { color: var(--texto); font-weight: 650; font-variant-numeric: tabular-nums; }
+
+/* Lista de medidores: partes de un total con tinta de severidad */
+.lista-medidores { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.lista-medidores .medidor {
+  display: grid; grid-template-columns: minmax(80px, 28%) minmax(0, 1fr) 76px; align-items: center; gap: var(--e3);
+  padding: 9px var(--e2); margin: 0 calc(var(--e2) * -1); border-radius: var(--radio-sm); outline: none;
+  transition: background-color var(--rapido) var(--salida);
+}
+.lista-medidores .medidor:hover { background: var(--superficie-2); }
+.lista-medidores .medidor:focus-visible { box-shadow: inset 0 0 0 2px var(--foco); }
+.lista-medidores .nombre { color: var(--texto-suave); font-size: var(--tam-sm); }
+.lista-medidores .pista { display: block; height: 10px; border-radius: 999px; background: var(--tono-suave); overflow: hidden; }
+.lista-medidores .pista span { display: block; height: 100%; border-radius: 999px; background: var(--tono); min-width: 0; }
+.lista-medidores .cifra { display: flex; align-items: baseline; justify-content: flex-end; gap: 6px; font-variant-numeric: tabular-nums; }
+.lista-medidores .cifra strong { color: var(--texto); font-size: var(--tam-sm); font-weight: 650; }
+.lista-medidores .cifra small { color: var(--texto-3); font-size: var(--tam-xs); min-width: 4ch; text-align: right; }
+.medidor.mal { --tono: var(--mal); --tono-suave: var(--mal-suave); }
+.medidor.alerta { --tono: var(--alerta); --tono-suave: var(--alerta-suave); }
+.medidor.serie { --tono: var(--grafico); --tono-suave: var(--accion-suave); }
+.medidor.neutro { --tono: var(--neutro); --tono-suave: var(--neutro-suave); }
+
+@media (max-width: 1080px) { .indicadores { grid-template-columns: 1fr; } }
+@media (max-width: 760px) {
+  .indicadores .table-wrap { display: block; }
+  .grafico-barras li { grid-template-columns: minmax(0, 1fr) auto; }
+  .grafico-barras .pista { grid-column: 1 / -1; grid-row: 2; }
+  .lista-medidores .medidor { grid-template-columns: minmax(0, 1fr) auto; }
+  .lista-medidores .pista { grid-column: 1 / -1; grid-row: 2; }
+}

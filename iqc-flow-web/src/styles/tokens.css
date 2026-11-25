@@ -1,0 +1,12 @@
+/*
+ * El panel usa el sistema de diseño compartido de IQC (../../iqc-flow-diseno): fuentes, tokens de color en claro y
+ * oscuro, escala tipográfica, espacios, radios, sombras y movimiento, y los estilos del navegador.
+ * Aquí solo van las medidas propias del armazón del panel.
+ */
+@import "@iqc/diseno/css/fuentes.css";
+@import "@iqc/diseno/css/tokens.css";
+@import "@iqc/diseno/css/navegador.css";
+
+:root {
+  --ancho-carril: 256px;
+}

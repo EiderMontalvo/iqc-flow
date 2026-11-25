@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import pe.com.iqc.flow.auditorias.ImportacionCertificaciones;
+import pe.com.iqc.flow.certificaciones.ImportacionCertificadosPersonales;
+import pe.com.iqc.flow.certificaciones.ImportacionCertificadosPersonales.PersonaLegado;
 import pe.com.iqc.flow.auditorias.ImportacionCertificaciones.CertificadoLegado;
 import pe.com.iqc.flow.auditorias.ImportacionCertificaciones.ExpedienteLegado;
 import pe.com.iqc.flow.auditorias.ImportacionCertificaciones.QrLegado;
@@ -44,15 +46,18 @@ public class ServicioImportacionLegado {
 
   private final ImportacionClientes clientes;
   private final ImportacionCertificaciones certificaciones;
+  private final ImportacionCertificadosPersonales personales;
   private final ServicioOrganizaciones organizaciones;
   private final DirectorioUsuarios directorio;
   private final TransactionTemplate transaccion;
   private final Clock reloj;
 
   public ServicioImportacionLegado(ImportacionClientes clientes, ImportacionCertificaciones certificaciones,
-      ServicioOrganizaciones organizaciones, DirectorioUsuarios directorio, TransactionTemplate transaccion, Clock reloj) {
+      ImportacionCertificadosPersonales personales, ServicioOrganizaciones organizaciones, DirectorioUsuarios directorio,
+      TransactionTemplate transaccion, Clock reloj) {
     this.clientes = clientes;
     this.certificaciones = certificaciones;
+    this.personales = personales;
     this.organizaciones = organizaciones;
     this.directorio = directorio;
     this.transaccion = transaccion;
@@ -70,16 +75,21 @@ public class ServicioImportacionLegado {
     } catch (IOException e) {
       throw new UncheckedIOException("No se pudo leer el volcado " + volcado, e);
     }
-    PlanImportacion plan = AnalizadorLegado.analizar(LectorVolcadoSql.leer(sql), LocalDate.now(reloj));
-    if (!aplicar) return new Resultado(plan, false, 0, 0, 0, 0, 0, 0, informe(plan, null, volcado));
+    Map<String, List<Map<String, String>>> tablas = LectorVolcadoSql.leer(sql);
+    PlanImportacion plan = AnalizadorLegado.analizar(tablas, LocalDate.now(reloj));
+    PlanPersonales personas = planPersonales(tablas);
+    if (!aplicar) return new Resultado(plan, false, 0, 0, 0, 0, 0, 0, informe(plan, null, volcado) + informePersonales(personas, -1));
 
     OrganizacionResumen organizacion = organizaciones.buscarPorCodigo(codigoOrganizacion)
         .orElseThrow(() -> new ReglaNegocioException("ORGANIZACION_INVALIDA", "No existe la organización " + codigoOrganizacion));
     UsuarioResumen responsable = directorio.buscarActivoPorCorreo(organizacion.id(), correoResponsable)
         .orElseThrow(() -> new ReglaNegocioException("RESPONSABLE_INVALIDO",
             "Indica el correo de un usuario activo como responsable de lo importado (iqc.importacion-legado.responsable)."));
-    int[] cuenta = new int[6];
+    int[] cuenta = new int[7];
     transaccion.executeWithoutResult(estado -> {
+      for (PersonalPlan pp : personas.certificados()) {
+        if (personales.importar(pp.persona(), pp.certificado(), organizacion.id())) cuenta[6]++;
+      }
       Map<String, UUID> clientePorLegado = new HashMap<>();
       for (ClientePlan c : plan.clientes()) {
         ImportacionClientes.Resultado r = clientes.importar(new ClienteLegado(organizacion.id(), FUENTE, c.idLegado(),
@@ -94,7 +104,8 @@ public class ServicioImportacionLegado {
             responsable.id(), g.certificados().stream().map(c -> new CertificadoLegado(c.idLegado(), c.norma(),
                 c.edicion(), c.codigo(), c.estado(), c.revisionAlcance(), c.ciclo(), c.anioDecision(),
                 c.fechaOtorgamiento(), c.fechaEmision(), c.fechaExpiracion(), c.url(), c.emitidoPorIndia(), c.alcance(),
-                c.qrs().stream().map(q -> new QrLegado(q.idQr(), q.encriptacionId(), q.activo(), q.registradoEn())).toList()))
+                c.qrs().stream().map(q -> new QrLegado(q.idQr(), q.encriptacionId(), q.activo(), q.registradoEn())).toList(),
+                c.paisMarca()))
                 .toList()));
         if (r.creado()) {
           cuenta[1]++;
@@ -105,10 +116,73 @@ public class ServicioImportacionLegado {
         }
       }
     });
-    log.info("Importación aplicada: {} clientes, {} expedientes, {} certificados y {} QR nuevos",
-        cuenta[0], cuenta[1], cuenta[2], cuenta[3]);
+    log.info("Importación aplicada: {} clientes, {} expedientes, {} certificados, {} QR y {} certificados personales nuevos",
+        cuenta[0], cuenta[1], cuenta[2], cuenta[3], cuenta[6]);
     return new Resultado(plan, true, cuenta[0], cuenta[1], cuenta[2], cuenta[3], cuenta[4], cuenta[5],
-        informe(plan, cuenta, volcado));
+        informe(plan, cuenta, volcado) + informePersonales(personas, cuenta[6]));
+  }
+
+  // Certificados de personas (tablas «personas» y «certificados_personales» de la plataforma anterior)
+
+  record PersonalPlan(PersonaLegado persona, ImportacionCertificadosPersonales.CertificadoLegado certificado) {
+  }
+
+  record PlanPersonales(int filas, List<PersonalPlan> certificados, List<String> descartes) {
+  }
+
+  private static final java.util.regex.Pattern TOKEN_PDF =
+      java.util.regex.Pattern.compile("personal-pdf/([0-9a-fA-F-]{36})");
+
+  static PlanPersonales planPersonales(Map<String, List<Map<String, String>>> tablas) {
+    Map<String, Map<String, String>> personas = new HashMap<>();
+    tablas.getOrDefault("personas", List.of()).forEach(f -> personas.put(f.get("id_persona"), f));
+    List<Map<String, String>> filas = tablas.getOrDefault("certificados_personales", List.of());
+    List<PersonalPlan> lista = new java.util.ArrayList<>();
+    List<String> descartes = new java.util.ArrayList<>();
+    for (Map<String, String> f : filas) {
+      String id = f.get("id_certificado_personal");
+      String codigo = f.get("codigo");
+      Map<String, String> p = personas.get(f.get("id_persona"));
+      if ("1".equals(f.get("estado"))) { descartes.add(codigo + ": eliminado en la plataforma anterior"); continue; }
+      if (p == null) { descartes.add(codigo + ": la persona no está en el volcado"); continue; }
+      if ("1".equals(p.get("estado"))) { descartes.add(codigo + ": la persona fue eliminada en la plataforma anterior"); continue; }
+      String errorDocumento = ImportacionCertificadosPersonales.errorDocumento(p.get("pais"), p.get("tipo_documento"),
+          p.get("numero_documento"));
+      if (errorDocumento != null) { descartes.add(codigo + ": " + errorDocumento); continue; }
+      String url = f.get("url_certificado");
+      java.util.regex.Matcher m = url == null ? null : TOKEN_PDF.matcher(url);
+      UUID token = m != null && m.find() ? UUID.fromString(m.group(1)) : null;
+      lista.add(new PersonalPlan(
+          new PersonaLegado(FUENTE, p.get("id_persona"), p.get("pais"), p.get("tipo_documento"), p.get("numero_documento"),
+              p.get("nombres_apellidos"), vacio(p.get("email")), vacio(p.get("telefono"))),
+          new ImportacionCertificadosPersonales.CertificadoLegado(id, codigo, f.get("curso"), vacio(f.get("norma_referencia")), vacio(f.get("norma_anio")),
+              vacio(f.get("subtitulo")), vacio(f.get("descripcion")),
+              vacio(f.get("duracion_horas")) == null ? null : new java.math.BigDecimal(f.get("duracion_horas")),
+              vacio(f.get("modalidad")), fecha(f.get("fecha_inicio")), fecha(f.get("fecha_fin")), fecha(f.get("fecha_emision")),
+              vacio(f.get("entrenador")), vacio(url), token, !"2".equals(f.get("status")),
+              "2".equals(f.get("status")) ? null : "Anulado en la plataforma anterior")));
+    }
+    return new PlanPersonales(filas.size(), lista, descartes);
+  }
+
+  private static String vacio(String v) { return v == null || v.isBlank() || "NULL".equals(v) ? null : v.trim(); }
+
+  private static LocalDate fecha(String v) {
+    String limpio = vacio(v);
+    return limpio == null || limpio.startsWith("0000") ? null : LocalDate.parse(limpio.substring(0, 10));
+  }
+
+  static String informePersonales(PlanPersonales p, int aplicados) {
+    StringBuilder s = new StringBuilder("\n## Certificados de personas\n\n");
+    s.append("Leídos: ").append(p.filas()).append(". A importar: ").append(p.certificados().size())
+        .append(" (anulados: ").append(p.certificados().stream().filter(c -> c.certificado().anulado()).count()).append(").");
+    if (aplicados >= 0) s.append(" **Aplicado:** ").append(aplicados).append(" nuevos.");
+    s.append("\n\n");
+    if (!p.descartes().isEmpty()) {
+      s.append("### Descartes (").append(p.descartes().size()).append(")\n\n");
+      p.descartes().forEach(d -> s.append("- ").append(d).append('\n'));
+    }
+    return s.toString();
   }
 
   /**informe en Markdown. Contiene razones sociales: se guarda junto al volcado, fuera del repositorio*/

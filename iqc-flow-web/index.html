@@ -1,1 +1,25 @@
-<!doctype html><html lang="es"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><meta name="theme-color" content="#0d0d0e"/><title>IQC Flow</title><script>const saved=localStorage.getItem('iqc-flow-theme');document.documentElement.dataset.theme=saved==='dark'||saved==='light'?saved:(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');</script></head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>
+<!doctype html>
+<html lang="es-PE">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/png" href="/logo-iqc.png" />
+  <!-- El logo se pide de inmediato, en paralelo con el JavaScript (va en el acceso, la carga y el carril) -->
+  <link rel="preload" as="image" href="/logo-iqc-horizontal.png" fetchpriority="high" />
+  <title>IQC Flow</title>
+  <script>
+    // Aplica el tema antes de pintar para evitar el destello; sin almacenamiento sigue al sistema
+    try {
+      const saved = localStorage.getItem('iqc-flow-theme');
+      document.documentElement.dataset.theme = saved === 'dark' || saved === 'light' ? saved
+        : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    } catch { document.documentElement.dataset.theme = 'light'; }
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+</html>

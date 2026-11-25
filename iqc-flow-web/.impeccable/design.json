@@ -1,0 +1,1040 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-23T01:49:34+00:00",
+  "title": "Design System: IQC Flow (panel interno)",
+  "extensions": {
+    "colorMeta": {
+      "negro-marca": {
+        "role": "neutral",
+        "displayName": "Negro de marca",
+        "canonical": "#000000"
+      },
+      "azul-iqc": {
+        "role": "primary",
+        "displayName": "Azul IQC",
+        "canonical": "#0019d2",
+        "tonalRamp": [
+          "#040a1c",
+          "#0c2053",
+          "#133696",
+          "#194de0",
+          "#3974ff",
+          "#71a1ff",
+          "#aac9ff",
+          "#e1efff"
+        ]
+      },
+      "azul-vivo": {
+        "role": "primary",
+        "displayName": "Azul IQC vivo",
+        "canonical": "#1a33e0",
+        "tonalRamp": [
+          "#050a1b",
+          "#102051",
+          "#1b3694",
+          "#274ddc",
+          "#4473ff",
+          "#77a0ff",
+          "#adc8ff",
+          "#e3efff"
+        ]
+      },
+      "azul-vivo-hover": {
+        "role": "primary",
+        "displayName": "Azul IQC vivo (hover)",
+        "canonical": "#1428bd",
+        "tonalRamp": [
+          "#050a19",
+          "#12214c",
+          "#1f398b",
+          "#2e52cf",
+          "#4b77f6",
+          "#7ca1fc",
+          "#b0c8ff",
+          "#e4efff"
+        ]
+      },
+      "degradado-rojo": {
+        "role": "tertiary",
+        "displayName": "Degradado: rojo",
+        "canonical": "#d90435",
+        "tonalRamp": [
+          "#170506",
+          "#450f13",
+          "#7b111f",
+          "#b6062c",
+          "#df3f4c",
+          "#ef7f7f",
+          "#fab4b2",
+          "#ffe6e5"
+        ]
+      },
+      "degradado-magenta": {
+        "role": "tertiary",
+        "displayName": "Degradado: magenta",
+        "canonical": "#9002ae",
+        "tonalRamp": [
+          "#110614",
+          "#36143f",
+          "#601f71",
+          "#8e28a8",
+          "#b350ce",
+          "#ca86de",
+          "#e1b8ed",
+          "#f9e8fe"
+        ]
+      },
+      "degradado-violeta": {
+        "role": "tertiary",
+        "displayName": "Degradado: violeta",
+        "canonical": "#6701e0",
+        "tonalRamp": [
+          "#0b081a",
+          "#27184f",
+          "#472590",
+          "#6931d7",
+          "#885aff",
+          "#a690ff",
+          "#c9bfff",
+          "#eeeaff"
+        ]
+      },
+      "degradado-azul": {
+        "role": "tertiary",
+        "displayName": "Degradado: azul",
+        "canonical": "#0019d2",
+        "tonalRamp": [
+          "#040a1c",
+          "#0c2053",
+          "#133696",
+          "#194de0",
+          "#3974ff",
+          "#71a1ff",
+          "#aac9ff",
+          "#e1efff"
+        ]
+      },
+      "tinta": {
+        "role": "neutral",
+        "displayName": "Tinta IQC",
+        "canonical": "#1a1a2e",
+        "tonalRamp": [
+          "#0b0b0e",
+          "#24242c",
+          "#40414f",
+          "#5e5f74",
+          "#7f8096",
+          "#a2a3b4",
+          "#c7c8d2",
+          "#eeeef2"
+        ]
+      },
+      "blanco": {
+        "role": "neutral",
+        "displayName": "Blanco",
+        "canonical": "#ffffff"
+      },
+      "papel": {
+        "role": "neutral",
+        "displayName": "Papel",
+        "canonical": "#f2f4f7",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242526",
+          "#414243",
+          "#606163",
+          "#818285",
+          "#a4a5a7",
+          "#c8c9ca",
+          "#eeeeef"
+        ]
+      },
+      "superficie": {
+        "role": "neutral",
+        "displayName": "Superficie",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "superficie-2": {
+        "role": "neutral",
+        "displayName": "Superficie 2",
+        "canonical": "#f7f8fb",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252526",
+          "#414243",
+          "#606163",
+          "#818284",
+          "#a4a5a7",
+          "#c9c9ca",
+          "#eeeeef"
+        ]
+      },
+      "superficie-hundida": {
+        "role": "neutral",
+        "displayName": "Superficie hundida",
+        "canonical": "#eceef3",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#242526",
+          "#414244",
+          "#606165",
+          "#818286",
+          "#a4a5a8",
+          "#c8c9cb",
+          "#eeeeef"
+        ]
+      },
+      "borde": {
+        "role": "neutral",
+        "displayName": "Borde",
+        "canonical": "#d5dbe4",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#242528",
+          "#3f4247",
+          "#5d6268",
+          "#7e838a",
+          "#a2a5ab",
+          "#c7c9cc",
+          "#edeef0"
+        ]
+      },
+      "borde-suave": {
+        "role": "neutral",
+        "displayName": "Borde suave",
+        "canonical": "#e6eaf0",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#242527",
+          "#404245",
+          "#5e6166",
+          "#7f8287",
+          "#a3a5a9",
+          "#c8c9cb",
+          "#eeeeef"
+        ]
+      },
+      "borde-fuerte": {
+        "role": "neutral",
+        "displayName": "Borde fuerte",
+        "canonical": "#c2c9d6",
+        "tonalRamp": [
+          "#0a0b0c",
+          "#232529",
+          "#3f4249",
+          "#5c616b",
+          "#7d838d",
+          "#a1a5ad",
+          "#c7c9ce",
+          "#edeef0"
+        ]
+      },
+      "texto": {
+        "role": "neutral",
+        "displayName": "Texto",
+        "canonical": "#1a1a2e",
+        "tonalRamp": [
+          "#0b0b0e",
+          "#24242c",
+          "#40414f",
+          "#5e5f74",
+          "#7f8096",
+          "#a2a3b4",
+          "#c7c8d2",
+          "#eeeef2"
+        ]
+      },
+      "texto-suave": {
+        "role": "neutral",
+        "displayName": "Texto suave",
+        "canonical": "#343a4d",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#23252b",
+          "#3e424e",
+          "#5b6173",
+          "#7b8295",
+          "#a0a5b3",
+          "#c6c9d2",
+          "#edeef2"
+        ]
+      },
+      "texto-2": {
+        "role": "neutral",
+        "displayName": "Texto secundario",
+        "canonical": "#434b5e",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#22252b",
+          "#3d424d",
+          "#5a6172",
+          "#7a8295",
+          "#9fa5b3",
+          "#c5c9d1",
+          "#edeef2"
+        ]
+      },
+      "texto-3": {
+        "role": "neutral",
+        "displayName": "Etiquetas y ayudas",
+        "canonical": "#59627a",
+        "tonalRamp": [
+          "#0a0b0e",
+          "#22252c",
+          "#3c4250",
+          "#596176",
+          "#7a8298",
+          "#9ea5b5",
+          "#c5c9d3",
+          "#edeef3"
+        ]
+      },
+      "accion": {
+        "role": "primary",
+        "displayName": "Acción (azul IQC vivo)",
+        "canonical": "#1a33e0",
+        "tonalRamp": [
+          "#050a1b",
+          "#102051",
+          "#1b3694",
+          "#274ddc",
+          "#4473ff",
+          "#77a0ff",
+          "#adc8ff",
+          "#e3efff"
+        ]
+      },
+      "accion-hover": {
+        "role": "primary",
+        "displayName": "Acción hover",
+        "canonical": "#1428bd",
+        "tonalRamp": [
+          "#050a19",
+          "#12214c",
+          "#1f398b",
+          "#2e52cf",
+          "#4b77f6",
+          "#7ca1fc",
+          "#b0c8ff",
+          "#e4efff"
+        ]
+      },
+      "accion-suave": {
+        "role": "primary",
+        "displayName": "Acción suave",
+        "canonical": "#eceffe",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#242529",
+          "#404149",
+          "#5e616c",
+          "#7f828d",
+          "#a3a4ad",
+          "#c8c9ce",
+          "#eeeef0"
+        ]
+      },
+      "enlace": {
+        "role": "primary",
+        "displayName": "Enlace",
+        "canonical": "#0019d2",
+        "tonalRamp": [
+          "#040a1c",
+          "#0c2053",
+          "#133696",
+          "#194de0",
+          "#3974ff",
+          "#71a1ff",
+          "#aac9ff",
+          "#e1efff"
+        ]
+      },
+      "ok": {
+        "role": "secondary",
+        "displayName": "Verde vigente",
+        "canonical": "#0d6b44",
+        "tonalRamp": [
+          "#060d09",
+          "#142b1e",
+          "#1f4c35",
+          "#2b714e",
+          "#4e936e",
+          "#83b296",
+          "#b5d1c0",
+          "#e6f2eb"
+        ]
+      },
+      "ok-suave": {
+        "role": "secondary",
+        "displayName": "Verde vigente suave",
+        "canonical": "#e8f4ee",
+        "tonalRamp": [
+          "#0a0b0b",
+          "#232624",
+          "#3e4441",
+          "#5b645f",
+          "#7c8580",
+          "#a0a7a3",
+          "#c6cac8",
+          "#edefee"
+        ]
+      },
+      "alerta": {
+        "role": "secondary",
+        "displayName": "Ámbar por vencer",
+        "canonical": "#9a5800",
+        "tonalRamp": [
+          "#110904",
+          "#34200d",
+          "#5d3811",
+          "#8a5212",
+          "#ae7339",
+          "#c79b74",
+          "#dfc4ac",
+          "#f8ece2"
+        ]
+      },
+      "alerta-suave": {
+        "role": "secondary",
+        "displayName": "Ámbar suave",
+        "canonical": "#fbf1e1",
+        "tonalRamp": [
+          "#0c0b09",
+          "#272520",
+          "#464139",
+          "#686054",
+          "#898175",
+          "#aaa49b",
+          "#ccc9c3",
+          "#f0eeec"
+        ]
+      },
+      "mal": {
+        "role": "secondary",
+        "displayName": "Rojo vencido",
+        "canonical": "#b42318",
+        "tonalRamp": [
+          "#150705",
+          "#401611",
+          "#72231b",
+          "#a93024",
+          "#d05546",
+          "#e3897b",
+          "#f1bab0",
+          "#ffe8e4"
+        ]
+      },
+      "mal-suave": {
+        "role": "secondary",
+        "displayName": "Rojo suave",
+        "canonical": "#fbeceb",
+        "tonalRamp": [
+          "#0c0b0b",
+          "#282424",
+          "#47403f",
+          "#695e5d",
+          "#8b7f7e",
+          "#aba3a2",
+          "#cdc8c7",
+          "#f0eeee"
+        ]
+      },
+      "pausa": {
+        "role": "secondary",
+        "displayName": "Naranja suspendido",
+        "canonical": "#a0480a",
+        "tonalRamp": [
+          "#120905",
+          "#381d0f",
+          "#653216",
+          "#95491b",
+          "#ba6b40",
+          "#d09678",
+          "#e5c0ae",
+          "#fbebe3"
+        ]
+      },
+      "pausa-suave": {
+        "role": "secondary",
+        "displayName": "Naranja suave",
+        "canonical": "#fdecdc",
+        "tonalRamp": [
+          "#0c0b09",
+          "#292420",
+          "#494038",
+          "#6b5f53",
+          "#8d8073",
+          "#ada39a",
+          "#cec8c2",
+          "#f0eeeb"
+        ]
+      },
+      "neutro": {
+        "role": "secondary",
+        "displayName": "Gris archivo",
+        "canonical": "#4a5568",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#22252b",
+          "#3c424e",
+          "#586273",
+          "#788395",
+          "#9ea5b3",
+          "#c5c9d2",
+          "#eceef2"
+        ]
+      },
+      "neutro-suave": {
+        "role": "secondary",
+        "displayName": "Gris archivo suave",
+        "canonical": "#eef1f5",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#242526",
+          "#414244",
+          "#5f6164",
+          "#808286",
+          "#a3a5a7",
+          "#c8c9ca",
+          "#eeeeef"
+        ]
+      },
+      "senal": {
+        "role": "secondary",
+        "displayName": "Señal de hoy",
+        "canonical": "#9002ae",
+        "tonalRamp": [
+          "#110614",
+          "#36143f",
+          "#601f71",
+          "#8e28a8",
+          "#b350ce",
+          "#ca86de",
+          "#e1b8ed",
+          "#f9e8fe"
+        ]
+      },
+      "cromo-texto-2": {
+        "role": "neutral",
+        "displayName": "Texto del carril",
+        "canonical": "#a3abbd",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#23252a",
+          "#3e424b",
+          "#5b616f",
+          "#7c8291",
+          "#a0a5b0",
+          "#c6c9d0",
+          "#edeef1"
+        ]
+      },
+      "cromo-hover": {
+        "role": "neutral",
+        "displayName": "Veladura hover del carril",
+        "canonical": "rgb(255 255 255 / .07)"
+      },
+      "cromo-activo": {
+        "role": "neutral",
+        "displayName": "Veladura activa del carril",
+        "canonical": "rgb(255 255 255 / .11)"
+      },
+      "cromo-borde": {
+        "role": "neutral",
+        "displayName": "Borde sobre negro",
+        "canonical": "rgb(255 255 255 / .1)"
+      },
+      "foco-cromo": {
+        "role": "neutral",
+        "displayName": "Foco sobre negro",
+        "canonical": "#8f9bff",
+        "tonalRamp": [
+          "#090a14",
+          "#1f223e",
+          "#373c71",
+          "#5057a8",
+          "#7079cd",
+          "#96a0dd",
+          "#c0c7ec",
+          "#eaeefe"
+        ]
+      },
+      "aviso-oscuro": {
+        "role": "neutral",
+        "displayName": "Aviso oscuro",
+        "canonical": "rgb(18 19 26 / .96)"
+      },
+      "grafico": {
+        "role": "primary",
+        "displayName": "Serie de gráfico",
+        "canonical": "#1a33e0",
+        "tonalRamp": [
+          "#050a1b",
+          "#102051",
+          "#1b3694",
+          "#274ddc",
+          "#4473ff",
+          "#77a0ff",
+          "#adc8ff",
+          "#e3efff"
+        ]
+      },
+      "grafico-hover": {
+        "role": "primary",
+        "displayName": "Serie de gráfico (hover)",
+        "canonical": "#0019d2",
+        "tonalRamp": [
+          "#040a1c",
+          "#0c2053",
+          "#133696",
+          "#194de0",
+          "#3974ff",
+          "#71a1ff",
+          "#aac9ff",
+          "#e1efff"
+        ]
+      },
+      "rejilla": {
+        "role": "neutral",
+        "displayName": "Rejilla",
+        "canonical": "#e6eaf0",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#242527",
+          "#404245",
+          "#5e6166",
+          "#7f8287",
+          "#a3a5a9",
+          "#c8c9cb",
+          "#eeeeef"
+        ]
+      },
+      "grafito-fondo": {
+        "role": "neutral",
+        "displayName": "Grafito (fondo oscuro)",
+        "canonical": "#0b0c10",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#242527",
+          "#414245",
+          "#606166",
+          "#818287",
+          "#a4a5a8",
+          "#c8c9cb",
+          "#eeeeef"
+        ]
+      },
+      "grafito-superficie": {
+        "role": "neutral",
+        "displayName": "Grafito superficie",
+        "canonical": "#14151c",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#242528",
+          "#414247",
+          "#5f6168",
+          "#80828a",
+          "#a4a5ab",
+          "#c8c9cc",
+          "#eeeef0"
+        ]
+      },
+      "grafito-superficie-2": {
+        "role": "neutral",
+        "displayName": "Grafito superficie 2",
+        "canonical": "#1a1b23",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#242528",
+          "#414247",
+          "#5f6169",
+          "#80828b",
+          "#a3a4ab",
+          "#c8c9cd",
+          "#eeeef0"
+        ]
+      },
+      "grafito-borde": {
+        "role": "neutral",
+        "displayName": "Grafito borde",
+        "canonical": "#2a2c38",
+        "tonalRamp": [
+          "#0b0b0d",
+          "#242529",
+          "#404149",
+          "#5e606c",
+          "#7f818e",
+          "#a3a4ae",
+          "#c8c9ce",
+          "#eeeef1"
+        ]
+      },
+      "grafito-texto": {
+        "role": "neutral",
+        "displayName": "Texto en oscuro",
+        "canonical": "#f2f3f7",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252526",
+          "#414244",
+          "#606164",
+          "#818285",
+          "#a4a5a7",
+          "#c9c9ca",
+          "#eeeeef"
+        ]
+      },
+      "grafito-texto-2": {
+        "role": "neutral",
+        "displayName": "Texto secundario en oscuro",
+        "canonical": "#aeb2c2",
+        "tonalRamp": [
+          "#0b0b0d",
+          "#242529",
+          "#3f424a",
+          "#5e616d",
+          "#7e828f",
+          "#a2a5ae",
+          "#c7c9cf",
+          "#eeeef1"
+        ]
+      },
+      "grafito-accion": {
+        "role": "primary",
+        "displayName": "Azul lavanda (acción en oscuro)",
+        "canonical": "#8f9bff",
+        "tonalRamp": [
+          "#090a14",
+          "#1f223e",
+          "#373c71",
+          "#5057a8",
+          "#7079cd",
+          "#96a0dd",
+          "#c0c7ec",
+          "#eaeefe"
+        ]
+      },
+      "grafito-grafico": {
+        "role": "primary",
+        "displayName": "Serie de gráfico en oscuro",
+        "canonical": "#6b7bff",
+        "tonalRamp": [
+          "#080a17",
+          "#1b2147",
+          "#303981",
+          "#4852bf",
+          "#6675e6",
+          "#8e9ff0",
+          "#bbc6f8",
+          "#e8eeff"
+        ]
+      },
+      "grafito-ok": {
+        "role": "secondary",
+        "displayName": "Vigente en oscuro",
+        "canonical": "#56d2a4",
+        "tonalRamp": [
+          "#040e09",
+          "#082c1f",
+          "#004f38",
+          "#007551",
+          "#299772",
+          "#73b599",
+          "#add3c2",
+          "#e3f3eb"
+        ]
+      },
+      "grafito-alerta": {
+        "role": "secondary",
+        "displayName": "Por vencer en oscuro",
+        "canonical": "#f1b54f",
+        "tonalRamp": [
+          "#100a03",
+          "#322204",
+          "#5a3b00",
+          "#855600",
+          "#a9781a",
+          "#c29f67",
+          "#dbc6a6",
+          "#f6ede0"
+        ]
+      },
+      "grafito-mal": {
+        "role": "secondary",
+        "displayName": "Vencido en oscuro",
+        "canonical": "#ff8395",
+        "tonalRamp": [
+          "#130709",
+          "#3b181e",
+          "#6a2934",
+          "#9d3a4d",
+          "#c45d6d",
+          "#d98c95",
+          "#ebbbbf",
+          "#fde9ea"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display-acceso": {
+        "displayName": "Display del acceso",
+        "purpose": "Solo el título de la pantalla de acceso, sobre negro; único tamaño fluido."
+      },
+      "headline": {
+        "displayName": "Título de pantalla",
+        "purpose": "Título de cada pantalla; 1.4375rem por debajo de 960 px."
+      },
+      "title": {
+        "displayName": "Título de cajón",
+        "purpose": "Títulos de cajón y formulario."
+      },
+      "panel-title": {
+        "displayName": "Título de panel",
+        "purpose": "Título de panel y gráfico, con línea de detalle debajo."
+      },
+      "cifra": {
+        "displayName": "Cifra",
+        "purpose": "Contadores y cifra en línea; tabular."
+      },
+      "body": {
+        "displayName": "Cuerpo",
+        "purpose": "Texto de interfaz, celdas y navegación."
+      },
+      "body-sm": {
+        "displayName": "Cuerpo pequeño",
+        "purpose": "Metadatos, ayudas, avisos y filtros."
+      },
+      "label": {
+        "displayName": "Rótulo",
+        "purpose": "Cabeceras de tabla y rótulos de dato, en mayúsculas; nunca como antetítulo."
+      },
+      "codigo": {
+        "displayName": "Código",
+        "purpose": "Códigos de certificado y URL de QR, con cero con barra."
+      },
+      "titular": {
+        "displayName": "Titular",
+        "purpose": "Solo el nombre del titular del certificado."
+      }
+    },
+    "shadows": [
+      {
+        "name": "sombra-flotante",
+        "value": "0 8px 24px -4px rgb(0 25 45 / .16)",
+        "purpose": "Tooltip de gráficos y buscador desplegable. Oscuro: 0 8px 24px -4px rgb(0 0 0 / .55)."
+      },
+      {
+        "name": "sombra-lateral",
+        "value": "-12px 0 32px rgb(0 25 45 / .16)",
+        "purpose": "Cajón de detalle y carril móvil abierto. Oscuro: rgb(0 0 0 / .5)."
+      },
+      {
+        "name": "velo",
+        "value": "rgb(5 6 12 / .48)",
+        "purpose": "Fondo detrás de cajón y carril móvil. Oscuro: rgb(0 0 0 / .62)."
+      },
+      {
+        "name": "foco-anillo",
+        "value": "0 0 0 3px rgb(26 51 224 / .3)",
+        "purpose": "Foco de campos. Oscuro: rgb(143 155 255 / .4)."
+      }
+    ],
+    "motion": [
+      {
+        "name": "salida",
+        "value": "cubic-bezier(.16, 1, .3, 1)",
+        "purpose": "Curva de todas las transiciones."
+      },
+      {
+        "name": "rapido",
+        "value": "150ms",
+        "purpose": "Hover, color y borde."
+      },
+      {
+        "name": "normal",
+        "value": "220ms",
+        "purpose": "Entrada del cajón y del carril móvil."
+      },
+      {
+        "name": "trazar-simbolo",
+        "value": "2.4s 0.2s",
+        "purpose": "El contorno del símbolo se dibuja una vez, solo en el acceso."
+      },
+      {
+        "name": "reducir-movimiento",
+        "value": "prefers-reduced-motion: reduce",
+        "purpose": "Toda animación y transición se detiene."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "movil",
+        "value": "760px"
+      },
+      {
+        "name": "acceso-apilado",
+        "value": "860px"
+      },
+      {
+        "name": "carril-cajon",
+        "value": "960px"
+      },
+      {
+        "name": "una-columna",
+        "value": "1080px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botón principal",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Acción principal de cada pantalla y formulario.",
+      "html": "<button class=\"ds-btn-primary\">Registrar certificado</button>",
+      "css": ".ds-btn-primary { font-family: \"Public Sans\", system-ui, sans-serif; display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 16px; border: 1px solid transparent; border-radius: var(--radio-sm, 6px); background: var(--accion, #1a33e0); color: var(--accion-texto, #fff); font-size: 14px; font-weight: 600; cursor: pointer; transition: background-color 150ms cubic-bezier(.16,1,.3,1); } .ds-btn-primary:hover { background: var(--accion-hover, #1428bd); } .ds-btn-primary:active { transform: translateY(1px); } .ds-btn-primary:focus-visible { outline: 2px solid var(--foco, #1a33e0); outline-offset: 2px; }"
+    },
+    {
+      "name": "Botón secundario",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Acciones de cabecera como «Actualizar» y acciones secundarias.",
+      "html": "<button class=\"ds-btn-secondary\">Actualizar</button>",
+      "css": ".ds-btn-secondary { font-family: \"Public Sans\", system-ui, sans-serif; display: inline-flex; align-items: center; min-height: 38px; padding: 0 16px; border: 1px solid var(--borde-fuerte, #c2c9d6); border-radius: var(--radio-sm, 6px); background: var(--superficie, #fff); color: var(--texto, #1a1a2e); font-size: 14px; font-weight: 600; cursor: pointer; transition: background-color 150ms, border-color 150ms; } .ds-btn-secondary:hover { background: var(--superficie-2, #f7f8fb); border-color: var(--texto-3, #59627a); } .ds-btn-secondary:focus-visible { outline: 2px solid var(--foco, #1a33e0); outline-offset: 2px; }"
+    },
+    {
+      "name": "Campo de texto",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Campo con rótulo encima; foco con borde azul y anillo de 3 px.",
+      "html": "<label class=\"ds-field\">Código<input class=\"ds-input\" placeholder=\"PE-INA-01520240132\"></label>",
+      "css": ".ds-field { font-family: \"Public Sans\", system-ui, sans-serif; display: grid; gap: 6px; font-size: 13px; font-weight: 600; color: var(--texto-suave, #343a4d); } .ds-input { font: inherit; font-size: 14px; font-weight: 400; min-height: 38px; padding: 7px 12px; border: 1px solid var(--borde-fuerte, #c2c9d6); border-radius: var(--radio-sm, 6px); background: var(--superficie, #fff); color: var(--texto, #1a1a2e); font-variant-numeric: slashed-zero; transition: border-color 150ms, box-shadow 150ms; } .ds-input::placeholder { color: var(--texto-3, #59627a); } .ds-input:hover { border-color: var(--texto-3, #59627a); } .ds-input:focus { outline: none; border-color: var(--accion, #1a33e0); box-shadow: 0 0 0 3px var(--foco-anillo, rgb(26 51 224 / .3)); }"
+    },
+    {
+      "name": "Carril de navegación",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Carril negro de marca con filete de degradado de 2 px y elementos con veladura blanca.",
+      "html": "<nav class=\"ds-rail\"><div class=\"ds-rail-heading\">Certificados</div><button class=\"ds-rail-item ds-active\">Resumen</button><button class=\"ds-rail-item\">Empresariales</button><button class=\"ds-rail-item\">Notificaciones <span class=\"ds-badge\">39</span></button></nav>",
+      "css": ".ds-rail { font-family: \"Public Sans\", system-ui, sans-serif; position: relative; display: grid; gap: 2px; width: 256px; padding: 24px 12px 16px; background: #000; color: #fff; } .ds-rail::before { content: \"\"; position: absolute; inset: 0 0 auto; height: 2px; background: linear-gradient(90deg, #d90435 0%, #9002ae 38%, #6701e0 66%, #0019d2 100%); } .ds-rail-heading { padding: 0 12px 4px; font-size: 12px; font-weight: 600; color: #a3abbd; } .ds-rail-item { display: flex; align-items: center; gap: 12px; min-height: 38px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: #c9cedb; font: inherit; font-size: 14px; font-weight: 500; text-align: left; cursor: pointer; transition: background-color 150ms, color 150ms; } .ds-rail-item:hover { background: rgb(255 255 255 / .07); color: #fff; } .ds-rail-item.ds-active { background: rgb(255 255 255 / .11); color: #fff; font-weight: 600; } .ds-rail-item:focus-visible { outline: 2px solid #8f9bff; outline-offset: 0; } .ds-badge { margin-left: auto; min-width: 22px; padding: 1px 7px; border-radius: 999px; background: #1a33e0; color: #fff; font-size: 12px; font-weight: 700; text-align: center; }"
+    },
+    {
+      "name": "Etiquetas de estado",
+      "kind": "chip",
+      "refersTo": "estado-vigente",
+      "description": "Tinta del sello con su palabra; punto de 6 px en el color del estado.",
+      "html": "<span class=\"ds-tag ds-ok\">Vigente</span> <span class=\"ds-tag ds-alerta\">Por vencer</span> <span class=\"ds-tag ds-mal\">Vencido</span> <span class=\"ds-tag ds-pausa\">Suspendido</span> <span class=\"ds-tag\">Reemplazado</span>",
+      "css": ".ds-tag { font-family: \"Public Sans\", system-ui, sans-serif; display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 650; background: var(--neutro-suave, #eef1f5); color: var(--neutro, #4a5568); } .ds-tag::before { content: \"\"; width: 6px; height: 6px; border-radius: 50%; background: currentColor; } .ds-ok { background: var(--ok-suave, #e8f4ee); color: var(--ok, #0d6b44); } .ds-alerta { background: var(--alerta-suave, #fbf1e1); color: var(--alerta, #9a5800); } .ds-mal { background: var(--mal-suave, #fbeceb); color: var(--mal, #b42318); } .ds-pausa { background: var(--pausa-suave, #fdecdc); color: var(--pausa, #a0480a); }"
+    },
+    {
+      "name": "Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Contenedor plano del área de trabajo: superficie blanca, borde de 1 px, radio 10 px, sin sombra.",
+      "html": "<section class=\"ds-panel\"><h2>Consulta pública</h2><p>Bases conectadas: CO · EC · PA · PE</p><div class=\"ds-cifra\"><strong>643</strong> certificados publicados</div></section>",
+      "css": ".ds-panel { font-family: \"Public Sans\", system-ui, sans-serif; padding: 20px; background: var(--superficie, #fff); border: 1px solid var(--borde, #d5dbe4); border-radius: 10px; color: var(--texto, #1a1a2e); } .ds-panel h2 { margin: 0; font-size: 16px; font-weight: 650; letter-spacing: -.01em; } .ds-panel p { margin: 2px 0 0; font-size: 13px; color: var(--texto-2, #434b5e); } .ds-cifra { margin-top: 16px; color: var(--texto-2, #434b5e); font-size: 14px; } .ds-cifra strong { margin-right: 6px; font-size: 23px; font-weight: 650; color: var(--texto, #1a1a2e); font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Vence en",
+      "kind": "custom",
+      "refersTo": "estado-por-vencer",
+      "description": "Días restantes en la ventana de 90 días; la pista se acorta y la tinta pasa a mal en los últimos 30.",
+      "html": "<div class=\"ds-vence\"><span class=\"ds-titular\">SIE AMERICA S.A.C.</span><span class=\"ds-vence-texto\">Quedan 11 días</span><span class=\"ds-vence-pista\"><span style=\"width:12%\"></span></span></div>",
+      "css": ".ds-vence { font-family: \"Public Sans\", system-ui, sans-serif; display: grid; gap: 6px; max-width: 260px; } .ds-titular { font-family: \"Source Serif 4\", Georgia, serif; font-weight: 600; color: var(--texto, #1a1a2e); } .ds-vence-texto { font-size: 13px; font-weight: 650; color: var(--mal, #b42318); font-variant-numeric: tabular-nums; } .ds-vence-pista { display: block; height: 6px; border-radius: 3px; background: var(--superficie-hundida, #eceef3); overflow: hidden; } .ds-vence-pista span { display: block; height: 100%; border-radius: 3px; background: var(--mal, #b42318); }"
+    },
+    {
+      "name": "Gráfico de barras",
+      "kind": "custom",
+      "refersTo": "grafico-tooltip",
+      "description": "Una serie en azul IQC, barras de 14 px con punta redondeada 4 px, cifra en tinta.",
+      "html": "<ul class=\"ds-barras\"><li><span>ISO 37001</span><span class=\"ds-pista\"><span style=\"width:100%\"></span></span><b>147</b></li><li><span>ISO 14001</span><span class=\"ds-pista\"><span style=\"width:87%\"></span></span><b>128</b></li><li><span>ISO/IEC 27001</span><span class=\"ds-pista\"><span style=\"width:12%\"></span></span><b>17</b></li></ul>",
+      "css": ".ds-barras { font-family: \"Public Sans\", system-ui, sans-serif; list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; max-width: 520px; } .ds-barras li { display: grid; grid-template-columns: 34% 1fr auto; align-items: center; gap: 12px; padding: 7px 8px; border-radius: 6px; transition: background-color 150ms; } .ds-barras li:hover { background: var(--superficie-2, #f7f8fb); } .ds-barras li > span:first-child { font-size: 13px; color: var(--texto-suave, #343a4d); } .ds-pista { display: block; height: 14px; } .ds-pista span { display: block; height: 100%; border-radius: 0 4px 4px 0; background: var(--grafico, #1a33e0); } .ds-barras li:hover .ds-pista span { background: var(--grafico-hover, #0019d2); } .ds-barras b { font-size: 13px; font-weight: 650; color: var(--texto, #1a1a2e); font-variant-numeric: tabular-nums; text-align: right; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "El marco negro y el expediente",
+    "overview": "**Creative North Star: \"El marco negro y el expediente\"**\n\nEl panel es la parte interna del mismo sistema visual que el portal de consultas. El negro de la marca IQC enmarca el trabajo: el carril de navegación, la pantalla de acceso y la carga inicial son negros como la cabecera de iqcperu.com, con el símbolo IQC dibujado en línea fina con el degradado del logo. Dentro del marco, el trabajo se lee como un expediente: papel gris muy claro, superficies blancas con borde fino, tinta casi negra y, para cada estado, la tinta de un sello.\n\nEs una herramienta de uso diario (modo Operate): escala tipográfica fija, densidad de tabla, filas de cifras y gráficos de una sola serie. No hay hero ni composición de página de presentación salvo en el acceso. Cada rol entra a su espacio («Hoy» de Dirección, Certificados, Gestión…) y ve primero lo urgente y después sus gráficos. Tiene tres apariencias, Claro, Oscuro y Sistema: en oscuro el papel pasa a grafito y el carril sigue negro.\n\nTodos los colores, fuentes, tamaños, espacios, radios, sombras y curvas vienen del paquete compartido `iqc-flow-diseno` (`css/tokens.css`). El panel no define colores propios: solo el ancho del carril (256 px). Lo que el usuario descartó no vuelve: fotos de stock, auroras y brillos difusos, redes de partículas, el carril azul marino del panel anterior y el acento magenta.",
+    "keyCharacteristics": [
+      "Carril negro de marca con filete superior de degradado de 2 px y el símbolo IQC recortado al pie, en línea.",
+      "Acceso a pantalla completa en negro, con el símbolo trazado en grande y el formulario directamente sobre el negro, sin tarjeta.",
+      "Área de trabajo en papel con paneles blancos de borde fino y radio de 10 px; planos, sin sombra.",
+      "Public Sans en todo; Source Serif 4 600 solo para el nombre del titular del certificado.",
+      "Códigos de certificado con cero con barra; cifras tabulares en tablas, contadores y gráficos.",
+      "Estados con las tintas del sello (ok, alerta, mal, pausa, neutro), siempre con su palabra.",
+      "Gráficos de una serie en azul IQC, columnas de 24 px como máximo, solo el máximo rotulado, tooltip negro y vista de tabla."
+    ],
+    "rules": [
+      {
+        "name": "The Paquete Compartido Rule",
+        "body": "El panel no inventa colores. Si falta uno, se agrega en `iqc-flow-diseno` con su valor claro y su valor oscuro, y lo heredan panel y portal.",
+        "section": "colors"
+      },
+      {
+        "name": "The Degradado en Línea Rule",
+        "body": "El degradado del logo solo dibuja líneas: filetes de 2 px y el contorno del símbolo. Nunca rellena botones, fondos, barras ni texto. La única excepción es el relleno interior del propio símbolo, una veladura del 6–7 % bajo su contorno.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tinta con Palabra Rule",
+        "body": "Un estado se dice con su tinta y con su palabra («Vigente», «Quedan 11 días»). El color nunca va solo, y las tintas de estado no rellenan botones ni paneles, salvo el botón destructivo de confirmación.",
+        "section": "colors"
+      },
+      {
+        "name": "The Serif del Titular Rule",
+        "body": "Source Serif 4 se usa solo para el nombre del titular. Ni títulos, ni cifras, ni rótulos.",
+        "section": "typography"
+      },
+      {
+        "name": "The Cifra Tabular Rule",
+        "body": "Toda cifra que se compara en columna (tablas, `dd`, contadores, ejes, tooltips, días restantes) usa cifras tabulares; los códigos usan cero con barra.",
+        "section": "typography"
+      },
+      {
+        "name": "The Sin Antetítulo Rule",
+        "body": "Ningún título lleva un rótulo pequeño encima. El contexto va debajo, como línea de detalle.",
+        "section": "typography"
+      },
+      {
+        "name": "The Urgente Primero Rule",
+        "body": "En el inicio de cada rol, lo que pide acción (atrasadas, por vencer) va antes que los gráficos; los gráficos sin datos van al final y compactos.",
+        "section": "layout"
+      },
+      {
+        "name": "The Plano en Reposo Rule",
+        "body": "Nada en el área de trabajo tiene sombra en reposo. Si un elemento no flota, se separa con borde.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** tomar todos los colores, tamaños, radios, sombras y curvas de `iqc-flow-diseno`; un color nuevo se agrega allí en claro y en oscuro.",
+      "**Do** mantener carril, acceso y carga inicial en negro de marca, con el filete de degradado de 2 px arriba.",
+      "**Do** usar el degradado solo en líneas: filetes y contorno del símbolo.",
+      "**Do** separar paneles con borde de 1 px y radio de 10 px, sin sombra.",
+      "**Do** comunicar cada estado con su tinta de sello y su palabra.",
+      "**Do** escribir los códigos de certificado con `.mono` (cero con barra) y las cifras comparables como tabulares.",
+      "**Do** reservar Source Serif 4 600 para el nombre del titular.",
+      "**Do** hacer cada gráfico de una sola serie, con columnas ≤ 24 px, rejilla de 1 px, solo el máximo rotulado, tooltip negro y vista de tabla.",
+      "**Do** detener toda animación con «reducir movimiento»."
+    ],
+    "donts": [
+      "**Don't** volver a usar fotos de stock como fondo: el usuario las descartó.",
+      "**Don't** usar auroras, brillos difusos ni redes de partículas.",
+      "**Don't** volver al carril azul marino ni al acento magenta del panel anterior.",
+      "**Don't** poner tarjetas ni bloques claros sobre negro; los avisos sobre negro van en la caja oscura.",
+      "**Don't** poner rótulos pequeños (antetítulos) encima de los títulos.",
+      "**Don't** rellenar con degradado botones, fondos, barras ni texto.",
+      "**Don't** pintar textos, cifras o etiquetas de un gráfico con el color de la serie, ni mezclar varias series de color en un gráfico.",
+      "**Don't** dar sombra a un panel en reposo."
+    ]
+  }
+}

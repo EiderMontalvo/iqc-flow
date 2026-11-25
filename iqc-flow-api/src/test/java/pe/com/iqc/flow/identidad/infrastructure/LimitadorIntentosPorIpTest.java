@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 class LimitadorIntentosPorIpTest {
   private final RelojMutable reloj = new RelojMutable(Instant.parse("2026-11-02T15:00:00Z"));
   private final LimitadorIntentosPorIp limitador = new LimitadorIntentosPorIp(
-      new PropiedadesSeguridad(5, Duration.ofMinutes(15), 3, Duration.ofMinutes(15)), reloj);
+      new PropiedadesSeguridad(5, Duration.ofMinutes(15), 3, Duration.ofMinutes(15), java.util.List.of()), reloj);
 
   @Test
   void bloqueaUnaIpAlAlcanzarElLimiteSinAfectarAOtras() {

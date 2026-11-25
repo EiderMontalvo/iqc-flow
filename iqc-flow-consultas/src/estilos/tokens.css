@@ -1,0 +1,7 @@
+/*
+ * El portal usa el sistema de diseño compartido de IQC (../../iqc-flow-diseno): fuentes, tokens de color, tipografía,
+ * espacios y movimiento, y los estilos del navegador. Aquí no se definen colores propios.
+ */
+@import "@iqc/diseno/css/fuentes.css";
+@import "@iqc/diseno/css/tokens.css";
+@import "@iqc/diseno/css/navegador.css";

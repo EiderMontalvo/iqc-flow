@@ -1,6 +1,9 @@
 # Secretos y configuración local
 .env
 .env.*
+!iqc-flow-web/.env.example
+!iqc-flow-consultas/.env.pe
+!iqc-flow-consultas/.env.latam
 iqc-flow-api/config/local.yml
 
 # Compilación
@@ -33,3 +36,4 @@ iqc-flow-api/datos/
 *.sql.gz
 **/volcados/
 iqc_prod_db*.sql
+iqc-flow-consultas/dist-*/

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 /**almacén en disco local. Escribe en un archivo temporal y lo mueve, para no dejar archivos a medias*/
 @Component
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "iqc.documentos.almacen", havingValue = "LOCAL", matchIfMissing = true)
 class AlmacenArchivosLocal implements AlmacenArchivos {
   private final Path raiz;
 

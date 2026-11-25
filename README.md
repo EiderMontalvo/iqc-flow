@@ -32,6 +32,7 @@ iqc-flow/
 ├── iqc-flow-api/     Backend Spring Boot (módulos en pe.com.iqc.flow.*)
 ├── iqc-flow-web/     Frontend React + Vite
 ├── docs/             Arquitectura, decisiones (ADR) y ejemplos HTTP
+├── plantillas/       Plantillas base de certificados, cotizaciones, contratos, cartas y correos (ver su README)
 └── scripts/          Scripts de apoyo (base de datos local)
 ```
 
@@ -251,8 +252,50 @@ Los errores siguen RFC 9457 (`application/problem+json`) con `codigo` estable e 
   consulta: Perú a `https://consultas.iqcperu.com/` (fija, impresa en los PDF) y LATAM a
   `https://consultas.iqc-latam.com/`. El certificado toma la marca del país del cliente, salvo que se elija otra.
 - **QR:** los certificados importados conservan el identificador de su QR impreso; los nuevos usan su token.
-- **Publicación:** cada minuto se copia a la base pública solo lo que cambió (ver «Base pública de consulta»).
+- **Publicación:** cada minuto se copia a la base pública de su país solo lo que cambió (ver «Bases públicas de consulta»).
 - Ejemplos: `docs/api/http/panel-certificados.http`.
+
+### Certificados personales (V11)
+
+| Método y ruta | Permiso |
+|---|---|
+| `GET /api/v1/certificados-personales?texto=&pais=&estado=`, `GET /{id}`, `GET /resumen`, `GET /tipos-documento`, `GET /personas?pais=&tipo=&numero=` | `certificados:leer` |
+| `POST /api/v1/certificados-personales`, `PUT /{id}` (corrección con motivo), `POST /{id}/anulacion`, `PUT /{id}/pdf` | `certificados:gestionar` |
+| `GET /api/v1/certificados/resumen` (empresariales por marca: vigentes, por vencer, vencidos, suspendidos, retirados) | `certificados:leer` |
+
+- La persona se identifica por país, tipo y número de documento (DNI, CE, cédula, pasaporte… según el país) y se reutiliza.
+- El código del certificado es único; anular exige un motivo y un anulado ya no se modifica.
+- `token_pdf` conserva las URL ya publicadas `consultas.iqcperu.com/personal-pdf/{token}`. El importador lee también las
+  tablas `personas` y `certificados_personales` del volcado.
+
+### Configuración de MASTER y modos de registro (V12)
+
+| Método y ruta | Permiso |
+|---|---|
+| `GET /api/v1/organizacion/parametros`, `PUT /{clave}` | autenticado / `organizacion:configurar` |
+| `GET /api/v1/certificados/herramientas` (modos y herramientas del usuario) | autenticado |
+| `POST /api/v1/certificados/lectura` (`tipo`: `EMPRESARIAL` o `PERSONAL`, `documentoId` de un `CERTIFICADO_PDF`) | `certificados:autocompletar` |
+
+- Interruptores globales: `IA_HABILITADA`, `AUTOMATIZACIONES_HABILITADAS`, los modos `CERT_EMPRESARIAL_MODO_*` y
+  `CERT_PERSONAL_MODO_*` (`MANUAL`, `AUTOMATIZADO`, `PLANTILLA`) y `ADMINISTRACION_AUTOCOMPLETADO` /
+  `ADMINISTRACION_GENERACION_PDF`, que quitan o devuelven la herramienta al rol Administración y logística.
+- MASTER tiene siempre todos los permisos: V12 se los da y, al arrancar, el sistema le agrega los que se creen después.
+- La lectura reconoce los formatos INACAL/SAE (DDC-FRM-015), IQC Global (QF-12) y personales sobre el texto del PDF
+  (PDFBox). Es una propuesta que la persona revisa: avisa los campos que no pudo leer y las fechas incoherentes. La IA
+  queda como respaldo cuando se elija un proveedor (`LectorIaCertificados`).
+
+### Cotizaciones y solicitudes de clientes (V16)
+
+| Método y ruta | Permiso |
+|---|---|
+| `GET /api/v1/cotizaciones`, `/resumen`, `/{id}` | `cotizaciones:leer` |
+| `POST /api/v1/cotizaciones`, `PUT /{id}`, `POST /{id}/envio`, `/respuesta`, `/anulacion`, `/duplicado` | `cotizaciones:gestionar` |
+| `POST /api/v1/cotizaciones/analisis-solicitud` (multipart `archivo` y/o `texto`: correo .eml/.msg, PDF, Word o texto) | `cotizaciones:gestionar` |
+| `GET /api/v1/padron/ruc/{n}`, `/dni/{n}` (SUNAT) | autenticado |
+
+- Detalle, decisiones y pendientes: [docs/architecture/proceso-comercial-cotizaciones.md](docs/architecture/proceso-comercial-cotizaciones.md) (ADR-045).
+- **Pendiente:** la configuración de los correos (buzón entrante `cotizaciones@` en Google Workspace y cuenta de envío) y la clave de IA. Variables previstas en `/etc/iqc-flow/api.env`: `ANTHROPIC_API_KEY`, `IQC_CORREO_ENTRADA_USUARIO`, `IQC_CORREO_ENTRADA_CONTRASENA`.
+- Ejemplos: `docs/api/http/cotizaciones.http`.
 
 ### Roles iniciales
 
@@ -264,6 +307,14 @@ Los errores siguen RFC 9457 (`application/problem+json`) con `codigo` estable e 
 | `COORDINADOR_AUDITORIAS` (Jefe de Operaciones) | `clientes:leer`, `seguimientos:leer`, `seguimientos:escribir`, `seguimientos:asignar`, `expedientes:*`, `auditores:*`, `documentos:subir` |
 | `RESPONSABLE_CERTIFICACIONES` (Jefe Técnico) | `clientes:leer`, `seguimientos:leer`, `seguimientos:escribir`, `expedientes:leer`, `auditores:leer`, `decisiones:registrar`, `certificados:gestionar`, `certificados:firmar-jefe-tecnico`, `documentos:subir` |
 | `ADMINISTRACION_LOGISTICA` | `expedientes:leer`, `entregas:gestionar` (conformidad de pagos, encuesta y entrega) |
+| `CERTIFICADOS` | `certificados:leer`, `certificados:gestionar`, `documentos:subir`, `clientes:leer` (solo para elegir el titular). Certificados empresariales y personales, sus PDF, QR y publicación; no ve expedientes, auditorías ni seguimientos |
+
+`certificados:leer` (V11) lo tienen también todos los roles que ya leían expedientes. Quien solo lee certificados descarga
+únicamente documentos de las categorías `CERTIFICADO_PDF` y `LOGO_MARCA`.
+
+En el frontend cada rol entra a su **espacio**: MASTER y Administrador ven el resumen general y todas las áreas;
+Certificados y Jefatura técnica entran al resumen de certificados (empresariales y personales por país o marca);
+Comercial, Operaciones y Administración entran a «Hoy» con las secciones de su área.
 
 ## 4. Pruebas
 
@@ -295,6 +346,23 @@ La apariencia tiene modos claro, oscuro y «Sistema». La elección se guarda en
 La sesión usa la cookie del servidor y las operaciones de escritura obtienen el token CSRF antes de
 enviar la solicitud. Para probar el acceso necesitas el usuario `MASTER` inicial o uno creado por la API.
 
+## Frontend en otro servidor (BanaHosting)
+
+El panel (`iqc-flow-web`) se publica como archivos estáticos en BanaHosting y la API corre en otro servidor.
+
+| Dónde | Variable | Ejemplo |
+|---|---|---|
+| Frontend, al compilar (`.env.production`, ver `.env.example`) | `VITE_API_URL` | `https://api.iqcperu.com` |
+| Backend | `IQC_ORIGENES_PANEL` (separados por comas) | `https://panel.iqcperu.com` |
+| Backend | `IQC_COOKIE_SAME_SITE` | `lax` si panel y API comparten dominio (`*.iqcperu.com`); `none` si no |
+
+Sin `IQC_ORIGENES_PANEL` la API no acepta llamadas de otro origen. Con `VITE_API_URL` vacío el panel llama a su propio
+dominio (desarrollo con el proxy de Vite). La sesión sigue siendo la cookie de la API y el token CSRF se pide a
+`/api/v1/autenticacion/csrf` antes de cada escritura.
+
+El diseño del panel está documentado en `iqc-flow-web/DESIGN.md` (tokens en `src/styles/tokens.css`) y el contexto
+del producto en `iqc-flow-web/PRODUCT.md`.
+
 ## Importar el histórico de la plataforma anterior
 
 Exporta desde phpMyAdmin solo los datos de `Certificaciones`, `Clientes`, `generarQR`, `estados_certificados`,
@@ -325,34 +393,51 @@ posibles duplicados.
 | `V7__decisiones_y_certificados.sql` | documentos, parámetros de la organización, declaraciones de conflicto, decisiones, certificados, condiciones de entrega, rol `ADMINISTRACION_LOGISTICA` y 7 permisos |
 | `V8__correcciones_codigo_e_importacion_legado.sql` | letra de edición en el código, unicidad código + norma, origen legado en expedientes y certificados, tabla `qr_legado` |
 | `V9__panel_certificados_marcas_y_publicacion.sql` | países CO y PA, categorías `CERTIFICADO_PDF` y `LOGO_MARCA`, marcas por país, PDF versionado y marca de cada certificado, estado de la publicación |
+| `V10__publicacion_por_pais.sql` | país donde quedó publicado cada certificado; vuelve a publicar todo en la base de su país |
+| `V11__rol_certificados_y_certificados_personales.sql` | permiso `certificados:leer`, rol `CERTIFICADOS`, personas y certificados personales |
+| `V12__permisos_master_herramientas_plantillas_correo.sql` | permisos de autocompletado, generación de PDF, plantillas y correo; MASTER con todos los permisos |
 
 Una migración aplicada nunca se modifica: los cambios se hacen con una nueva versión.
 
-La base pública de consulta tiene sus propias migraciones en `src/main/resources/db/consultas` (`V1__certificados_publicos.sql`),
-que aplica el panel al arrancar.
+Las bases públicas de consulta tienen sus propias migraciones en `src/main/resources/db/consultas` (`V1__certificados_publicos.sql`
+y `V2__redirecciones_qr.sql`), que el panel aplica a cada base al arrancar.
 
-## Base pública de consulta
+## Bases públicas de consulta (una por país)
 
-La consulta pública (`consultas.iqcperu.com` y `consultas.iqc-latam.com`) no lee la base interna. Lee una base
-aparte que solo contiene lo que se muestra: titular, norma, alcance, fechas, estado, marca, QR y PDF. La escribe
-únicamente el panel, y el servicio de consulta (Incremento 8b) la lee con un usuario de solo lectura.
+Las consultas públicas no leen la base interna. Cada país de marca tiene su propia base, que solo contiene lo que se
+muestra: titular, norma, alcance, fechas, estado, marca, QR y PDF. Las escribe únicamente el panel, y cada certificado
+va solo a la base de su país (ADR-043).
 
-- **Desarrollo y pruebas:** usa el esquema `consultas` de `iqc_flow` y de `iqc_flow_test`, sin configurar nada.
-- **Producción:** crea una base propia, de preferencia en otro servidor, con dos usuarios:
+| País | Base | Portal que la lee |
+|---|---|---|
+| Perú (`PE`) | `iqc_consultas_pe` | `consultas.iqcperu.com` |
+| Ecuador (`EC`) | `iqc_consultas_ec` | `consultas.iqc-latam.com` (portal LATAM único) |
+| Colombia (`CO`) | `iqc_consultas_co` | `consultas.iqc-latam.com` |
+| Panamá (`PA`) | `iqc_consultas_pa` | `consultas.iqc-latam.com` |
+
+- **Desarrollo y pruebas:** usan los esquemas `consultas_pe`, `consultas_ec`, `consultas_co` y `consultas_pa` de
+  `iqc_flow` y de `iqc_flow_test`, sin configurar nada.
+- **Producción:** crea una base por país, de preferencia en otro servidor, con un usuario que escribe (el panel) y otro
+  de solo lectura (el portal). Por ejemplo, para Ecuador:
 
 ```sql
-CREATE DATABASE iqc_consultas;
-CREATE USER iqc_publicador WITH PASSWORD '...';   -- lo usa el panel (escribe)
-CREATE USER iqc_consulta WITH PASSWORD '...';     -- lo usa el servicio de consulta (solo lee)
-\c iqc_consultas
-GRANT CREATE, USAGE ON SCHEMA public TO iqc_publicador;
-ALTER DEFAULT PRIVILEGES FOR ROLE iqc_publicador IN SCHEMA public GRANT SELECT ON TABLES TO iqc_consulta;
-GRANT USAGE ON SCHEMA public TO iqc_consulta;
+CREATE DATABASE iqc_consultas_ec;
+CREATE USER iqc_publicador_ec WITH PASSWORD '...';   -- lo usa el panel (escribe)
+CREATE USER iqc_consulta_latam WITH PASSWORD '...';  -- lo usa el portal LATAM (solo lee EC, CO y PA)
+\c iqc_consultas_ec
+GRANT CREATE, USAGE ON SCHEMA public TO iqc_publicador_ec;
+ALTER DEFAULT PRIVILEGES FOR ROLE iqc_publicador_ec IN SCHEMA public GRANT SELECT ON TABLES TO iqc_consulta_latam;
+GRANT USAGE ON SCHEMA public TO iqc_consulta_latam;
 ```
 
-  y configura el panel con `IQC_CONSULTAS_URL`, `IQC_CONSULTAS_USUARIO` y `IQC_CONSULTAS_CLAVE`
-  (`IQC_CONSULTAS_ESQUEMA`, por defecto `public`). Sin `IQC_CONSULTAS_URL` no se publica nada.
-- **Restaurar la base pública:** `POST /api/v1/publicacion?forzar=true` vuelve a escribir todos los certificados.
+  y configura el panel con `IQC_CONSULTAS_<PAÍS>_URL`, `_USUARIO` y `_CLAVE` (`_ESQUEMA`, por defecto `public`), por
+  ejemplo `IQC_CONSULTAS_EC_URL`. Un país sin URL no publica: sus certificados aparecen con error en
+  `GET /api/v1/publicacion`, que también lista en `paises` los que tienen base.
+- **Cambio de marca:** si un certificado pasa de un país a otro, se publica en la base nueva y se borra de la anterior.
+- **QR impresos de la plataforma anterior:** todos apuntan a `consultas.iqcperu.com`, también los de Ecuador. La base de
+  Perú guarda en `qr_redirecciones` a dónde reenviar los de otras marcas; el portal de Perú debe consultarla cuando un
+  QR no está en `qr_publicos`.
+- **Restaurar una base pública:** `POST /api/v1/publicacion?forzar=true` vuelve a escribir todos los certificados.
 
 ## Seguridad
 

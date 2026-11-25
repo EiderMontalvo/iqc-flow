@@ -13,12 +13,43 @@ springdoc:
     enabled: false
 
 iqc:
-  # En producción la base pública es otra base (de preferencia otro servidor). Sin IQC_CONSULTAS_URL no se publica
+  # En producción cada país tiene su base pública (de preferencia en otro servidor). Un país sin URL no publica: sus
+  # certificados quedan con error en /api/v1/publicacion hasta configurarlo
   consultas:
-    url: ${IQC_CONSULTAS_URL:}
-    usuario: ${IQC_CONSULTAS_USUARIO:}
-    clave: ${IQC_CONSULTAS_CLAVE:}
-    esquema: ${IQC_CONSULTAS_ESQUEMA:public}
+    bases:
+      PE:
+        url: ${IQC_CONSULTAS_PE_URL:}
+        usuario: ${IQC_CONSULTAS_PE_USUARIO:}
+        clave: ${IQC_CONSULTAS_PE_CLAVE:}
+        esquema: ${IQC_CONSULTAS_PE_ESQUEMA:public}
+      EC:
+        url: ${IQC_CONSULTAS_EC_URL:}
+        usuario: ${IQC_CONSULTAS_EC_USUARIO:}
+        clave: ${IQC_CONSULTAS_EC_CLAVE:}
+        esquema: ${IQC_CONSULTAS_EC_ESQUEMA:public}
+      CO:
+        url: ${IQC_CONSULTAS_CO_URL:}
+        usuario: ${IQC_CONSULTAS_CO_USUARIO:}
+        clave: ${IQC_CONSULTAS_CO_CLAVE:}
+        esquema: ${IQC_CONSULTAS_CO_ESQUEMA:public}
+      PA:
+        url: ${IQC_CONSULTAS_PA_URL:}
+        usuario: ${IQC_CONSULTAS_PA_USUARIO:}
+        clave: ${IQC_CONSULTAS_PA_CLAVE:}
+        esquema: ${IQC_CONSULTAS_PA_ESQUEMA:public}
+
+  portal-consultas:
+    portales:
+      PE:
+        url: ${IQC_CONSULTAS_PE_URL:}
+        usuario: ${IQC_LECTURA_PE_USUARIO:}
+        clave: ${IQC_LECTURA_PE_CLAVE:}
+        esquema: ${IQC_CONSULTAS_PE_ESQUEMA:public}
+      LATAM:
+        url: ${IQC_CONSULTAS_EC_URL:}
+        usuario: ${IQC_LECTURA_LATAM_USUARIO:}
+        clave: ${IQC_LECTURA_LATAM_CLAVE:}
+        esquema: ${IQC_CONSULTAS_EC_ESQUEMA:public}
 
 logging:
   structured:

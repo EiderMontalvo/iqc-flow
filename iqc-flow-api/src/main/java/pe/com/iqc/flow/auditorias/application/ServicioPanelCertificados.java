@@ -120,7 +120,7 @@ public class ServicioPanelCertificados {
   }
 
   @Transactional(readOnly = true)
-  @PreAuthorize("hasAuthority('expedientes:leer')")
+  @PreAuthorize("hasAnyAuthority('expedientes:leer', 'certificados:leer')")
   public RespuestaPaginada<CertificadoPanel> buscar(FiltroCertificados filtro, int pagina, int tamano) {
     UUID org = actorActual.requerido().organizacionId();
     PageRequest paginacion = PageRequest.of(Math.max(pagina, 0), Math.min(Math.max(tamano, 1), 100), orden());
@@ -131,15 +131,35 @@ public class ServicioPanelCertificados {
   }
 
   @Transactional(readOnly = true)
-  @PreAuthorize("hasAuthority('expedientes:leer')")
+  @PreAuthorize("hasAnyAuthority('expedientes:leer', 'certificados:leer')")
   public CertificadoPanel obtener(UUID certificadoId) {
     UUID org = actorActual.requerido().organizacionId();
     return respuestas(org, List.of(cargar(org, certificadoId)), DIAS_POR_VENCER).get(0);
   }
 
+  /**cuántos certificados empresariales muestra cada marca (país), por vigencia y estado*/
+  @Transactional(readOnly = true)
+  @PreAuthorize("hasAnyAuthority('expedientes:leer', 'certificados:leer')")
+  public List<DtosPanelCertificados.ResumenMarca> resumenPorMarca() {
+    UUID org = actorActual.requerido().organizacionId();
+    List<DtosPanelCertificados.ResumenMarca> resumen = new ArrayList<>();
+    for (var pais : catalogos.paises()) {
+      String p = pais.codigo();
+      java.util.function.BiFunction<Certificado.Estado, Vigencia, Long> contar = (estado, vigencia) -> certificados.count(
+          especificacion(org, new FiltroCertificados(null, null, null, p, estado, vigencia, null)));
+      long vigentes = contar.apply(Certificado.Estado.EMITIDO, Vigencia.VIGENTE);
+      long porVencer = contar.apply(Certificado.Estado.EMITIDO, Vigencia.POR_VENCER);
+      long vencidos = contar.apply(Certificado.Estado.EMITIDO, Vigencia.VENCIDO);
+      long suspendidos = contar.apply(Certificado.Estado.SUSPENDIDO, null);
+      long retirados = contar.apply(Certificado.Estado.RETIRADO, null) + contar.apply(Certificado.Estado.CANCELADO, null);
+      resumen.add(new DtosPanelCertificados.ResumenMarca(p, vigentes, porVencer, vencidos, suspendidos, retirados));
+    }
+    return resumen;
+  }
+
   /**exporta a Excel el resultado completo del filtro (sin paginar)*/
   @Transactional(readOnly = true)
-  @PreAuthorize("hasAuthority('expedientes:leer')")
+  @PreAuthorize("hasAnyAuthority('expedientes:leer', 'certificados:leer')")
   public byte[] exportar(FiltroCertificados filtro) {
     UUID org = actorActual.requerido().organizacionId();
     List<Certificado> lista = certificados.findAll(especificacion(org, filtro),
@@ -283,7 +303,7 @@ public class ServicioPanelCertificados {
   }
 
   @Transactional(readOnly = true)
-  @PreAuthorize("hasAuthority('expedientes:leer')")
+  @PreAuthorize("hasAnyAuthority('expedientes:leer', 'certificados:leer')")
   public List<VersionPdf> historialPdf(UUID certificadoId) {
     UUID org = actorActual.requerido().organizacionId();
     Certificado c = cargar(org, certificadoId);

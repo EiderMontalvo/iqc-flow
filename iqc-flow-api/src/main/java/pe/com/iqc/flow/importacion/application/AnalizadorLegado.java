@@ -201,7 +201,9 @@ public final class AnalizadorLegado {
       conjunto.forEach(f -> principalDe.put(f.get("idCliente"), principal.get("idCliente")));
       List<Cert> suyos = conjunto.stream().flatMap(f -> certsPorCliente.getOrDefault(f.get("idCliente"), List.of()).stream()).toList();
       String ruc = soloDigitos(principal.get("ruc"));
-      boolean ecuador = ruc.length() == 13 || suyos.stream().anyMatch(c -> c.ecuador);
+      // El país del cliente sale de su RUC: en la plataforma anterior el país es del certificado (ADR-043), y hay
+      // empresas peruanas con certificados marcados "Ecuador"
+      boolean ecuador = ruc.length() == 13;
       String direccion = conjunto.stream().map(f -> limpio(f.get("direccion"))).filter(Objects::nonNull).findFirst().orElse(null);
       String representante = conjunto.stream().map(f -> limpio(f.get("representante_legal"))).filter(Objects::nonNull)
           .findFirst().orElse(null);
@@ -239,6 +241,8 @@ public final class AnalizadorLegado {
     }
 
     // 5. Expedientes históricos: certificados del mismo cliente, esquema, fecha y ciclo
+    Map<String, String> paisCliente = clientes.stream()
+        .collect(Collectors.toMap(ClientePlan::idLegado, ClientePlan::codigoPais));
     Map<String, List<Cert>> porGrupo = new TreeMap<>();
     for (Cert c : unicos) {
       String cliente = principalDe.get(c.cliente);
@@ -259,7 +263,8 @@ public final class AnalizadorLegado {
           expiracion, vig1, vig2, vigente,
           lista.stream().map(c -> new CertificadoPlan(c.id, c.norma, c.edicion, c.codigo, c.estado, c.revision, c.ciclo,
               c.anio, c.otorgamiento, c.emision, c.expiracion, c.url, c.india, c.alcance,
-              qrPorCert.getOrDefault(c.id, List.of()))).toList()));
+              qrPorCert.getOrDefault(c.id, List.of()),
+              marca(c.ecuador, paisCliente.get(principalDe.get(c.cliente))))).toList()));
     }
     return new PlanImportacion(clientes, grupos, descartes, advertencias, posiblesDuplicados, filasCert.size(),
         filasCli.size(), filasQr.size());
@@ -331,6 +336,12 @@ public final class AnalizadorLegado {
     if (valor == null) return null;
     String t = valor.replace(' ', ' ').trim();
     return t.isEmpty() || t.equals("-") ? null : t;
+  }
+
+  /**marca del certificado: la de su campo país, si no coincide con la del país del cliente (si coincide, nula)*/
+  static String marca(boolean certificadoEcuador, String paisCliente) {
+    String pais = certificadoEcuador ? "EC" : "PE";
+    return pais.equals(paisCliente) ? null : pais;
   }
 
   private static String soloDigitos(String valor) { return valor == null ? "" : valor.replaceAll("\\D", ""); }

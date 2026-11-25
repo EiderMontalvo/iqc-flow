@@ -1,0 +1,13 @@
+/*
+ * Estilos del portal, en orden de cascada: los ajustes por pantalla, movimiento e impresión van al final
+ * porque sobrescriben a los de cada componente.
+ */
+@import "./tokens.css";
+@import "./base.css";
+@import "./banda.css";
+@import "./formulario.css";
+@import "./certificado.css";
+@import "./toast.css";
+@import "./responsive.css";
+@import "./movimiento.css";
+@import "./impresion.css";

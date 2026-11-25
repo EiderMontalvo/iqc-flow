@@ -1,0 +1,589 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-21T20:39:19+00:00",
+  "title": "Design System: Consulta oficial de certificados IQC",
+  "extensions": {
+    "colorMeta": {
+      "navy": {
+        "role": "primary",
+        "displayName": "Azul IQC",
+        "canonical": "oklch(20.6% 0.051 245)",
+        "tonalRamp": [
+          "#070c11",
+          "#1b2630",
+          "#324454",
+          "#4b647a",
+          "#6b869d",
+          "#93a8ba",
+          "#bccbd9",
+          "#e7f0f7"
+        ]
+      },
+      "navy-2": {
+        "role": "primary",
+        "displayName": "Azul microtexto",
+        "canonical": "oklch(26.6% 0.058 248)",
+        "tonalRamp": [
+          "#060c12",
+          "#1a2632",
+          "#314456",
+          "#4a647e",
+          "#6a86a1",
+          "#92a8bd",
+          "#bccbdb",
+          "#e7f0f9"
+        ]
+      },
+      "tinta": {
+        "role": "neutral",
+        "displayName": "Tinta IQC",
+        "canonical": "oklch(22.8% 0.038 283)",
+        "tonalRamp": [
+          "#0a0b10",
+          "#24242e",
+          "#404050",
+          "#5e5f75",
+          "#7f8097",
+          "#a2a3b6",
+          "#c7c8d5",
+          "#edeef6"
+        ]
+      },
+      "blanco": {
+        "role": "neutral",
+        "displayName": "Blanco",
+        "canonical": "oklch(100.0% 0.000 90)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "papel": {
+        "role": "neutral",
+        "displayName": "Papel de seguridad",
+        "canonical": "oklch(96.6% 0.005 258)",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#242527",
+          "#404244",
+          "#606164",
+          "#818285",
+          "#a3a5a8",
+          "#c7c9cc",
+          "#edeff2"
+        ]
+      },
+      "linea": {
+        "role": "neutral",
+        "displayName": "Línea",
+        "canonical": "oklch(88.9% 0.014 258)",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#232528",
+          "#3f4247",
+          "#5d6268",
+          "#7e838a",
+          "#a1a5ab",
+          "#c6c9ce",
+          "#edeef1"
+        ]
+      },
+      "linea-suave": {
+        "role": "neutral",
+        "displayName": "Línea suave",
+        "canonical": "oklch(93.6% 0.009 258)",
+        "tonalRamp": [
+          "#0a0b0c",
+          "#242527",
+          "#404245",
+          "#5e6166",
+          "#7f8387",
+          "#a3a5a9",
+          "#c7c9cc",
+          "#edeef0"
+        ]
+      },
+      "texto-2": {
+        "role": "neutral",
+        "displayName": "Texto secundario",
+        "canonical": "oklch(41.3% 0.034 267)",
+        "tonalRamp": [
+          "#090b0f",
+          "#21252d",
+          "#3c424f",
+          "#596173",
+          "#7a8295",
+          "#9ea5b4",
+          "#c4c9d4",
+          "#eceef5"
+        ]
+      },
+      "etiqueta": {
+        "role": "neutral",
+        "displayName": "Etiqueta",
+        "canonical": "oklch(49.8% 0.040 269)",
+        "tonalRamp": [
+          "#090b10",
+          "#21252f",
+          "#3c4251",
+          "#596176",
+          "#798299",
+          "#9ea5b7",
+          "#c4c9d6",
+          "#ebeef6"
+        ]
+      },
+      "foco-banda": {
+        "role": "neutral",
+        "displayName": "Foco en banda",
+        "canonical": "oklch(77.5% 0.115 274)",
+        "tonalRamp": [
+          "#070a18",
+          "#1d2240",
+          "#353e6c",
+          "#505b9b",
+          "#6f7dc0",
+          "#95a2d7",
+          "#bec7ee",
+          "#e8eeff"
+        ]
+      },
+      "ok": {
+        "role": "secondary",
+        "displayName": "Verde sello",
+        "canonical": "oklch(46.7% 0.103 159)",
+        "tonalRamp": [
+          "#020f07",
+          "#0b2c1c",
+          "#194d34",
+          "#28714d",
+          "#4c936e",
+          "#7eb395",
+          "#afd4bd",
+          "#e0f5e8"
+        ]
+      },
+      "ok-fondo": {
+        "role": "secondary",
+        "displayName": "Verde papel",
+        "canonical": "oklch(95.7% 0.015 165)",
+        "tonalRamp": [
+          "#0a0c0b",
+          "#222624",
+          "#3d4441",
+          "#5b645f",
+          "#7b8580",
+          "#9fa7a3",
+          "#c5cbc8",
+          "#ecefee"
+        ]
+      },
+      "mal": {
+        "role": "secondary",
+        "displayName": "Rojo sello",
+        "canonical": "oklch(50.0% 0.182 30)",
+        "tonalRamp": [
+          "#1c0301",
+          "#470d08",
+          "#771d14",
+          "#aa2e22",
+          "#d25344",
+          "#e98576",
+          "#fdb4a8",
+          "#ffe3db"
+        ]
+      },
+      "mal-fondo": {
+        "role": "secondary",
+        "displayName": "Rojo papel",
+        "canonical": "oklch(95.5% 0.016 22)",
+        "tonalRamp": [
+          "#0d0a0a",
+          "#292423",
+          "#48403f",
+          "#695e5d",
+          "#8b7f7e",
+          "#aca2a2",
+          "#cec7c7",
+          "#f1eded"
+        ]
+      },
+      "alerta": {
+        "role": "secondary",
+        "displayName": "Ámbar sello",
+        "canonical": "oklch(52.5% 0.120 63)",
+        "tonalRamp": [
+          "#150800",
+          "#381e02",
+          "#603606",
+          "#8b510c",
+          "#b07337",
+          "#cb9a6e",
+          "#e5c2a3",
+          "#ffead9"
+        ]
+      },
+      "alerta-fondo": {
+        "role": "secondary",
+        "displayName": "Ámbar papel",
+        "canonical": "oklch(96.2% 0.024 80)",
+        "tonalRamp": [
+          "#0d0b08",
+          "#28251f",
+          "#474138",
+          "#686054",
+          "#898174",
+          "#aaa49a",
+          "#cdc8c1",
+          "#f1eeea"
+        ]
+      },
+      "neutro": {
+        "role": "secondary",
+        "displayName": "Pizarra sello",
+        "canonical": "oklch(44.7% 0.034 261)",
+        "tonalRamp": [
+          "#090b0f",
+          "#21252d",
+          "#3b424f",
+          "#586273",
+          "#788395",
+          "#9da6b4",
+          "#c3c9d4",
+          "#ebeff5"
+        ]
+      },
+      "neutro-fondo": {
+        "role": "secondary",
+        "displayName": "Pizarra papel",
+        "canonical": "oklch(95.7% 0.006 255)",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#242526",
+          "#404244",
+          "#5f6164",
+          "#808286",
+          "#a3a5a8",
+          "#c8c9cb",
+          "#eeeeef"
+        ]
+      },
+      "banda-texto": {
+        "role": "neutral",
+        "displayName": "Bajada en banda",
+        "tonalRamp": [
+          "#070c11",
+          "#1b2630",
+          "#324454",
+          "#4b647a",
+          "#6b869d",
+          "#93a8ba",
+          "#bccbd9",
+          "#e7f0f7"
+        ]
+      },
+      "banda-etiqueta": {
+        "role": "neutral",
+        "displayName": "Etiqueta en banda",
+        "tonalRamp": [
+          "#070c11",
+          "#1b2630",
+          "#324454",
+          "#4b647a",
+          "#6b869d",
+          "#93a8ba",
+          "#bccbd9",
+          "#e7f0f7"
+        ]
+      },
+      "banda-region": {
+        "role": "neutral",
+        "displayName": "Región en banda",
+        "tonalRamp": [
+          "#070c11",
+          "#1b2630",
+          "#324454",
+          "#4b647a",
+          "#6b869d",
+          "#93a8ba",
+          "#bccbd9",
+          "#e7f0f7"
+        ]
+      },
+      "microtexto": {
+        "role": "neutral",
+        "displayName": "Tinta de microtexto",
+        "tonalRamp": [
+          "#060c12",
+          "#1a2632",
+          "#314456",
+          "#4a647e",
+          "#6a86a1",
+          "#92a8bd",
+          "#bccbdb",
+          "#e7f0f9"
+        ]
+      },
+      "mal-texto": {
+        "role": "secondary",
+        "displayName": "Rojo profundo",
+        "tonalRamp": [
+          "#1c0301",
+          "#470d08",
+          "#771d14",
+          "#aa2e22",
+          "#d25344",
+          "#e98576",
+          "#fdb4a8",
+          "#ffe3db"
+        ]
+      },
+      "mal-borde": {
+        "role": "secondary",
+        "displayName": "Rojo filete",
+        "tonalRamp": [
+          "#1c0301",
+          "#470d08",
+          "#771d14",
+          "#aa2e22",
+          "#d25344",
+          "#e98576",
+          "#fdb4a8",
+          "#ffe3db"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Título de la banda."
+      },
+      "headline": {
+        "displayName": "Titular",
+        "purpose": "Nombre del titular en la hoja; única aparición de Source Serif 4."
+      },
+      "veredicto": {
+        "displayName": "Veredicto",
+        "purpose": "Palabra de estado en mayúsculas, en la tinta del sello."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Encabezado de la guía."
+      },
+      "lead": {
+        "displayName": "Bajada",
+        "purpose": "Texto explicativo bajo el título de la banda, máx. 60ch."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Texto corrido; alcances a máx. 75ch."
+      },
+      "dato": {
+        "displayName": "Dato",
+        "purpose": "Valores de la rejilla de la hoja."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Etiquetas de datos (13px) y de campos (14px)."
+      },
+      "codigo": {
+        "displayName": "Código",
+        "purpose": "Códigos de certificado: cifras tabulares y cero con barra."
+      },
+      "microtexto": {
+        "displayName": "Microtexto",
+        "purpose": "Solo la tira de seguridad; decorativa."
+      }
+    },
+    "shadows": [
+      {
+        "name": "hoja-apoyada",
+        "value": "0 1px 2px rgb(0 25 45 / .06), 0 12px 32px -12px rgb(0 25 45 / .22)",
+        "purpose": "Solo la hoja de resultado; se quita al imprimir."
+      },
+      {
+        "name": "campo-hundido",
+        "value": "inset 0 1px 2px rgb(0 25 45 / .12)",
+        "purpose": "Campos del formulario en reposo."
+      },
+      {
+        "name": "boton-sobre-banda",
+        "value": "0 1px 2px rgb(0 0 0 / .25)",
+        "purpose": "Botón Verificar sobre la banda navy."
+      },
+      {
+        "name": "foco-banda",
+        "value": "0 0 0 3px #9fb0ff",
+        "purpose": "Foco de los campos sobre la banda."
+      }
+    ],
+    "motion": [
+      {
+        "name": "salida",
+        "value": "cubic-bezier(.16, 1, .3, 1)",
+        "purpose": "Curva de todas las transiciones y del estampado."
+      },
+      {
+        "name": "estampar",
+        "value": "620ms salida; scale 1.28 rotate -14deg blur 2.5px opacity .4 → scale 1 rotate -4deg",
+        "purpose": "Aparición única del sello al llegar el resultado; se omite con movimiento reducido y al imprimir."
+      },
+      {
+        "name": "estado-boton",
+        "value": "180ms salida (fondo y borde); 120ms translateY(1px) al pulsar",
+        "purpose": "Hover y pulsación de botones."
+      },
+      {
+        "name": "foco-campo",
+        "value": "200ms salida (box-shadow)",
+        "purpose": "Aparición del anillo de foco en campos."
+      },
+      {
+        "name": "brillo-carga",
+        "value": "1.4s ease-in-out infinito",
+        "purpose": "Barras de la hoja en carga."
+      },
+      {
+        "name": "gira",
+        "value": "0.9s linear infinito",
+        "purpose": "Indicador del botón Verificar mientras consulta."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "tableta",
+        "value": "860px"
+      },
+      {
+        "name": "movil",
+        "value": "560px"
+      },
+      {
+        "name": "impresion",
+        "value": "@media print"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botón primario",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Acción principal de la hoja, «Ver certificado en PDF»; una por hoja.",
+      "html": "<a class=\"ds-boton ds-primario\" href=\"#\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"/><path d=\"M14 2v4a2 2 0 0 0 2 2h4\"/><path d=\"M10 9H8\"/><path d=\"M16 13H8\"/><path d=\"M16 17H8\"/></svg> Ver certificado en PDF</a>",
+      "css": ":host{--navy:#00192d;--navy-2:#0a2740;--tinta:#1a1a2e;--blanco:#fff;--papel:#f2f4f7;--linea:#d5dbe4;--linea-suave:#e6eaf0;--texto-2:#434b5e;--etiqueta:#59627a;--foco-banda:#9fb0ff;--ok:#0d6b44;--ok-fondo:#e8f4ee;--mal:#b42318;--mal-fondo:#fbeceb;--alerta:#9a5800;--neutro:#4a5568;--sans:'Public Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--serif:'Source Serif 4',Georgia,serif;--radio:6px;--salida:cubic-bezier(.16,1,.3,1);--sombra-hoja:0 1px 2px rgb(0 25 45 / .06),0 12px 32px -12px rgb(0 25 45 / .22);} .ds-boton{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:var(--radio);border:1px solid transparent;font:600 1rem var(--sans);cursor:pointer;text-decoration:none;transition:background-color .18s var(--salida),border-color .18s var(--salida),transform .12s var(--salida);} .ds-boton:active{transform:translateY(1px);} .ds-boton:focus-visible{outline:2px solid var(--navy);outline-offset:2px;} .ds-primario{background:var(--navy);color:var(--blanco);} .ds-primario:hover{background:#062843;}"
+    },
+    {
+      "name": "Botón secundario",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Acciones de apoyo sobre papel, como «Imprimir constancia».",
+      "html": "<button type=\"button\" class=\"ds-boton ds-secundario\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2\"/><path d=\"M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6\"/><rect x=\"6\" y=\"14\" width=\"12\" height=\"8\" rx=\"1\"/></svg> Imprimir constancia</button>",
+      "css": ":host{--navy:#00192d;--navy-2:#0a2740;--tinta:#1a1a2e;--blanco:#fff;--papel:#f2f4f7;--linea:#d5dbe4;--linea-suave:#e6eaf0;--texto-2:#434b5e;--etiqueta:#59627a;--foco-banda:#9fb0ff;--ok:#0d6b44;--ok-fondo:#e8f4ee;--mal:#b42318;--mal-fondo:#fbeceb;--alerta:#9a5800;--neutro:#4a5568;--sans:'Public Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--serif:'Source Serif 4',Georgia,serif;--radio:6px;--salida:cubic-bezier(.16,1,.3,1);--sombra-hoja:0 1px 2px rgb(0 25 45 / .06),0 12px 32px -12px rgb(0 25 45 / .22);} .ds-boton{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:var(--radio);border:1px solid transparent;font:600 1rem var(--sans);cursor:pointer;text-decoration:none;transition:background-color .18s var(--salida),border-color .18s var(--salida),transform .12s var(--salida);} .ds-boton:active{transform:translateY(1px);} .ds-boton:focus-visible{outline:2px solid var(--navy);outline-offset:2px;} .ds-secundario{background:var(--blanco);color:var(--tinta);border-color:var(--linea);} .ds-secundario:hover{border-color:#aab4c4;background:#f8f9fb;}"
+    },
+    {
+      "name": "Buscador en banda",
+      "kind": "input",
+      "refersTo": "input-buscador",
+      "description": "Campos documento + código y botón Verificar sobre la banda navy.",
+      "html": "<form class=\"ds-banda-form\" onsubmit=\"return false\"><label><span>Documento del titular</span><input placeholder=\"RUC, DNI o cédula\"></label><label><span>Código del certificado</span><input placeholder=\"Tal como figura en el certificado\"></label><button class=\"ds-boton ds-verificar\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg> Verificar</button></form>",
+      "css": ":host{--navy:#00192d;--navy-2:#0a2740;--tinta:#1a1a2e;--blanco:#fff;--papel:#f2f4f7;--linea:#d5dbe4;--linea-suave:#e6eaf0;--texto-2:#434b5e;--etiqueta:#59627a;--foco-banda:#9fb0ff;--ok:#0d6b44;--ok-fondo:#e8f4ee;--mal:#b42318;--mal-fondo:#fbeceb;--alerta:#9a5800;--neutro:#4a5568;--sans:'Public Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--serif:'Source Serif 4',Georgia,serif;--radio:6px;--salida:cubic-bezier(.16,1,.3,1);--sombra-hoja:0 1px 2px rgb(0 25 45 / .06),0 12px 32px -12px rgb(0 25 45 / .22);} .ds-boton{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:var(--radio);border:1px solid transparent;font:600 1rem var(--sans);cursor:pointer;text-decoration:none;transition:background-color .18s var(--salida),border-color .18s var(--salida),transform .12s var(--salida);} .ds-boton:active{transform:translateY(1px);} .ds-boton:focus-visible{outline:2px solid var(--navy);outline-offset:2px;} .ds-banda-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr) auto;gap:12px;align-items:end;padding:24px;background:var(--navy);font-family:var(--sans);} .ds-banda-form label{display:grid;gap:8px;} .ds-banda-form label>span{font-size:14px;font-weight:600;color:#e4eaf3;} .ds-banda-form input{height:52px;width:100%;box-sizing:border-box;padding:0 16px;border:1px solid transparent;border-radius:var(--radio);background:var(--blanco);color:var(--tinta);font:500 1.0625rem var(--sans);letter-spacing:.01em;box-shadow:inset 0 1px 2px rgb(0 25 45 / .12);transition:box-shadow .2s var(--salida);} .ds-banda-form input::placeholder{color:#6b7387;font-weight:400;} .ds-banda-form input:focus{outline:none;box-shadow:0 0 0 3px var(--foco-banda);} .ds-verificar{height:52px;padding:0 28px;background:var(--blanco);color:var(--navy);font-weight:700;box-shadow:0 1px 2px rgb(0 0 0 / .25);} .ds-verificar:hover{background:#e3eaf3;} .ds-verificar:focus-visible{outline-color:var(--foco-banda);} @media (max-width:560px){.ds-banda-form{grid-template-columns:1fr;}}"
+    },
+    {
+      "name": "Sello de estado",
+      "kind": "custom",
+      "refersTo": "sello",
+      "description": "Sello SVG estampado con la tinta del estado; firma del sistema.",
+      "html": "<div class=\"ds-sello\" role=\"img\" aria-label=\"Estado: Vigente\"><svg viewBox=\"0 0 120 120\" aria-hidden=\"true\"><defs><path id=\"ds-anillo\" d=\"M60,60 m-46,0 a46,46 0 1,1 92,0 a46,46 0 1,1 -92,0\"/></defs><circle cx=\"60\" cy=\"60\" r=\"58\" class=\"ds-borde\"/><circle cx=\"60\" cy=\"60\" r=\"55\" class=\"ds-fino\"/><text class=\"ds-anillo\"><textPath href=\"#ds-anillo\" textLength=\"286\" lengthAdjust=\"spacingAndGlyphs\">VIGENTE • IQC PERÚ • REGISTRO OFICIAL •</textPath></text><circle cx=\"60\" cy=\"60\" r=\"38\" class=\"ds-fino\"/><g transform=\"translate(44 44) scale(1.3333)\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\"/><path d=\"m9 12 2 2 4-4\"/></g></svg></div>",
+      "css": ":host{--navy:#00192d;--navy-2:#0a2740;--tinta:#1a1a2e;--blanco:#fff;--papel:#f2f4f7;--linea:#d5dbe4;--linea-suave:#e6eaf0;--texto-2:#434b5e;--etiqueta:#59627a;--foco-banda:#9fb0ff;--ok:#0d6b44;--ok-fondo:#e8f4ee;--mal:#b42318;--mal-fondo:#fbeceb;--alerta:#9a5800;--neutro:#4a5568;--sans:'Public Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--serif:'Source Serif 4',Georgia,serif;--radio:6px;--salida:cubic-bezier(.16,1,.3,1);--sombra-hoja:0 1px 2px rgb(0 25 45 / .06),0 12px 32px -12px rgb(0 25 45 / .22);} .ds-sello{width:120px;height:120px;color:var(--ok);transform:rotate(-4deg);animation:ds-estampar .62s var(--salida) both;} .ds-sello svg{width:100%;height:100%;overflow:visible;} .ds-sello .ds-borde{fill:none;stroke:currentColor;stroke-width:2.25;} .ds-sello .ds-fino{fill:none;stroke:currentColor;stroke-width:.8;} .ds-sello .ds-anillo{fill:currentColor;font:700 8.6px var(--sans);letter-spacing:.5px;} @keyframes ds-estampar{from{transform:scale(1.28) rotate(-14deg);filter:blur(2.5px);opacity:.4;}60%{filter:blur(0);opacity:1;}to{transform:scale(1) rotate(-4deg);}} @media (prefers-reduced-motion:reduce){.ds-sello{animation:none;}} "
+    },
+    {
+      "name": "Hoja de resultado",
+      "kind": "card",
+      "refersTo": "hoja-resultado",
+      "description": "Documento con marco doble: sello, veredicto, titular en serif y rejilla de datos.",
+      "html": "<article class=\"ds-hoja\"><div class=\"ds-cab\"><div class=\"ds-sello\" role=\"img\" aria-label=\"Estado: Vigente\"><svg viewBox=\"0 0 120 120\" aria-hidden=\"true\"><defs><path id=\"ds-anillo\" d=\"M60,60 m-46,0 a46,46 0 1,1 92,0 a46,46 0 1,1 -92,0\"/></defs><circle cx=\"60\" cy=\"60\" r=\"58\" class=\"ds-borde\"/><circle cx=\"60\" cy=\"60\" r=\"55\" class=\"ds-fino\"/><text class=\"ds-anillo\"><textPath href=\"#ds-anillo\" textLength=\"286\" lengthAdjust=\"spacingAndGlyphs\">VIGENTE • IQC PERÚ • REGISTRO OFICIAL •</textPath></text><circle cx=\"60\" cy=\"60\" r=\"38\" class=\"ds-fino\"/><g transform=\"translate(44 44) scale(1.3333)\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\"/><path d=\"m9 12 2 2 4-4\"/></g></svg></div><p class=\"ds-veredicto\"><strong>Vigente</strong><span>Válido hasta el 1 de mayo de 2028</span></p><div class=\"ds-titulo\"><h2>Empresa de Servicios Generales S.A.C.</h2><p>Certificado de sistema de gestión emitido por IQC Perú</p></div></div><dl class=\"ds-campos\"><div><dt>Código del certificado</dt><dd class=\"ds-codigo\">PER/OHSMS/JAS-C0084/0805</dd></div><div><dt>Norma</dt><dd>ISO 45001:2018</dd></div><div><dt>Expiración</dt><dd>1 de mayo de 2028</dd></div></dl></article>",
+      "css": ":host{--navy:#00192d;--navy-2:#0a2740;--tinta:#1a1a2e;--blanco:#fff;--papel:#f2f4f7;--linea:#d5dbe4;--linea-suave:#e6eaf0;--texto-2:#434b5e;--etiqueta:#59627a;--foco-banda:#9fb0ff;--ok:#0d6b44;--ok-fondo:#e8f4ee;--mal:#b42318;--mal-fondo:#fbeceb;--alerta:#9a5800;--neutro:#4a5568;--sans:'Public Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--serif:'Source Serif 4',Georgia,serif;--radio:6px;--salida:cubic-bezier(.16,1,.3,1);--sombra-hoja:0 1px 2px rgb(0 25 45 / .06),0 12px 32px -12px rgb(0 25 45 / .22);} .ds-sello{width:120px;height:120px;color:var(--ok);transform:rotate(-4deg);animation:ds-estampar .62s var(--salida) both;} .ds-sello svg{width:100%;height:100%;overflow:visible;} .ds-sello .ds-borde{fill:none;stroke:currentColor;stroke-width:2.25;} .ds-sello .ds-fino{fill:none;stroke:currentColor;stroke-width:.8;} .ds-sello .ds-anillo{fill:currentColor;font:700 8.6px var(--sans);letter-spacing:.5px;} @keyframes ds-estampar{from{transform:scale(1.28) rotate(-14deg);filter:blur(2.5px);opacity:.4;}60%{filter:blur(0);opacity:1;}to{transform:scale(1) rotate(-4deg);}} @media (prefers-reduced-motion:reduce){.ds-sello{animation:none;}} .ds-hoja{background:var(--blanco);color:var(--tinta);border-radius:4px;padding:32px;border:1px solid var(--linea);box-shadow:var(--sombra-hoja);outline:1px solid var(--linea-suave);outline-offset:-8px;font:400 16px/1.55 var(--sans);} .ds-cab{display:grid;grid-template-columns:auto 1fr;grid-template-areas:'sello veredicto' 'sello titulo';column-gap:28px;row-gap:10px;align-items:center;padding-bottom:28px;border-bottom:1px solid var(--linea-suave);} .ds-cab .ds-sello{grid-area:sello;} .ds-veredicto{grid-area:veredicto;align-self:end;margin:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;color:var(--ok);} .ds-veredicto strong{font-size:1.25rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;} .ds-veredicto span{font-weight:500;} .ds-titulo{grid-area:titulo;align-self:start;} .ds-titulo h2{margin:0;font:600 clamp(1.45rem,1.1rem + 1.3vw,2rem)/1.18 var(--serif);letter-spacing:-.01em;} .ds-titulo p{margin:8px 0 0;font-size:14px;color:var(--etiqueta);} .ds-campos{margin:0;padding:28px 0 0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px 28px;} .ds-campos div:first-child{grid-column:span 2;} .ds-campos dt{font-size:13px;font-weight:600;color:var(--etiqueta);margin-bottom:4px;} .ds-campos dd{margin:0;font-weight:500;} .ds-codigo{font-variant-numeric:tabular-nums slashed-zero;font-weight:600;letter-spacing:.02em;}"
+    },
+    {
+      "name": "Aviso de error",
+      "kind": "custom",
+      "refersTo": "aviso",
+      "description": "Mensaje de consulta fallida bajo la banda; plano, en tinta roja.",
+      "html": "<p class=\"ds-aviso\" role=\"alert\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/></svg><span>No encontramos un certificado con ese documento y ese código.</span></p>",
+      "css": ":host{--navy:#00192d;--navy-2:#0a2740;--tinta:#1a1a2e;--blanco:#fff;--papel:#f2f4f7;--linea:#d5dbe4;--linea-suave:#e6eaf0;--texto-2:#434b5e;--etiqueta:#59627a;--foco-banda:#9fb0ff;--ok:#0d6b44;--ok-fondo:#e8f4ee;--mal:#b42318;--mal-fondo:#fbeceb;--alerta:#9a5800;--neutro:#4a5568;--sans:'Public Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--serif:'Source Serif 4',Georgia,serif;--radio:6px;--salida:cubic-bezier(.16,1,.3,1);--sombra-hoja:0 1px 2px rgb(0 25 45 / .06),0 12px 32px -12px rgb(0 25 45 / .22);} .ds-aviso{display:flex;gap:12px;align-items:flex-start;margin:0;padding:16px 18px;border-radius:var(--radio);border:1px solid #efc3bf;background:var(--mal-fondo);color:#7a1a12;font:500 16px/1.55 var(--sans);} .ds-aviso svg{flex:none;margin-top:2px;color:var(--mal);}"
+    },
+    {
+      "name": "Banda de seguridad",
+      "kind": "nav",
+      "refersTo": "banda",
+      "description": "Cabecera navy con guilloche trazado, logo, título y tira de microtexto.",
+      "html": "<header class=\"ds-banda\"><svg class=\"ds-guilloche\" viewBox=\"0 0 600 160\" preserveAspectRatio=\"xMidYMid slice\" aria-hidden=\"true\"><g><path d=\"M0,70 C100,30 200,110 300,70 S500,30 600,70\"/><path d=\"M0,76 C100,36 200,116 300,76 S500,36 600,76\"/><path d=\"M0,82 C100,42 200,122 300,82 S500,42 600,82\"/><path d=\"M0,88 C100,48 200,128 300,88 S500,48 600,88\"/></g><circle cx=\"500\" cy=\"70\" r=\"52\" class=\"ds-ros\"/><circle cx=\"500\" cy=\"70\" r=\"34\" class=\"ds-ros\"/></svg><div class=\"ds-banda-in\"><p class=\"ds-portal\">Consulta oficial<span>Perú</span></p><h1>Validación de certificados</h1><p class=\"ds-bajada\">Comprueba que un certificado emitido por IQC es auténtico y si sigue vigente.</p></div></header><div class=\"ds-micro\" aria-hidden=\"true\">IQC PERÚ · REGISTRO OFICIAL DE CERTIFICADOS · VALIDACIÓN EN LÍNEA · IQC PERÚ · REGISTRO OFICIAL DE CERTIFICADOS · VALIDACIÓN EN LÍNEA · IQC PERÚ · REGISTRO OFICIAL DE CERTIFICADOS ·</div>",
+      "css": ":host{--navy:#00192d;--navy-2:#0a2740;--tinta:#1a1a2e;--blanco:#fff;--papel:#f2f4f7;--linea:#d5dbe4;--linea-suave:#e6eaf0;--texto-2:#434b5e;--etiqueta:#59627a;--foco-banda:#9fb0ff;--ok:#0d6b44;--ok-fondo:#e8f4ee;--mal:#b42318;--mal-fondo:#fbeceb;--alerta:#9a5800;--neutro:#4a5568;--sans:'Public Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--serif:'Source Serif 4',Georgia,serif;--radio:6px;--salida:cubic-bezier(.16,1,.3,1);--sombra-hoja:0 1px 2px rgb(0 25 45 / .06),0 12px 32px -12px rgb(0 25 45 / .22);} .ds-banda{position:relative;overflow:hidden;isolation:isolate;background:var(--navy);color:var(--blanco);font-family:var(--sans);} .ds-guilloche{position:absolute;inset:0;width:100%;height:100%;z-index:-1;-webkit-mask-image:linear-gradient(90deg,rgb(0 0 0 / .35) 0%,#000 55%);mask-image:linear-gradient(90deg,rgb(0 0 0 / .35) 0%,#000 55%);} .ds-guilloche path,.ds-guilloche circle{fill:none;vector-effect:non-scaling-stroke;} .ds-guilloche path{stroke:rgb(170 196 228 / .13);stroke-width:.7;} .ds-guilloche .ds-ros{stroke:rgb(170 196 228 / .22);stroke-width:.6;} .ds-banda-in{padding:20px 24px 32px;} .ds-portal{margin:0 0 24px;display:flex;flex-direction:column;align-items:flex-end;font-size:14px;font-weight:600;} .ds-portal span{font-weight:400;color:#b9c6d8;} .ds-banda h1{margin:0;font-size:clamp(1.75rem,1.2rem + 2.2vw,2.6rem);line-height:1.12;font-weight:700;letter-spacing:-.02em;} .ds-bajada{margin:12px 0 0;max-width:60ch;color:#c9d4e3;font-size:1.0625rem;} .ds-micro{background:var(--navy-2);color:#8ea4bf;white-space:nowrap;overflow:hidden;font:600 7.5px/14px var(--sans);letter-spacing:.18em;user-select:none;border-top:1px solid rgb(255 255 255 / .06);}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Papel de seguridad",
+    "overview": "**Creative North Star: \"Papel de seguridad\"**\n\nEl portal se comporta como un documento de seguridad, no como una página de marketing. Arriba hay una banda azul IQC con guilloche de trazo fino (ondas senoidales y dos rosetas hipotrocoides dibujadas en SVG) y debajo una tira de microtexto con el nombre de la marca y «REGISTRO OFICIAL DE CERTIFICADOS» repetido. Todo lo demás descansa sobre papel blanco azulado. La respuesta a la consulta es una hoja blanca con marco doble y el estado del certificado aparece como un sello circular estampado con tinta, nunca como una etiqueta de color.\n\nLa densidad es de registro oficial: pocas superficies, datos en rejilla de definición (etiqueta arriba, valor abajo), una sola acción principal por estado. La autoridad se consigue con materiales propios del papel de seguridad (línea fina, marco, sello, microtexto) y no con adorno. El color de estado vive solo en la tinta del sello y en el veredicto; el resto es navy y tinta sobre papel.\n\nLa única pieza en movimiento con intención es el sello: se estampa una vez al llegar el resultado. Fuera de eso, el sistema está quieto.",
+    "keyCharacteristics": [
+      "Banda navy con guilloche trazado (líneas de 0,6–0,7 px, opacidad 13–22 %) y una máscara que lo desvanece hacia la izquierda, donde va el texto.",
+      "Tira de microtexto en mayúsculas espaciadas bajo la banda, decorativa y oculta a lectores de pantalla.",
+      "Hoja de resultado con marco doble: borde exterior de línea y un segundo filete interior a 8 px.",
+      "Sello SVG de 120 px con texto en anillo, roseta de trama interior e icono de escudo, en la tinta del estado y girado −4°.",
+      "Public Sans para toda la interfaz; Source Serif 4 seminegrita reservada al nombre del titular.",
+      "Hoja imprimible: la impresión produce una constancia limpia, sin banda de color ni formulario."
+    ],
+    "rules": [
+      {
+        "name": "La Regla de la Tinta de Sello",
+        "body": "Los colores de estado solo tiñen el sello y el veredicto de la hoja (y el aviso de error). Nunca rellenan la hoja, un botón ni una franja: el estado se estampa, no se pinta.",
+        "section": "colors"
+      },
+      {
+        "name": "La Regla de los Tres Obligatorios",
+        "body": "Navy, tinta y blanco son los colores de marca exigidos; cualquier gris nuevo debe derivarse del navy (tono azul frío, croma bajo), como papel y líneas.",
+        "section": "colors"
+      },
+      {
+        "name": "La Regla de la Firma Única",
+        "body": "Source Serif 4 se usa solo para el nombre del titular. Si aparece en un título de sección, un botón o un dato, deja de significar «esto es lo inscrito».",
+        "section": "typography"
+      },
+      {
+        "name": "La Regla de la Cifra Tabular",
+        "body": "Todo código o número de documento se compone con cifras tabulares para que se pueda cotejar carácter por carácter con el papel.",
+        "section": "typography"
+      },
+      {
+        "name": "La Regla de la Hoja Única",
+        "body": "Solo la hoja de resultado (y su versión de carga) proyecta sombra. Avisos, guía y pie son planos; si algo más necesita destacar, usa filete, no sombra.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** comunicar el estado con el sello en su tinta (ok, mal, alerta, neutro) y repetirlo en palabra en el veredicto; el color nunca va solo.",
+      "**Do** dibujar el guilloche con trazos SVG reales de 0,6–0,7 px y opacidad baja (13–22 %), con `vector-effect: non-scaling-stroke`.",
+      "**Do** reservar Source Serif 4 600 para el nombre del titular.",
+      "**Do** mantener una sola acción primaria navy por hoja y usar el secundario blanco con borde para lo demás.",
+      "**Do** componer códigos y documentos con cifras tabulares (y cero con barra en códigos).",
+      "**Do** usar el azul de foco claro (#9fb0ff) para el foco sobre la banda y el navy sobre papel.",
+      "**Do** respetar `prefers-reduced-motion`: sin estampado, sin brillo de carga, sin giro.",
+      "**Do** cuidar la versión impresa: constancia en blanco, filete navy bajo la cabecera, alcance completo, hoja sin cortes."
+    ],
+    "donts": [
+      "**Don't** rellenar la hoja, los botones o fondos grandes con las tintas de estado; el estado se estampa en el sello.",
+      "**Don't** sustituir el guilloche por degradados, fotos o texturas rasterizadas.",
+      "**Don't** usar la serif en títulos de sección, botones, etiquetas o datos.",
+      "**Don't** poner información necesaria en el microtexto; es un elemento de seguridad decorativo.",
+      "**Don't** añadir sombras a avisos, guía o pie; solo la hoja de resultado se apoya sobre el papel.",
+      "**Don't** introducir grises neutros o cálidos; los neutros se derivan del navy.",
+      "**Don't** redondear más allá de 6 px ni usar contenedores circulares fuera del sello (y su marcador de carga)."
+    ]
+  }
+}

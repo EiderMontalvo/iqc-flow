@@ -95,4 +95,15 @@ class AnalizadorLegadoTest {
   private static ClientePlan cliente(String id) {
     return plan.clientes().stream().filter(c -> c.idLegado().equals(id)).findFirst().orElseThrow();
   }
+
+  @Test
+  void laMarcaSaleDelPaisDelCertificadoYElPaisDelClienteDeSuRuc() {
+    // Empresa peruana con un certificado marcado "Ecuador" en la plataforma anterior: se muestra como IQC Ecuador
+    assertThat(AnalizadorLegado.marca(true, "PE")).isEqualTo("EC");
+    // Cliente ecuatoriano con un certificado marcado "Perú": se muestra como IQC Perú
+    assertThat(AnalizadorLegado.marca(false, "EC")).isEqualTo("PE");
+    // Si coinciden, se usa la del cliente
+    assertThat(AnalizadorLegado.marca(false, "PE")).isNull();
+    assertThat(AnalizadorLegado.marca(true, "EC")).isNull();
+  }
 }

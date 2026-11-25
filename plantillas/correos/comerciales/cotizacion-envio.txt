@@ -1,0 +1,20 @@
+Asunto: Propuesta {{numero}} – {{tipoServicio}} {{normas}} – {{razonSocial}}
+
+Estimado(a) {{contactoNombre}}:
+
+Gracias por su interés en certificar con {{marcaNombre}}. Adjuntamos nuestra propuesta {{numero}} para la {{tipoServicio}} en {{normas}}, que considera {{numeroSedes}} sede(s) y el alcance indicado en su solicitud.
+
+Resumen:
+- Días auditor: {{diasAuditor}}
+- Inversión: {{moneda}} {{total}} (incluye {{nombreImpuesto}})
+- Condiciones de pago: {{condicionesPago}}
+- Validez de la propuesta: {{validezDias}} días, hasta el {{fechaVencimiento}}
+
+Si tiene alguna consulta o necesita ajustar el alcance o las sedes, con gusto lo revisamos.
+
+Atentamente,
+
+{{responsableNombre}}
+{{marcaNombre}}
+{{responsableCorreo}} · {{responsableTelefono}}
+{{marcaSitioWeb}}

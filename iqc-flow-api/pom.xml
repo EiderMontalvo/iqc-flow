@@ -22,6 +22,8 @@
     <spring-modulith.version>2.1.2</spring-modulith.version>
     <zxing.version>3.5.3</zxing.version>
     <poi.version>5.4.1</poi.version>
+    <pdfbox.version>3.0.8</pdfbox.version>
+    <awssdk.version>2.57.5</awssdk.version>
   </properties>
 
   <dependencyManagement>
@@ -93,7 +95,50 @@
       <artifactId>poi-ooxml</artifactId>
       <version>${poi.version}</version>
     </dependency>
+    <!-- correos guardados de Outlook (.msg) -->
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-scratchpad</artifactId>
+      <version>${poi.version}</version>
+    </dependency>
+    <!-- correos guardados .eml (Gmail «Descargar mensaje») y, más adelante, lectura del buzón por IMAP -->
+    <dependency>
+      <groupId>org.eclipse.angus</groupId>
+      <artifactId>angus-mail</artifactId>
+    </dependency>
+    <!-- Sesiones en PostgreSQL: sobreviven a reinicios y se comparten entre varias instancias -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-session-jdbc</artifactId>
+    </dependency>
+    <!-- Almacén de documentos en S3 o compatible (R2, Wasabi, MinIO); solo se usa con iqc.documentos.almacen=S3 -->
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>s3</artifactId>
+      <version>${awssdk.version}</version>
+      <exclusions>
+        <exclusion><groupId>software.amazon.awssdk</groupId><artifactId>netty-nio-client</artifactId></exclusion>
+        <exclusion><groupId>software.amazon.awssdk</groupId><artifactId>apache-client</artifactId></exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>url-connection-client</artifactId>
+      <version>${awssdk.version}</version>
+    </dependency>
+    <!-- Lectura del texto de los PDF de certificados (modo de registro automatizado) -->
+    <dependency>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox</artifactId>
+      <version>${pdfbox.version}</version>
+    </dependency>
 
+    <!-- SDK oficial de Anthropic: análisis de solicitudes con Claude (módulo ia). Sin clave configurada no se usa -->
+    <dependency>
+      <groupId>com.anthropic</groupId>
+      <artifactId>anthropic-java</artifactId>
+      <version>3.3.0</version>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>

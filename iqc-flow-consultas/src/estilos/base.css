@@ -1,0 +1,37 @@
+/* Reinicio, elementos base, botones y la entrada escalonada de la portada */
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--fondo); color: var(--texto);
+  font: 400 16px/1.55 var(--fuente); font-feature-settings: "tnum" 0;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  caret-color: var(--enlace);
+}
+::selection { background: #cdd3ff; color: var(--texto); }
+a { color: var(--enlace); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 2px solid var(--iqc-azul); outline-offset: 2px; border-radius: 3px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+p { margin: 0; text-wrap: pretty; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+.pagina { min-height: 100dvh; display: flex; flex-direction: column; }
+
+.boton {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 20px;
+  border-radius: var(--radio-sm); border: 1px solid transparent; font: 600 1rem var(--fuente); cursor: pointer; text-decoration: none;
+  transition: background-color .18s var(--salida), border-color .18s var(--salida), transform .12s var(--salida);
+}
+.boton:active { transform: translateY(1px); }
+.boton:disabled { cursor: progress; opacity: .85; }
+
+.gira { animation: gira .9s linear infinite; }
+@keyframes gira { to { transform: rotate(360deg); } }
+
+/* Entrada al cargar: título, bajada y formulario aparecen en secuencia */
+[data-enter] > * { animation: entrar .7s var(--salida) both; }
+[data-enter] > :nth-child(2) { animation-delay: .08s; }
+[data-enter] > :nth-child(3) { animation-delay: .16s; }
+[data-enter] > :nth-child(n+4) { animation-delay: .24s; }
+@keyframes entrar { from { opacity: 0; transform: translateY(14px); } }

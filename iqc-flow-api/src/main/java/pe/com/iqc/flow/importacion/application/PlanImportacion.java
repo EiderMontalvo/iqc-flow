@@ -31,7 +31,9 @@ public record PlanImportacion(
 
   public record CertificadoPlan(String idLegado, String norma, String edicion, String codigo, String estado,
       int revisionAlcance, int ciclo, Integer anioDecision, LocalDate fechaOtorgamiento, LocalDate fechaEmision,
-      LocalDate fechaExpiracion, String url, boolean emitidoPorIndia, String alcance, List<QrPlan> qrs) {
+      LocalDate fechaExpiracion, String url, boolean emitidoPorIndia, String alcance, List<QrPlan> qrs,
+      /**marca elegida por el campo país del certificado; nula si es la del país del cliente*/
+      String paisMarca) {
   }
 
   public record QrPlan(String idQr, String encriptacionId, boolean activo, Instant registradoEn) {

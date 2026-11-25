@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="es-PE">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="description" content="Validación oficial de certificados empresariales y personales." />
+  <link rel="icon" type="image/png" href="/logo-iqc.png" />
+  <!-- El logo se pide de inmediato, en paralelo con el JavaScript: así ya está listo cuando React dibuja la cabecera -->
+  <link rel="preload" as="image" href="/logo-iqc-horizontal.png" fetchpriority="high" />
+  <!-- Fondo negro desde el primer instante, antes de que carguen los estilos y React (evita un destello claro) -->
+  <style>html { background: #000; }</style>
+  <title>Validación de certificados</title>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+</html>

@@ -21,6 +21,10 @@ public class PublicacionCertificado {
   @Column(length = 64)
   private String huella;
 
+  /**base (país de marca) donde está publicado; si cambia, se retira de la anterior*/
+  @Column(name = "pais_publicado", length = 2)
+  private String paisPublicado;
+
   @Column(name = "publicado_en")
   private Instant publicadoEn;
 
@@ -38,8 +42,9 @@ public class PublicacionCertificado {
 
   public PublicacionCertificado(UUID certificadoId) { this.certificadoId = certificadoId; }
 
-  public void publicado(String huella, Instant ahora) {
+  public void publicado(String huella, String pais, Instant ahora) {
     this.huella = huella;
+    this.paisPublicado = pais;
     this.publicadoEn = ahora;
     this.ultimoIntentoEn = ahora;
     this.intentosFallidos = 0;
@@ -54,6 +59,7 @@ public class PublicacionCertificado {
 
   public UUID getCertificadoId() { return certificadoId; }
   public String getHuella() { return huella; }
+  public String getPaisPublicado() { return paisPublicado; }
   public Instant getPublicadoEn() { return publicadoEn; }
   public int getIntentosFallidos() { return intentosFallidos; }
   public String getUltimoError() { return ultimoError; }

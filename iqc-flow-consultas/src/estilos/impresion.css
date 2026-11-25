@@ -1,0 +1,20 @@
+/* Impresión: la constancia de la consulta, en blanco y negro y sin elementos interactivos */
+
+/* ---------- Impresión: la constancia de la consulta ---------- */
+
+@media print {
+  body { background: #fff; }
+  .banda { background: #fff; color: var(--texto); border-bottom: 2px solid var(--iqc-navy); }
+  .fondo, .buscador, .nueva, .bajada, .acciones, .visor { display: none; }
+  .banda.compacta h1 { position: static; width: auto; height: auto; clip-path: none; }
+  .marca img { filter: invert(1) brightness(.2); height: 40px; }
+  .sitio { display: none; }
+  .barra { margin-bottom: 12px; }
+  .banda h1 { font-size: 20pt; }
+  .hoja { box-shadow: none; break-inside: avoid; }
+  .hoja .sello { animation: none; }
+  .pie { background: #fff; color: var(--texto); }
+  .pie-marca b, .pie a { color: var(--texto); }
+}
+
+@media print { .alcance.recortado { display: block; -webkit-line-clamp: unset; overflow: visible; } .mostrar { display: none; } }

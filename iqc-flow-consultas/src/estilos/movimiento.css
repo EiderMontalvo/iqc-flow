@@ -1,0 +1,8 @@
+/* Reducir movimiento: se detienen todas las animaciones. Los selectores deben igualar la especificidad de los que animan */
+
+@media (prefers-reduced-motion: reduce) {
+  [data-enter] > *, .fondo.portada .trazo, .fondo.portada .relleno, .fondo .luz { animation: none; }
+  .toast { animation: none; }
+  .fondo .luz { display: none; }
+  .hoja .sello, .lineas span, .gira { animation: none; }
+}

@@ -26,7 +26,9 @@ public interface ImportacionCertificaciones {
   /**estado: EMITIDO, SUSPENDIDO o RETIRADO; anioDecision nulo para los certificados de India*/
   record CertificadoLegado(String idLegado, String norma, String edicion, String codigo, String estado,
       int revisionAlcance, int ciclo, Integer anioDecision, LocalDate fechaOtorgamiento, LocalDate fechaEmision,
-      LocalDate fechaExpiracion, String urlDocumento, boolean emitidoPorIndia, String alcance, List<QrLegado> qrs) {
+      LocalDate fechaExpiracion, String urlDocumento, boolean emitidoPorIndia, String alcance, List<QrLegado> qrs,
+      /**marca con que se muestra; nula para usar la del país del cliente*/
+      String paisMarca) {
   }
 
   /**QR ya impreso: la consulta pública abre consultas.iqcperu.com/{encriptacionId}*/

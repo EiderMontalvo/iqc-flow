@@ -22,7 +22,8 @@ class FiltroLimiteInicioSesion extends OncePerRequestFilter {
   @Override
   protected boolean shouldNotFilter(HttpServletRequest solicitud) {
     return !("POST".equals(solicitud.getMethod())
-        && ConfiguracionSeguridad.RUTA_INICIO_SESION.equals(solicitud.getRequestURI()));
+        && (ConfiguracionSeguridad.RUTA_INICIO_SESION.equals(solicitud.getRequestURI())
+            || ConfiguracionSeguridad.RUTA_OLVIDO_CONTRASENA.equals(solicitud.getRequestURI())));
   }
 
   @Override
@@ -33,6 +34,8 @@ class FiltroLimiteInicioSesion extends OncePerRequestFilter {
           "Demasiados intentos de inicio de sesión desde esta dirección. Intenta nuevamente más tarde."));
       return;
     }
+    // Cada solicitud de «olvidé mi contraseña» cuenta como un intento: no se puede usar para inundar de avisos
+    if (ConfiguracionSeguridad.RUTA_OLVIDO_CONTRASENA.equals(solicitud.getRequestURI())) limitador.registrarFallo(solicitud.getRemoteAddr());
     cadena.doFilter(solicitud, respuesta);
   }
 }
