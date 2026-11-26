@@ -14,8 +14,13 @@ class PoliticaContrasenaTest {
   }
 
   @Test
-  void rechazaMenosDeDoceCaracteres() {
-    assertThatThrownBy(() -> PoliticaContrasena.validar("Corta-123", "ana@iqcperu.com"))
+  void aceptaExactamenteLaLongitudMinima() {
+    assertThatCode(() -> PoliticaContrasena.validar("Cuarzo-8", "ana@iqcperu.com")).doesNotThrowAnyException();
+  }
+
+  @Test
+  void rechazaMenosDeLaLongitudMinima() {
+    assertThatThrownBy(() -> PoliticaContrasena.validar("Corta-1", "ana@iqcperu.com"))
         .isInstanceOf(ReglaNegocioException.class)
         .hasFieldOrPropertyWithValue("codigo", "CONTRASENA_DEBIL");
   }

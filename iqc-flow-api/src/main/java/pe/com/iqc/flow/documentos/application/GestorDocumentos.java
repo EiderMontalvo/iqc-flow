@@ -64,6 +64,17 @@ public class GestorDocumentos implements ServicioDocumentos {
   @Transactional
   @PreAuthorize("hasAuthority('documentos:subir')")
   public DocumentoReferencia subir(CategoriaDocumento categoria, String nombreOriginal, byte[] contenido) {
+    return guardar(categoria, nombreOriginal, contenido);
+  }
+
+  /**mismas validaciones que {@link #subir}, para documentos que genera el sistema; quien lo usa aplica sus propios permisos*/
+  @Override
+  @Transactional
+  public DocumentoReferencia guardarGenerado(CategoriaDocumento categoria, String nombre, byte[] contenido) {
+    return guardar(categoria, nombre, contenido);
+  }
+
+  private DocumentoReferencia guardar(CategoriaDocumento categoria, String nombreOriginal, byte[] contenido) {
     UsuarioAutenticado actor = actorActual.requerido();
     if (contenido == null || contenido.length == 0) {
       throw new ReglaNegocioException("ARCHIVO_VACIO", "Adjunta un archivo con contenido.");

@@ -60,8 +60,9 @@ class AnalizadorTextoCertificadoTest {
         Alcance: Servicios de prueba.
         Subdivisión                            : 70, 59 Fecha de  emisi ó n   inicial    : 18.11.2026
         Clase                                  : 7000, 5910 Fec ha de 1era vi gilan c i a    : 17.11.2027
-        Procesos no aplicables   : NA Fecha de 2da vig i lanci a   : 17.11.2028
+        Procesos no aplicables   : 8.3 Fecha de 2da vig i lanci a   : 17.11.2028
         Número de  c e r t i f i c a do : PER/QE/JAS-C0001/0001 Certificado válido hast a    : 17.11.2029
+        Anexos    : NA
         QF-12 Rev 01 date 28.10.2025
         """);
     assertThat(r.formato()).isEqualTo(Formato.IQC_GLOBAL);
@@ -75,6 +76,8 @@ class AnalizadorTextoCertificadoTest {
     assertThat(e.limiteVigilancia1()).isEqualTo(LocalDate.of(2027, 11, 17));
     assertThat(e.fechaExpiracion()).isEqualTo(LocalDate.of(2029, 11, 17));
     assertThat(e.subdivision()).isEqualTo("70, 59");
+    assertThat(e.procesosNoAplicables()).isEqualTo("8.3");
+    assertThat(e.anexos()).isEqualTo("NA");
   }
 
   @Test

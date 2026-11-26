@@ -1,0 +1,8 @@
+P052-Roman.ttf y P052-Bold.ttf: URW++ P052 (clon de Palatino, de urw-base35-fonts), convertidas de OpenType/CFF a TrueType
+con fontTools (sin cambiar los contornos) para poder incrustarlas con PDFBox. Se usan en el certificado de IQC Global en
+lugar de Book Antiqua, que no es libre.
+
+Licencia: AGPL-3.0-only con la excepción de fuentes PS-or-PDF-font-exception-20170817 de URW++. Incrustar la fuente en un
+documento PDF, como hace el generador, no hace que el documento quede cubierto por la AGPL. Este archivo de fuente se
+redistribuye sin otro cambio que la conversión de formato. Texto de la excepción y de la licencia:
+https://github.com/ArtifexSoftware/urw-base35-fonts (COPYING)

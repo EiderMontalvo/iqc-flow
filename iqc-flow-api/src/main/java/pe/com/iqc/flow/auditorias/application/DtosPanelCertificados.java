@@ -6,11 +6,13 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import pe.com.iqc.flow.auditorias.ImpresionCertificados;
 import pe.com.iqc.flow.auditorias.application.DtosExpedientes.Referencia;
 import pe.com.iqc.flow.auditorias.domain.Certificado;
 import pe.com.iqc.flow.auditorias.domain.TipoServicio;
@@ -57,6 +59,11 @@ public final class DtosPanelCertificados {
       boolean tienePdf,
       UUID documentoPdfId,
       String urlDocumentoLegado,
+      /**datos del certificado de IQC Global; nulos en los demás esquemas*/
+      String subdivision,
+      String clase,
+      String procesosNoAplicables,
+      String anexos,
       long version) {
   }
 
@@ -75,6 +82,9 @@ public final class DtosPanelCertificados {
       LocalDate limiteVigilancia1,
       LocalDate limiteVigilancia2,
       Boolean emitidoPorIndia,
+      /**sector del titular, igual en todas las normas de la solicitud; solo se guarda con el esquema IQC_GLOBAL*/
+      @Size(max = 40) @Pattern(regexp = ImpresionCertificados.PATRON_SECTOR) String subdivision,
+      @Size(max = 40) @Pattern(regexp = ImpresionCertificados.PATRON_SECTOR) String clase,
       @NotBlank @Size(max = 500) String motivo,
       @NotEmpty @Valid List<CertificadoDirecto> certificados) {
   }
@@ -85,7 +95,10 @@ public final class DtosPanelCertificados {
       @NotBlank @Size(max = 60) String codigo,
       @Min(1) @Max(9) Integer revisionAlcance,
       @Min(1) @Max(9) Integer ciclo,
-      UUID documentoPdfId) {
+      UUID documentoPdfId,
+      /**por norma; solo se guardan con el esquema IQC_GLOBAL*/
+      @Size(max = 60) @Pattern(regexp = ImpresionCertificados.PATRON_PROCESOS) String procesosNoAplicables,
+      @Size(max = 200) String anexos) {
   }
 
   public record RegistroDirectoRespuesta(UUID expedienteId, String expedienteCodigo, List<CertificadoPanel> certificados,

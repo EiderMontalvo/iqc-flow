@@ -69,6 +69,19 @@ public class Certificado extends EntidadBase {
   @Column(length = 4000)
   private String alcance;
 
+  /**datos del certificado de IQC Global (QF-12); nulos en los demás esquemas*/
+  @Column(length = 40)
+  private String subdivision;
+
+  @Column(length = 40)
+  private String clase;
+
+  @Column(name = "procesos_no_aplicables", length = 60)
+  private String procesosNoAplicables;
+
+  @Column(length = 200)
+  private String anexos;
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 15)
   private Estado estado;
@@ -224,9 +237,14 @@ public class Certificado extends EntidadBase {
   /**certificado registrado directamente en el panel, ya emitido, con el código que figura en el documento*/
   public static Certificado registroDirecto(Expediente expediente, NormaExpediente norma, String codigo,
       boolean emitidoPorIndia, int revisionAlcance, int ciclo, Integer anioDecision, String alcance,
-      LocalDate fechaOtorgamiento, LocalDate fechaEmision, LocalDate fechaExpiracion) {
+      LocalDate fechaOtorgamiento, LocalDate fechaEmision, LocalDate fechaExpiracion, String subdivision, String clase,
+      String procesosNoAplicables, String anexos) {
     Certificado c = new Certificado(expediente, norma, codigo);
     c.estado = Estado.EMITIDO;
+    c.subdivision = subdivision;
+    c.clase = clase;
+    c.procesosNoAplicables = procesosNoAplicables;
+    c.anexos = anexos;
     c.emitidoPorIndia = emitidoPorIndia;
     c.revisionAlcance = revisionAlcance;
     c.ciclo = ciclo;
@@ -356,6 +374,10 @@ public class Certificado extends EntidadBase {
   public int getRevisionAlcance() { return revisionAlcance; }
   public int getCiclo() { return ciclo; }
   public String getAlcance() { return alcance; }
+  public String getSubdivision() { return subdivision; }
+  public String getClase() { return clase; }
+  public String getProcesosNoAplicables() { return procesosNoAplicables; }
+  public String getAnexos() { return anexos; }
   public Estado getEstado() { return estado; }
   public UUID getDecisionId() { return decisionId; }
   public UUID getReemplazaId() { return reemplazaId; }
@@ -369,6 +391,7 @@ public class Certificado extends EntidadBase {
   public LocalDate getFechaEmision() { return fechaEmision; }
   public LocalDate getFechaExpiracion() { return fechaExpiracion; }
   public String getVersionDocumento() { return versionDocumento; }
+  public int getNumeroVersion() { return numeroVersion; }
   public UUID getTokenVerificacion() { return tokenVerificacion; }
   public UUID getTraduccionDocumentoId() { return traduccionDocumentoId; }
   public Instant getEntregadoEn() { return entregadoEn; }

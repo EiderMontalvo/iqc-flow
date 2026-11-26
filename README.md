@@ -86,7 +86,7 @@ $env:IQC_MASTER_CONTRASENA = "Una-Frase-Temporal-Larga"
 ```
 
 - Crea la organización IQC Perú y el usuario con el rol `MASTER`. Queda registrado en la bitácora.
-- La contraseña debe tener al menos 12 caracteres. Se exige cambiarla en el primer inicio de sesión.
+- La contraseña debe tener al menos 8 caracteres. Se exige cambiarla en el primer inicio de sesión.
 - Si ya existe un usuario `MASTER`, no hace nada.
 - Después cierra esa consola o elimina las variables: `Remove-Item Env:IQC_MASTER_*`.
 

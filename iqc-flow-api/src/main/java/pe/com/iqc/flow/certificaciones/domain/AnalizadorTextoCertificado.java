@@ -24,7 +24,7 @@ public final class AnalizadorTextoCertificado {
   public record Empresarial(String codigo, String esquema, String titular, String direccion, String normaTexto,
       String normaNombre, String edicion, String alcance, Integer ciclo, LocalDate fechaOtorgamiento,
       LocalDate fechaEmision, LocalDate limiteVigilancia1, LocalDate limiteVigilancia2, LocalDate fechaExpiracion,
-      String subdivision, String clase) {
+      String subdivision, String clase, String procesosNoAplicables, String anexos) {
   }
 
   public record Personal(String codigo, String nombres, String tipoDocumento, String numeroDocumento, String curso,
@@ -110,7 +110,7 @@ public final class AnalizadorTextoCertificado {
     Integer ciclo = entero(grupo(texto, "Ciclo de certificaci[oó]n\\s*Nro\\.?\\s*(\\d+)"));
     Empresarial e = new Empresarial(codigo, esquema, unir(titular), unir(direccion),
         norma.find() ? normaTexto(norma) : null, nombreNorma(texto),
-        edicion(texto), alcance, ciclo, porEtiqueta[0], porEtiqueta[1], porEtiqueta[2], porEtiqueta[3], porEtiqueta[4], null, null);
+        edicion(texto), alcance, ciclo, porEtiqueta[0], porEtiqueta[1], porEtiqueta[2], porEtiqueta[3], porEtiqueta[4], null, null, null, null);
     if (e.fechaOtorgamiento() != null && e.fechaEmision() != null && e.fechaEmision().isBefore(e.fechaOtorgamiento())) {
       avisos.add("En el PDF la fecha de emisión es anterior a la de otorgamiento: revisa ambas antes de registrar.");
     }
@@ -163,7 +163,9 @@ public final class AnalizadorTextoCertificado {
     Matcher norma = NORMA.matcher(texto);
     Empresarial e = new Empresarial(codigo, "IQC_GLOBAL", titular, direccion, norma.find() ? normaTexto(norma) : null,
         nombreNorma(texto), edicion(texto), alcance, null, inicial, emision, vigilancia1, vigilancia2, expiracion,
-        limpio(grupo(texto, "(?:Sub)?divisi[oó]n\\s*:\\s*([0-9, ]+)")), limpio(grupo(texto, "Clase\\s*:\\s*([0-9, ]+)")));
+        limpio(grupo(texto, "(?:Sub)?divisi[oó]n\\s*:\\s*([0-9, ]+)")), limpio(grupo(texto, "Clase\\s*:\\s*([0-9, ]+)")),
+        grupo(texto, "Procesos\\s+no\\s+aplicables\\s*:\\s*(NA\\b|\\d+(?:\\.\\d+)*(?:\\s*[,;]\\s*\\d+(?:\\.\\d+)*)*)"),
+        grupo(texto, "Anexos\\s*:\\s*(NA\\b|\\S+)"));
     if (fechas.size() < 4) avisos.add("Se esperaban 4 fechas (emisión inicial, dos vigilancias y validez); se leyeron " + fechas.size() + ".");
     faltantes(avisos, Map.of("código", e.codigo() == null, "titular", e.titular() == null, "norma", e.normaTexto() == null));
     return e;

@@ -17,6 +17,12 @@ public interface ServicioDocumentos {
   /**contenido del archivo, para procesos del sistema (publicación, QR). No aplica permisos: los aplica quien lo usa*/
   byte[] leerContenido(UUID organizacionId, UUID documentoId);
 
+  /**
+   *guarda un documento que genera el sistema (p. ej. el PDF de un certificado): valida tamaño y formato, calcula la
+   *huella y lo deja en la bitácora, pero no exige documentos:subir; quien lo llama aplica sus propios permisos
+   */
+  DocumentoReferencia guardarGenerado(CategoriaDocumento categoria, String nombre, byte[] contenido);
+
   record DocumentoReferencia(UUID id, CategoriaDocumento categoria, String nombreOriginal, String tipoContenido,
       long tamanoBytes, String sha256, UUID subidoPor, Instant creadoEn) {
   }

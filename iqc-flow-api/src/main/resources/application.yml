@@ -77,6 +77,26 @@ logging:
 
 iqc:
   zona-horaria: America/Lima
+  # IA de la bandeja de correo. La clave es la variable de entorno ANTHROPIC_API_KEY (nunca va aquí). Un modelo ligero para clasificar y
+  # resumir, y uno mejor para redactar a un cliente y para contestar preguntas sobre varios correos
+  ia:
+    modelo-correos-ligero: claude-haiku-5-5
+    modelo-correos: claude-sonnet-5-5
+  # Correo saliente: cuentas con nombre. El servidor y el puerto van aquí; el usuario y la clave de cada una solo vienen de variables
+  # de entorno (IQC_CORREO_CUENTAS_<NOMBRE>_USUARIO y _CLAVE). Una cuenta sin credenciales queda apagada
+  correo:
+    cuentas:
+      administracion: { host: mail.iqcperu.net, puerto: 587, imap-host: mail.iqcperu.net, imap-puerto: 993 }
+      comercial: { host: mail.iqcperu.net, puerto: 587, imap-host: mail.iqcperu.net, imap-puerto: 993 }
+      gmail: { host: smtp.gmail.com, puerto: 587, imap-host: imap.gmail.com, imap-puerto: 993 }
+    # Bandeja: cada cuánto se revisan los buzones (solo lectura: no marca, mueve ni borra nada), hasta cuántos días atrás se importa
+    # la primera vez y cuántos mensajes se traen por cuenta y pasada
+    sincronizacion:
+      habilitada: true
+      intervalo: PT3M
+      ventana-inicial-dias: 14
+      maximo-por-pasada: 100
+      organizacion: IQC_PERU
   seguridad:
     intentos-maximos: 5
     duracion-bloqueo: 15m
@@ -102,6 +122,18 @@ iqc:
       clave-acceso: ${IQC_S3_CLAVE_ACCESO:}
       clave-secreta: ${IQC_S3_CLAVE_SECRETA:}
       ruta-estilo: ${IQC_S3_RUTA_ESTILO:false}
+  # Datos fijos de los certificados generados desde plantilla. La firma es la imagen de resources/certificados/imagenes.
+  # acreditaciones: número con el que SAE o INACAL acreditan a IQC, por esquema y norma (si falta, la línea no se imprime)
+  certificados:
+    firmante:
+      titulo: Lic.
+      nombre: Fiorella Tenorio Alfaro
+      cargo: Gerente General
+      empresa: IQC PERU S.A.C.
+    acreditaciones:
+      SAE:
+        ISO_37001: SAE CSGAS 24-001
+        ISO_14001: SAE CSA 24-001
   # Bases públicas de consulta, una por país de marca (ADR-043). Solo las escribe el panel. Perú la lee
   # consultas.iqcperu.com; Ecuador, Colombia y Panamá, el portal único consultas.iqc-latam.com. En desarrollo son
   # esquemas de la base local; en producción, bases propias (ver README)

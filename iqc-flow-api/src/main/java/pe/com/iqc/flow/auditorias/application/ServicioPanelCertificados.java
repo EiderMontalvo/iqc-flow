@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import org.apache.poi.ss.usermodel.Cell;
@@ -34,6 +35,7 @@ import pe.com.iqc.flow.auditorias.application.DtosPanelCertificados.CertificadoP
 import pe.com.iqc.flow.auditorias.application.DtosPanelCertificados.FiltroCertificados;
 import pe.com.iqc.flow.auditorias.application.DtosPanelCertificados.RegistroDirectoRespuesta;
 import pe.com.iqc.flow.auditorias.application.DtosPanelCertificados.SolicitudMarca;
+import pe.com.iqc.flow.auditorias.ImpresionCertificados;
 import pe.com.iqc.flow.auditorias.application.DtosPanelCertificados.SolicitudPdf;
 import pe.com.iqc.flow.auditorias.application.DtosPanelCertificados.SolicitudRegistroDirecto;
 import pe.com.iqc.flow.auditorias.application.DtosPanelCertificados.TitularResumen;
@@ -42,6 +44,7 @@ import pe.com.iqc.flow.auditorias.application.DtosPanelCertificados.VersionPdf;
 import pe.com.iqc.flow.auditorias.domain.Auditoria;
 import pe.com.iqc.flow.auditorias.domain.Certificado;
 import pe.com.iqc.flow.auditorias.domain.CertificadoPdf;
+import pe.com.iqc.flow.auditorias.domain.CicloCertificacion;
 import pe.com.iqc.flow.auditorias.domain.Expediente;
 import pe.com.iqc.flow.auditorias.domain.HistorialExpediente;
 import pe.com.iqc.flow.auditorias.domain.NormaExpediente;
@@ -76,7 +79,7 @@ import pe.com.iqc.flow.seguimientos.ProgramadorTareas.NuevaTareaAutomatica;
  *y retiros se registran como decisiones del expediente (ServicioDecisiones), con su checklist y control de imparcialidad
  */
 @Service
-public class ServicioPanelCertificados {
+public class ServicioPanelCertificados implements ImpresionCertificados {
   private static final int DIAS_POR_VENCER = 90;
   private static final int MAXIMO_EXPORTACION = 20_000;
   private static final String PDF = "application/pdf";
@@ -244,6 +247,8 @@ public class ServicioPanelCertificados {
       servicioCertificados.exigirCodigoLibre(org, codigo(c.codigo()), norma, null);
     }
     boolean india = s.emitidoPorIndia() != null ? s.emitidoPorIndia() : "IQC_GLOBAL".equals(esquema);
+    // los datos de sector solo existen en el certificado de IQC Global: con otro esquema se descartan en vez de guardar basura
+    boolean global = "IQC_GLOBAL".equals(esquema);
     TipoServicio servicio = s.tipoServicio() != null ? s.tipoServicio() : TipoServicio.CERTIFICACION_INICIAL;
     UUID responsable = cliente.responsableId() != null ? cliente.responsableId() : actor.id();
     Instant ahora = Instant.now(reloj);
@@ -259,7 +264,8 @@ public class ServicioPanelCertificados {
       Certificado c = certificados.saveAndFlush(Certificado.registroDirecto(e, norma, codigo(d.codigo()), india,
           d.revisionAlcance() != null ? d.revisionAlcance() : 1, d.ciclo() != null ? d.ciclo() : 1,
           india ? null : s.fechaOtorgamiento().getYear(), alcance, s.fechaOtorgamiento(), s.fechaEmision(),
-          s.fechaExpiracion()));
+          s.fechaExpiracion(), global ? vacioANulo(s.subdivision()) : null, global ? vacioANulo(s.clase()) : null,
+          global ? vacioANulo(d.procesosNoAplicables()) : null, global ? vacioANulo(d.anexos()) : null));
       servicioCertificados.sustituirAnteriores(c);
       if (d.documentoPdfId() != null) registrarPdf(org, c, d.documentoPdfId(), "Registro directo", actor.id(), ahora);
       creados.add(c);
@@ -344,6 +350,27 @@ public class ServicioPanelCertificados {
     return respuestas(org, List.of(c), DIAS_POR_VENCER).get(0);
   }
 
+  @Override
+  @Transactional(readOnly = true)
+  public Optional<DatosImpresion> datos(UUID organizacionId, UUID certificadoId) {
+    return certificados.findByIdAndOrganizacionId(certificadoId, organizacionId).map(c -> {
+      var esquema = catalogos.esquema(c.getEsquemaCodigo());
+      List<LocalDate> limites = c.getFechaOtorgamiento() == null || esquema.isEmpty() ? List.of()
+          : CicloCertificacion.calcular(c.getFechaOtorgamiento(), esquema.get().aniosCiclo(),
+              esquema.get().vigilanciasPorCiclo()).limitesVigilancia();
+      return new DatosImpresion(c.getId(), c.getClienteId(), c.getCodigo(), c.getEsquemaCodigo(), c.getNormaCodigo(),
+          c.getEdicion(), c.getAlcance(), c.getEstado().name(), c.getCiclo(), c.getNumeroVersion(), c.getFechaOtorgamiento(),
+          c.getFechaEmision(), c.getFechaExpiracion(), limites, c.getPaisMarca(), c.getSubdivision(), c.getClase(),
+          c.getProcesosNoAplicables(), c.getAnexos());
+    });
+  }
+
+  @Override
+  @Transactional
+  public void registrarPdfGenerado(UUID organizacionId, UUID certificadoId, UUID documentoId, UUID actorId, String motivo) {
+    registrarPdf(organizacionId, cargar(organizacionId, certificadoId), documentoId, motivo, actorId, Instant.now(reloj));
+  }
+
   private void registrarPdf(UUID org, Certificado c, UUID documentoId, String motivo, UUID actor, Instant ahora) {
     DocumentoReferencia d = documentos.exigir(org, documentoId, CategoriaDocumento.CERTIFICADO_PDF);
     if (!PDF.equals(d.tipoContenido())) {
@@ -411,9 +438,12 @@ public class ServicioPanelCertificados {
           c.getEsquemaCodigo(), c.isEmitidoPorIndia(), c.getEstado(), vigencia(c.getFechaExpiracion(), hoy, dias), titular,
           paisMarca, c.getPaisMarca() != null, c.getAlcance(), c.getFechaOtorgamiento(), c.getFechaEmision(),
           c.getFechaExpiracion(), c.getDocumentoPdfId() != null || c.getUrlDocumentoLegado() != null,
-          c.getDocumentoPdfId(), c.getUrlDocumentoLegado(), c.getVersion());
+          c.getDocumentoPdfId(), c.getUrlDocumentoLegado(), c.getSubdivision(), c.getClase(), c.getProcesosNoAplicables(),
+          c.getAnexos(), c.getVersion());
     }).toList();
   }
+
+  private static String vacioANulo(String texto) { return texto == null || texto.isBlank() ? null : texto.strip(); }
 
   static Vigencia vigencia(LocalDate expiracion, LocalDate hoy, int dias) {
     if (expiracion == null) return Vigencia.SIN_FECHA;

@@ -9,7 +9,7 @@ import pe.com.iqc.flow.compartido.domain.ReglaNegocioException;
  *el máximo de 72 bytes es el límite de bcrypt.
  */
 public final class PoliticaContrasena {
-  public static final int LONGITUD_MINIMA = 12;
+  public static final int LONGITUD_MINIMA = 8;
   private static final int BYTES_MAXIMOS = 72;
 
   private PoliticaContrasena() {
