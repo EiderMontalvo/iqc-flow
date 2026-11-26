@@ -84,6 +84,8 @@ legend { padding: 0; margin-bottom: var(--e3); font-size: var(--tam-sm); font-we
 .list-panel { overflow: hidden; }
 .list-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e2); padding: var(--e3) var(--e4); border-bottom: 1px solid var(--borde); background: var(--superficie-2); }
 .list-toolbar select { width: auto; min-width: 128px; }
+/* Búsqueda a la izquierda; los filtros (selects, casillas) se alinean a la derecha */
+.list-toolbar .search-field { margin-right: auto; }
 .search-field { position: relative; display: flex; align-items: center; flex: 1 1 280px; max-width: 420px; color: var(--texto-3); }
 .search-field > svg { position: absolute; left: 11px; pointer-events: none; }
 .search-field input { padding-left: 34px !important; padding-right: 32px !important; }
@@ -94,13 +96,19 @@ legend { padding: 0; margin-bottom: var(--e3); font-size: var(--tam-sm); font-we
 /* Tablas */
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: var(--tam-md); }
-th { position: sticky; top: 0; padding: var(--e2) var(--e4); background: var(--superficie); border-bottom: 1px solid var(--borde); color: var(--texto-2); font-size: var(--tam-xs); font-weight: 600; text-align: left; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+th { position: sticky; top: 0; padding: var(--e2) var(--e4); background: var(--accion-suave); border-bottom: 1px solid color-mix(in srgb, var(--accion) 22%, var(--borde)); color: var(--enlace); font-size: var(--tam-xs); font-weight: 600; text-align: left; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
 td { padding: var(--e3) var(--e4); border-bottom: 1px solid var(--borde); color: var(--texto-suave); vertical-align: top; }
 td strong { display: block; color: var(--texto); font-weight: 600; line-height: 1.35; }
 td small { display: block; margin-top: 2px; color: var(--texto-3); }
+td.nowrap { white-space: nowrap; }
+/* El identificador que abre el detalle (código de certificado, personal o empresarial) va en azul en toda tabla */
+td .code { color: var(--enlace); font-weight: 600; }
 tbody tr:last-child td { border-bottom: 0; }
+/* Filas alternas con un tinte azul apenas perceptible: guían la vista en tablas largas. Los tintes de estado (por vencer,
+   vencido) tienen más especificidad y mandan sobre este */
+tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--accion-suave) 55%, var(--superficie)); }
 tr.clickable { cursor: pointer; transition: background-color 120ms var(--salida); }
-tr.clickable:hover td { background: var(--superficie-2); }
+tr.clickable:hover td { background: color-mix(in srgb, var(--accion) 9%, var(--superficie)); }
 tr.clickable:focus-within td { background: var(--accion-suave); }
 .mobile-list { display: none; }
 
@@ -120,7 +128,14 @@ p.empty-state { display: flex; align-items: center; justify-content: center; gap
 .skeleton-row span { height: 120px; }
 
 /* Estados y etiquetas */
-.status-label { display: inline-flex; align-items: center; gap: 7px; font-size: var(--tam-sm); color: var(--texto-suave); white-space: nowrap; }
+.status-label { display: inline-flex; align-items: center; font-size: var(--tam-sm); font-weight: 600; color: var(--texto-2); white-space: nowrap; }
+/* Sin punto (26/11/2026): el estado es la palabra en su tinta. El marcado conserva .status-dot como portador de la
+   clase de estado; aquí no se dibuja y el color pasa al texto */
+.status-dot { display: none; }
+.status-label:has(.activo, .correo-atendido) { color: var(--ok); }
+.status-label:has(.prospecto, .prioridad-normal, .correo-nuevo) { color: var(--accion); }
+.status-label:has(.prioridad-urgente) { color: var(--mal); }
+.status-label:has(.prioridad-alta, .alerta, .correo-en_curso) { color: var(--alerta); }
 .status-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--neutro); }
 .status-dot.activo { background: var(--ok); }
 .status-dot.prospecto { background: var(--accion); }
@@ -204,7 +219,6 @@ button.tarjeta-cifra:active { transform: none; }
 .tarjeta-cifra.tono-mal { --tinta: var(--mal); --tinta-suave: var(--mal-suave); }
 .tarjeta-cifra.tono-alerta { --tinta: var(--alerta); --tinta-suave: var(--alerta-suave); }
 .tarjeta-cifra.tono-ok { --tinta: var(--ok); --tinta-suave: var(--ok-suave); }
-.tarjeta-cifra.tono-neutro { --tinta: var(--neutro); --tinta-suave: var(--neutro-suave); }
 .tarjeta-cifra-cabeza { display: flex; align-items: center; gap: var(--e2); margin-bottom: var(--e2); color: var(--texto-2); font-size: var(--tam-sm); font-weight: 600; }
 .tarjeta-cifra-icono { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radio); background: var(--tinta-suave); color: var(--tinta); flex: none; }
 .tarjeta-cifra-valor { font-size: 2rem; line-height: 1.1; font-weight: 700; letter-spacing: -.02em; color: var(--texto); }
@@ -293,6 +307,20 @@ button.tarjeta-cifra:active { transform: none; }
    (.mode-tabs) a propósito: elige un valor y por eso la elegida lleva el color de acción y un contorno; las pestañas solo cambian de vista */
 .seccion-form { display: grid; gap: var(--e3); }
 .seccion-form ~ .seccion-form { padding-top: var(--e4); border-top: 1px solid var(--borde-suave); }
+/* Formularios con color (26/11/2026): el título de cada sección en el azul de IQC, obligatorio con asterisco rojo y
+   campo con error en rojo con su mensaje debajo (validación propia: un campo con solo espacios también es vacío) */
+.seccion-form > h3 { color: var(--enlace); }
+.obligatorio { margin-left: 2px; color: var(--mal); font-weight: 700; }
+/* La etiqueta es una rejilla de una columna: con asterisco pasa a dos columnas en la primera fila (texto y *) y todo lo
+   demás (campo, ayuda, error) ocupa el ancho completo debajo */
+label:has(> .obligatorio) { grid-template-columns: max-content 1fr; column-gap: 0; }
+label:has(> .obligatorio) > :not(.obligatorio) { grid-column: 1 / -1; }
+label > .obligatorio { justify-self: start; }
+.field-error { display: block; color: var(--mal); font-size: var(--tam-xs); font-weight: 600; }
+/* Con la misma especificidad que la regla base de los campos (input:not(checkbox, radio, file)), si no, esa gana */
+input[aria-invalid="true"]:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select[aria-invalid="true"], textarea[aria-invalid="true"] {
+  border-color: var(--mal); background: color-mix(in srgb, var(--mal-suave) 50%, var(--superficie)); }
+input[aria-invalid="true"]:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus, select[aria-invalid="true"]:focus, textarea[aria-invalid="true"]:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--mal) 25%, transparent); }
 .resumen-vigencia { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); gap: var(--e2) var(--e4); margin: 0; font-variant-numeric: tabular-nums; }
 .resumen-vigencia div { display: grid; gap: 1px; }
 .resumen-vigencia dt { font-size: var(--tam-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--texto-2); }

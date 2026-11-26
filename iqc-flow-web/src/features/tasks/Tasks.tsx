@@ -186,7 +186,7 @@ export function Tasks({ canWrite, canReadAll, initialView }: { canWrite: boolean
       <TarjetaCifra icono={Clock3} etiqueta="Atrasados" valor={counts?.atrasadas} detalle="Pasaron su fecha límite" tono="mal" activa={view === 'ATRASADAS'} alPulsar={() => elegir('ATRASADAS')} />
       <TarjetaCifra icono={CalendarCheck} etiqueta="Para hoy" valor={counts?.hoy} detalle="Vencen hoy" tono="alerta" activa={view === 'HOY'} alPulsar={() => elegir('HOY')} />
       <TarjetaCifra icono={CalendarRange} etiqueta="Próximos" valor={counts?.proximas} detalle="En los próximos 7 días" activa={view === 'PROXIMAS'} alPulsar={() => elegir('PROXIMAS')} />
-      <TarjetaCifra icono={PauseCircle} etiqueta="En espera" valor={counts?.enEspera} detalle="Esperan una respuesta externa" tono="neutro" activa={view === 'EN_ESPERA'} alPulsar={() => elegir('EN_ESPERA')} />
+      <TarjetaCifra icono={PauseCircle} etiqueta="En espera" valor={counts?.enEspera} detalle="Esperan una respuesta externa" activa={view === 'EN_ESPERA'} alPulsar={() => elegir('EN_ESPERA')} />
     </FilaCifras>
     <section className="list-panel"><div className="task-tabs" role="tablist" aria-label="Vista de seguimientos">{views.map(([key, label]) =>
       <button role="tab" aria-selected={view === key} className={view === key ? 'active' : ''} key={key}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AlertTriangle, ArrowRight, CalendarClock, CheckCircle2, Plus } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CheckCircle2, Plus } from 'lucide-react';
 import { Icono } from '../../lib/iconos';
 import { api, type Brand, type BrandSummary, type Certificate, type PersonalCertificate, type PersonalSummary, type PublicationStatus } from '../../lib/api';
 import { day, errorText, number } from '../../lib/format';
@@ -60,7 +60,7 @@ export function CertificatesHome({ canManage, go }: { canManage: boolean; go: (t
 
     <div className="overview-grid">
       <section className="panel">
-        <div className="panel-title"><div><h2><CalendarClock size={18} aria-hidden /> Vencen pronto</h2><p>Empresariales en los próximos 90 días</p></div>
+        <div className="panel-title"><div><h2>Vencen pronto</h2><p>Empresariales en los próximos 90 días</p></div>
           <Boton variante="texto" onClick={() => go({ screen: 'business', validity: 'POR_VENCER' })}>Ver todos <ArrowRight size={14} aria-hidden /></Boton></div>
         {!expiring ? <div className="skeleton-rows" aria-hidden="true"><span /><span /></div> : expiring.length === 0
           ? <p className="empty-state"><CheckCircle2 size={18} aria-hidden /> Ningún certificado vence en los próximos 90 días.</p>
@@ -68,7 +68,7 @@ export function CertificatesHome({ canManage, go }: { canManage: boolean; go: (t
             <VenceEn fecha={c.fechaExpiracion} /></li>)}</ul>}
       </section>
       <section className="panel">
-        <div className="panel-title"><div><h2><Icono.certificadoPersonal size={18} aria-hidden /> Últimos personales</h2><p>Emitidos más recientemente</p></div>
+        <div className="panel-title"><div><h2>Últimos personales</h2><p>Emitidos más recientemente</p></div>
           <Boton variante="texto" onClick={() => go({ screen: 'personal' })}>Ver todos <ArrowRight size={14} aria-hidden /></Boton></div>
         {!latest ? <div className="skeleton-rows" aria-hidden="true"><span /><span /></div> : latest.length === 0
           ? <p className="empty-state">Aún no hay certificados personales.</p>

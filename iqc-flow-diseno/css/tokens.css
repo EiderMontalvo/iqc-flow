@@ -35,8 +35,9 @@
   --borde-fuerte: #c2c9d6;
   --texto: #1a1a2e;
   --texto-suave: #343a4d;
-  --texto-2: #434b5e;              /* textos secundarios */
-  --texto-3: #59627a;              /* etiquetas y ayudas (≥ 4.5:1 sobre --fondo) */
+  /* Escala de texto abierta (26/11/2026): con #434b5e el secundario casi no se distinguía del principal */
+  --texto-2: #59627a;              /* textos secundarios: 6,1:1 sobre blanco, 5,5:1 sobre --fondo */
+  --texto-3: #646c80;              /* etiquetas y ayudas: 5,2:1 sobre blanco, ≥ 4,5:1 sobre --fondo y --superficie-hundida */
 
   --accion: #1a33e0;
   --accion-hover: #1428bd;

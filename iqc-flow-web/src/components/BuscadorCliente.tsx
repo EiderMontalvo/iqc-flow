@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
+import { ErrorCampo, Obligatorio } from './ui/Validacion';
 import { api, type ClientSummary } from '../lib/api';
 import { Boton } from '../components/ui/Boton';
 
@@ -7,8 +8,9 @@ import { Boton } from '../components/ui/Boton';
  * Busca un cliente por razón social, código o RUC. Si se busca un RUC que no es cliente, muestra qué empresa es según
  * SUNAT para confirmarla antes de registrarla en Clientes.
  */
-export function BuscadorCliente({ etiqueta = 'Cliente', value, onChange, initialQuery = '' }: {
-  etiqueta?: string; value: ClientSummary | null; onChange: (client: ClientSummary | null) => void; initialQuery?: string;
+/** obligatorio: lleva asterisco; error: el mensaje de validación del formulario (campo en rojo y mensaje debajo) */
+export function BuscadorCliente({ etiqueta = 'Cliente', value, onChange, initialQuery = '', obligatorio, error }: {
+  etiqueta?: string; value: ClientSummary | null; onChange: (client: ClientSummary | null) => void; initialQuery?: string; obligatorio?: boolean; error?: string;
 }) {
   const [query, setQuery] = useState(value?.razonSocial || initialQuery), [matches, setMatches] = useState<ClientSummary[]>([]);
   useEffect(() => {
@@ -31,7 +33,8 @@ export function BuscadorCliente({ etiqueta = 'Cliente', value, onChange, initial
     return () => { active = false; };
   }, [rucBuscado, value, matches.length]);
   return <div className="client-picker full">
-    <label>{etiqueta}<input value={query} required onChange={event => { setQuery(event.target.value); onChange(null); }} placeholder="Razón social, código o RUC" autoComplete="off" /></label>
+    <label>{etiqueta}{obligatorio && <Obligatorio />}<input value={query} required aria-invalid={!!error} onChange={event => { setQuery(event.target.value); onChange(null); }} placeholder="Razón social, código o RUC" autoComplete="off" />
+      <ErrorCampo mensaje={error} /></label>
     {value && <p className="field-help"><Check size={14} aria-hidden /> {value.codigo} · {value.tipoDocumento || 'Documento'} {value.numeroDocumento || 'sin registrar'} <Boton type="button" variante="texto" onClick={() => { setQuery(''); onChange(null); }}>Cambiar</Boton></p>}
     {!value && matches.length > 0 && <div className="picker-results" role="listbox">{matches.map(client =>
       <button type="button" role="option" aria-selected="false" key={client.id} onClick={() => { onChange(client); setQuery(client.razonSocial); setMatches([]); }}>

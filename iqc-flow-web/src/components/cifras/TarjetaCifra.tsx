@@ -2,7 +2,8 @@ import type { ComponentType, ReactNode } from 'react';
 import type { LucideProps } from 'lucide-react';
 import { number } from '../../lib/format';
 
-export type TonoCifra = 'mal' | 'alerta' | 'ok' | 'accion' | 'neutro';
+/** Rojo, ámbar y verde solo para estados (atrasado, por vencer, vigente); cualquier otra cifra va en el azul de IQC */
+export type TonoCifra = 'mal' | 'alerta' | 'ok' | 'accion';
 
 interface Props {
   icono: ComponentType<LucideProps>;

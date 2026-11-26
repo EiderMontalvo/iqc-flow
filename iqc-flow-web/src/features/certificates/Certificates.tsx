@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import {
   BadgeCheck, CalendarClock, CalendarX2, Check, ChevronRight, Copy, Download, ExternalLink, FileSpreadsheet, FileText, FilterX, Plus, QrCode, Upload,
 } from 'lucide-react';
@@ -8,13 +8,13 @@ import {
   api, type Brand, type Certificate, type CertificateState, type ConsultLink, type Page, type PdfVersion, type Scheme, type Standard, type Tools, type Validity,
 } from '../../lib/api';
 import { VistaPdf, type FuentePdf } from '../../components/pdf/VistaPdf';
-import { ElegirPdf } from '../../components/pdf/ElegirPdf';
 import { day, errorText, kb, number, stamp } from '../../lib/format';
 import { Drawer } from '../../components/Drawer';
 import { Pagination } from '../../components/Pagination';
 import { SearchField } from '../../components/SearchField';
 import { CycleBar } from './CycleBar';
 import { RegistrarCertificados } from './RegistrarCertificados';
+import { ErrorCampo, Obligatorio, enfocarPrimerError, vacio } from '../../components/ui/Validacion';
 import { Boton } from '../../components/ui/Boton';
 
 const stateNames: Record<CertificateState, string> = {
@@ -40,13 +40,15 @@ function Alcance({ texto }: { texto: string }) {
   </section>;
 }
 
-function CertificateDetail({ id, brands, schemes, canManage, canGeneratePdf, onClose, onChanged }: {
-  id: string; brands: Brand[]; schemes: Scheme[]; canManage: boolean; canGeneratePdf: boolean; onClose: () => void; onChanged: () => void;
+/** inicial: la fila de la lista; la ficha se muestra con ella al instante y se actualiza con la respuesta de la API */
+function CertificateDetail({ id, inicial, brands, schemes, canManage, canGeneratePdf, onClose, onChanged }: {
+  id: string; inicial?: Certificate; brands: Brand[]; schemes: Scheme[]; canManage: boolean; canGeneratePdf: boolean; onClose: () => void; onChanged: () => void;
 }) {
-  const [cert, setCert] = useState<Certificate | null>(null), [link, setLink] = useState<ConsultLink | null>(null);
+  const [cert, setCert] = useState<Certificate | null>(inicial ?? null), [link, setLink] = useState<ConsultLink | null>(null);
   const [versions, setVersions] = useState<PdfVersion[]>([]), [error, setError] = useState(''), [notice, setNotice] = useState('');
   const [file, setFile] = useState<File | null>(null), [pdfReason, setPdfReason] = useState('');
-  const [brand, setBrand] = useState(''), [brandReason, setBrandReason] = useState(''), [busy, setBusy] = useState(false);
+  const [brand, setBrand] = useState(inicial?.marcaManual ? inicial.paisMarca : ''), [brandReason, setBrandReason] = useState(''), [busy, setBusy] = useState(false);
+  const [intentoMarca, setIntentoMarca] = useState(false), elegirVersion = useRef<HTMLInputElement>(null);
   const [seed, setSeed] = useState(0), [copied, setCopied] = useState(false);
   /** Versión del PDF en la vista previa (por defecto la vigente) */
   const [versionVista, setVersionVista] = useState<number | null>(null);
@@ -77,13 +79,14 @@ function CertificateDetail({ id, brands, schemes, canManage, canGeneratePdf, onC
       setFile(null); setVersionVista(null); setNotice('PDF generado con la plantilla. La consulta pública lo mostrará en menos de un minuto.'); setSeed(n => n + 1); onChanged();
     } catch (e) { setError(errorText(e)); } finally { setBusy(false); }
   }
-  async function changeBrand(event: FormEvent) {
-    event.preventDefault();
+  async function changeBrand(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); setIntentoMarca(true);
     if (!cert) return;
+    if (vacio(brandReason)) { enfocarPrimerError(event.currentTarget); return; }
     setBusy(true); setError(''); setNotice('');
     try {
       await api.setCertificateBrand(cert.id, { pais: brand || null, motivo: brandReason.trim(), version: cert.version });
-      setBrandReason(''); setNotice('Marca cambiada. El QR y la consulta pública usan ahora la nueva marca.'); setSeed(n => n + 1); onChanged();
+      setBrandReason(''); setIntentoMarca(false); setNotice('Marca cambiada. El QR y la consulta pública usan ahora la nueva marca.'); setSeed(n => n + 1); onChanged();
     } catch (e) { setError(errorText(e)); } finally { setBusy(false); }
   }
   async function copy() {
@@ -146,21 +149,29 @@ function CertificateDetail({ id, brands, schemes, canManage, canGeneratePdf, onC
             {v.vigente && <span className="status-label"><span className="status-dot activo" />Vigente</span>}
             <span>{stamp(v.subidoEn)} · {v.subidoPor?.nombre || '—'} · {kb(v.tamanoBytes)}</span>{v.motivo && <em>{v.motivo}</em>}
           </li>; })}</ol>}
-        {canGeneratePdf && cert.estado === 'EMITIDO' && <Boton variante="secundario" pequeno icono={FileText} cargando={busy} onClick={generatePdf}>{versions.length ? 'Regenerar PDF con la plantilla' : 'Generar PDF con la plantilla'}</Boton>}
-        {canManage && cert.estado !== 'CANCELADO' && cert.estado !== 'REEMPLAZADO' && <form className="inline-form" onSubmit={uploadPdf}>
-          <div><ElegirPdf etiqueta="Nueva versión" texto={file ? 'Elegir otro' : 'Elegir PDF'} requerido alElegir={setFile} />
-            {file && <span className="field-help">{file.name}: revísala en la vista previa antes de subirla.</span>}</div>
-          <label>Motivo<input maxLength={500} value={pdfReason} onChange={e => setPdfReason(e.target.value)} placeholder="Ej.: corrección del alcance" /></label>
-          <Boton type="submit" variante="primario" disabled={busy || !file}><Upload size={16} aria-hidden /> {busy ? 'Subiendo…' : 'Subir PDF'}</Boton>
-        </form>}
+        {canManage && cert.estado !== 'CANCELADO' && cert.estado !== 'REEMPLAZADO' && <>
+          <input ref={elegirVersion} type="file" accept="application/pdf" className="sr-only" onChange={e => { setFile(e.target.files?.[0] || null); }} />
+          {!file ? <div className="acciones-pdf">
+            {canGeneratePdf && cert.estado === 'EMITIDO' && <Boton variante="secundario" pequeno icono={FileText} cargando={busy} onClick={generatePdf}>{versions.length ? 'Regenerar PDF con la plantilla' : 'Generar PDF con la plantilla'}</Boton>}
+            <Boton variante="secundario" pequeno icono={Upload} onClick={() => elegirVersion.current?.click()}>Subir una versión nueva</Boton>
+          </div> : <form className="form-ficha" onSubmit={uploadPdf}>
+            <p className="field-help">{file.name}: revísala a la derecha antes de subirla.</p>
+            <label>Motivo (opcional)<input maxLength={500} value={pdfReason} onChange={e => setPdfReason(e.target.value)} placeholder="Ej.: corrección del alcance" /></label>
+            <div className="acciones-pdf">
+              <Boton variante="secundario" pequeno onClick={() => { setFile(null); setPdfReason(''); if (elegirVersion.current) elegirVersion.current.value = ''; }}>Cancelar</Boton>
+              <Boton type="submit" variante="primario" pequeno icono={Upload} cargando={busy}>Subir esta versión</Boton>
+            </div>
+          </form>}
+        </>}
       </section>
 
       {canManage && published && <section className="ficha-seccion"><h3>Marca con que se muestra</h3>
-        <form className="inline-form" onSubmit={changeBrand}>
+        <form className="form-ficha" onSubmit={changeBrand} noValidate>
           <label>Marca<select value={brand} onChange={e => setBrand(e.target.value)}>
             <option value="">La del país del titular ({brandName(cert.cliente.codigoPais)})</option>
             {brands.map(b => <option key={b.codigoPais} value={b.codigoPais}>{b.nombre}</option>)}</select></label>
-          <label>Motivo<input required maxLength={500} value={brandReason} onChange={e => setBrandReason(e.target.value)} placeholder="Queda en la bitácora" /></label>
+          <label>Motivo<Obligatorio /><input required aria-invalid={intentoMarca && vacio(brandReason)} maxLength={500} value={brandReason} onChange={e => setBrandReason(e.target.value)} placeholder="Queda en la bitácora" />
+            <ErrorCampo mensaje={intentoMarca && vacio(brandReason) ? 'Escribe el motivo: queda en la bitácora.' : undefined} /></label>
           <Boton type="submit" variante="secundario" disabled={busy || (brand || null) === (cert.marcaManual ? cert.paisMarca : null)}>Cambiar marca</Boton>
         </form>
         <p className="field-help">Suspender, levantar o retirar se hace desde el expediente, con su decisión y control de imparcialidad.</p>
@@ -240,7 +251,7 @@ export function Certificates({ canManage, initialCountry = '', initialValidity =
       <div className="table-wrap"><table className="cert-table"><thead><tr><th>Certificado</th><th>Titular</th><th>Esquema</th><th>Marca</th><th>Ciclo</th><th>Situación</th><th><span className="sr-only">Abrir</span></th></tr></thead>
         <tbody>{!data && <tr className="skeleton-row"><td colSpan={7}><span /></td></tr>}
           {data?.contenido.map(c => <tr key={c.id} onClick={() => setOpen(c.id)} className={`clickable ${c.estado === 'EMITIDO' && c.vigencia !== 'VIGENTE' ? `row-${c.vigencia.toLowerCase()}` : ''}`}>
-            <td><span className="mono code">{c.codigo}</span><small>{c.designacion}</small></td>
+            <td><span className="mono code">{partirEnBarras(c.codigo)}</span><small>{c.designacion}</small></td>
             <td><strong>{c.cliente.razonSocial}</strong><small className="tabular">{c.cliente.numeroDocumento || 'sin documento'}</small></td>
             <td>{schemeShort(c.esquema)}{c.emitidoPorIndia && <small>India</small>}</td><td>{c.paisMarca}</td>
             <td><CycleBar start={c.fechaEmision} end={c.fechaExpiracion} inactive={c.estado !== 'EMITIDO'} /></td>
@@ -259,8 +270,14 @@ export function Certificates({ canManage, initialCountry = '', initialValidity =
       {data && data.contenido.length === 0 && <div className="empty-state"><QrCode size={20} aria-hidden /><p>{filtered ? 'Ningún certificado coincide con estos filtros.' : 'Aún no hay certificados registrados.'}</p>{filtered && <Boton variante="secundario" pequeno onClick={clear}><FilterX size={14} aria-hidden /> Quitar filtros</Boton>}</div>}
       <Pagination page={page} totalPages={data?.totalPaginas || 1} total={data?.totalElementos ?? null} noun="certificados" onPage={setPage} />
     </section>
-    {open && <CertificateDetail id={open} brands={brands} schemes={schemes} canManage={canManage} canGeneratePdf={!!tools?.generacionPdf} onClose={() => setOpen(null)} onChanged={() => setRefresh(n => n + 1)} />}
+    {open && <CertificateDetail id={open} inicial={data?.contenido.find(c => c.id === open)} brands={brands} schemes={schemes} canManage={canManage} canGeneratePdf={!!tools?.generacionPdf} onClose={() => setOpen(null)} onChanged={() => setRefresh(n => n + 1)} />}
     {registering && <RegistrarCertificados schemes={schemes} standards={standards} tools={tools} onClose={() => setRegistering(false)}
       onDone={first => { setRegistering(false); setRefresh(n => n + 1); if (first) setOpen(first.id); }} />}
   </div>;
+}
+
+/** Código con puntos de corte solo después de cada «/»: «PER/QEO/JAS-C0140/RC1/0567» nunca se parte a mitad de número */
+function partirEnBarras(codigo: string) {
+  const partes = codigo.split('/');
+  return partes.map((p, i) => <Fragment key={i}>{p}{i < partes.length - 1 && <>/<wbr /></>}</Fragment>);
 }

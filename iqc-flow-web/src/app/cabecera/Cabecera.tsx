@@ -16,7 +16,7 @@ const APARIENCIAS: Array<[Apariencia, string, ComponentType<LucideProps>]> = [['
 
 interface Props {
   user: CurrentUser; espacio: string; titulo: string; noLeidas: number; verNotificaciones: boolean;
-  /** Temática de temporada vigente: su saludo acompaña al de la hora */
+  /** Temática de temporada vigente: su saludo completa la frase del de la hora */
   temporada: Tematica | null;
   apariencia: Apariencia; cambiarApariencia: (a: Apariencia) => void;
   /** Escritorio: el carril lateral está oculto */
@@ -47,8 +47,8 @@ export function Cabecera({ user, espacio, titulo, noLeidas, verNotificaciones, t
       {carrilOculto ? <PanelLeftOpen size={19} aria-hidden /> : <PanelLeftClose size={19} aria-hidden />}
     </button>
     <div className="cabecera-saludo">
-      <strong>{saludo(ahora.getHours())}, {primerNombre(user.nombre)}{temporada && <span className="cabecera-temporada">
-        {(() => { const Icono = temporada.iconos[0]; return <Icono size={15} aria-hidden style={{ color: temporada.colores[0] }} />; })()}{temporada.saludo}</span>}</strong>
+      {/* En temporada, una sola frase: «Buenos días, Ana. ¡Feliz Navidad!» */}
+      <strong>{saludo(ahora.getHours())}, {primerNombre(user.nombre)}{temporada ? <>. <span className="cabecera-temporada">{temporada.saludo}</span></> : null}</strong>
       <span><span className="cabecera-fecha">{fecha.charAt(0).toUpperCase() + fecha.slice(1)}</span> · {espacio}</span>
     </div>
     <span className="cabecera-titulo">{titulo}</span>
@@ -68,7 +68,7 @@ export function Cabecera({ user, espacio, titulo, noLeidas, verNotificaciones, t
           <div className="menu-perfil-apariencia" role="radiogroup" aria-label="Apariencia"><span>Apariencia</span>
             <div>{APARIENCIAS.map(([clave, nombre, Icono]) => <button key={clave} type="button" role="radio" aria-checked={apariencia === clave}
               className={apariencia === clave ? 'elegida' : ''} onClick={() => cambiarApariencia(clave)}><Icono size={15} aria-hidden />{nombre}</button>)}</div></div>
-          <button role="menuitem" onClick={() => { setAbierto(false); setPerfil(true); }}><UserRound size={16} aria-hidden /> Mi perfil y contraseña</button>
+          <button role="menuitem" onClick={() => { setAbierto(false); setPerfil(true); }}><UserRound size={16} aria-hidden /> Mi perfil, firma y contraseña</button>
           <button role="menuitem" className="peligro" onClick={() => { setAbierto(false); cerrarSesion(); }}><LogOut size={16} aria-hidden /> Cerrar sesión</button>
         </div>}
       </div>

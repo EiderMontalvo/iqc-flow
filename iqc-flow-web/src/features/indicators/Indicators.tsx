@@ -9,7 +9,7 @@ import { DibujoGrafico, definiciones, total, type Grafico } from './graficos';
 /** Qué gráficos ve cada espacio de trabajo (ver SPACES en App.tsx) */
 export type VistaIndicadores = 'direccion' | 'certificados' | 'operaciones' | 'comercial' | 'administracion';
 
-/** El primero de cada lista va a todo el ancho: es la pregunta principal de ese rol */
+/** En orden de importancia para cada rol: el primero es su pregunta principal y va arriba a la izquierda */
 const POR_VISTA: Record<VistaIndicadores, Grafico[]> = {
   direccion: ['vencimientos', 'emisiones', 'normas', 'cartera', 'tareasPrioridad'],
   certificados: ['vencimientos', 'emisiones', 'personales', 'normas', 'esquemas'],
@@ -35,7 +35,7 @@ export function Indicators({ vista }: { vista: VistaIndicadores }) {
 
   if (error) return <div className="notice" role="alert"><AlertTriangle size={16} aria-hidden /> No se pudieron cargar los gráficos: {error}</div>;
   if (!datos) return <div className="indicadores" aria-busy="true" aria-label="Cargando gráficos">
-    {POR_VISTA[vista].slice(0, 3).map((g, i) => <div key={g} className={i === 0 ? 'panel panel-grafico ancho' : 'panel panel-grafico'} aria-hidden>
+    {POR_VISTA[vista].slice(0, 4).map(g => <div key={g} className="panel panel-grafico" aria-hidden>
       <div className="skeleton-rows"><span /><span /><span /></div></div>)}
   </div>;
 
@@ -47,14 +47,18 @@ export function Indicators({ vista }: { vista: VistaIndicadores }) {
   if (!disponibles.length) return null;
   const conDatos = disponibles.filter(g => !compacto(g));
   const compactos = [...disponibles.filter(g => compacto(g) && total(defs[g]!.datos) > 0), ...disponibles.filter(g => total(defs[g]!.datos) === 0)];
-  // El primero con datos va a todo el ancho; si los demás quedan impares, el último también, para no dejar un hueco
-  const ultimoSolo = (conDatos.length - 1) % 2 === 1;
+  // De dos en dos. Si quedan impares, uno va solo a todo el ancho (al final, para no dejar un hueco): mejor uno de
+  // barras, medidores o segmentado, que a lo ancho se lee igual; uno de columnas o de área por mes quedaría con huecos
+  // grandes entre sus marcas (las columnas no pasan de 24 px)
+  const seLeeAncho = (g: Grafico) => defs[g]!.forma !== 'columnas' && defs[g]!.forma !== 'area';
+  const solo = conDatos.length % 2 === 1 ? ([...conDatos].reverse().find(seLeeAncho) ?? conDatos[conDatos.length - 1]) : null;
+  const orden = solo ? [...conDatos.filter(g => g !== solo), solo] : conDatos;
   const panel = (g: Grafico, ancho: boolean) => { const d = defs[g]!;
     return <PanelGrafico key={g} ancho={ancho} titulo={d.titulo} detalle={d.detalle} datos={d.datos} vacio={d.vacio} unica={d.unica}
       alAmpliar={() => setAbierto(g)}><DibujoGrafico d={d} /></PanelGrafico>; };
   return <>
     <div className="indicadores">
-      {conDatos.map((g, i) => panel(g, i === 0 || (ultimoSolo && i === conDatos.length - 1)))}
+      {orden.map(g => panel(g, g === solo))}
       {compactos.map(g => panel(g, false))}
     </div>
     {abierto && defs[abierto] && <DetalleGrafico d={defs[abierto]!} cerrar={() => setAbierto(null)} />}

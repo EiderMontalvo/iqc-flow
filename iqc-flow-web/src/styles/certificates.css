@@ -28,18 +28,17 @@
 .row-actions .reveal { opacity: 0; transition: opacity 150ms var(--salida); }
 .cert-table tr:hover .reveal, .cert-table tr:focus-within .reveal { opacity: 1; }
 @media (hover: none) { .row-actions .reveal { opacity: 1; } }
-.cert-table .code { display: block; color: var(--texto); font-weight: 600; word-break: break-all; line-height: 1.4; }
+.cert-table .code { display: block; color: var(--enlace); font-weight: 600; overflow-wrap: anywhere; line-height: 1.4; }
 .cert-table tr.row-por_vencer td { background: color-mix(in srgb, var(--alerta-suave) 55%, transparent); }
 .cert-table tr.row-vencido td { background: color-mix(in srgb, var(--mal-suave) 45%, transparent); }
-.cert-table tr.clickable:hover td { background: var(--superficie-2); }
+.cert-table tr.clickable:hover td { background: color-mix(in srgb, var(--accion) 9%, var(--superficie)); }
 
-/* Estado del certificado: punto en su tinta y la palabra, sin fondo de pastilla (como el estado en Clientes) */
-.cert-tag { display: inline-flex; align-items: center; gap: 7px; font-size: var(--tam-sm); font-weight: 600; white-space: nowrap; color: var(--texto-suave); --tinta: var(--neutro); }
-.cert-tag::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--tinta); flex: none; }
-.cert-tag.vigente { --tinta: var(--ok); }
-.cert-tag.por_vencer { --tinta: var(--alerta); color: var(--alerta); }
-.cert-tag.vencido, .cert-tag.retirado, .cert-tag.cancelado { --tinta: var(--mal); color: var(--mal); }
-.cert-tag.suspendido { --tinta: var(--pausa); }
+/* Estado del certificado: solo la palabra en su tinta, sin punto ni pastilla (26/11/2026: más limpio en la tabla) */
+.cert-tag { display: inline-flex; align-items: center; font-size: var(--tam-sm); font-weight: 600; white-space: nowrap; color: var(--texto-2); }
+.cert-tag.vigente { color: var(--ok); }
+.cert-tag.por_vencer { color: var(--alerta); }
+.cert-tag.vencido, .cert-tag.retirado, .cert-tag.cancelado { color: var(--mal); }
+.cert-tag.suspendido { color: var(--pausa); }
 
 /* Gesto de la dirección: el ciclo de 3 años con la marca de hoy */
 .cycle { display: grid; gap: 6px; min-width: 0; }
@@ -77,7 +76,7 @@
 .cert-lines { display: grid; gap: var(--e3); margin-bottom: var(--e3); }
 /* Datos extra del certificado de IQC Global: una fila propia bajo los campos de la norma */
 .cert-line-global { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e3); }
-.cert-line { display: grid; grid-template-columns: 1.1fr 0.9fr 1.3fr 1fr auto; align-items: end; gap: var(--e3); padding: var(--e3); border: 1px solid var(--borde); border-radius: var(--radio); background: var(--superficie-2); }
+.cert-line { display: grid; grid-template-columns: 1.1fr 0.9fr 1.3fr 1fr auto; align-items: start; gap: var(--e3); padding: var(--e3); border: 1px solid var(--borde); border-radius: var(--radio); background: var(--superficie-2); }
 
 @media (max-width: 760px) {
   .validity-filter button { flex: 1 1 auto; justify-content: center; }
@@ -183,3 +182,9 @@ p.pdf-adjunto { cursor: default; }
 @media (max-width: 560px) { .ficha-datos { grid-template-columns: 1fr; } .ficha-qr { grid-template-columns: 1fr; } }
 .ficha-datos .span-2 { grid-column: 1 / -1; }
 .ficha-seccion .qr-actions { justify-content: flex-start; }
+/* Acciones del PDF en la ficha: en una fila, sin recuadro */
+.acciones-pdf { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e2) var(--e3); margin-top: var(--e3); }
+/* Formularios dentro de una ficha (marca, nueva versión del PDF): campos uno bajo otro, sin recuadro */
+.form-ficha { display: grid; gap: var(--e3); max-width: 520px; }
+.form-ficha .acciones-pdf { margin-top: 0; }
+.form-ficha > button { justify-self: start; }

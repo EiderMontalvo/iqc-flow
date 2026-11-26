@@ -7,6 +7,7 @@ import { api, type CurrentUser, type TaskView } from '../lib/api';
 import { errorText } from '../lib/format';
 import { Cabecera, type Apariencia } from './cabecera/Cabecera';
 import { FondoTematico } from './tematica/FondoTematico';
+import { ContextoTematica } from './tematica/contexto';
 import { TEMATICAS, tematicaActiva } from './tematica/tematicas';
 import { BrandMark } from '../components/BrandMark';
 import { Icono } from '../lib/iconos';
@@ -25,11 +26,12 @@ import { Users } from '../features/users/Users';
 import { Notices } from '../features/notices/Notices';
 import { Settings } from '../features/settings/Settings';
 import { Cotizaciones } from '../features/quotes/Cotizaciones';
+import { Cartas } from '../features/letters/Cartas';
 import { BotonIcono } from '../components/ui/Boton';
 import { Correos } from '../features/correos/Correos';
 import { useContadoresCorreo } from '../features/correos/hooks';
 
-type Screen = 'overview' | 'cert-home' | 'business' | 'personal' | 'clients' | 'quotes' | 'tasks' | 'correos' | 'brands' | 'users' | 'notices' | 'settings';
+type Screen = 'overview' | 'cert-home' | 'business' | 'personal' | 'clients' | 'quotes' | 'letters' | 'tasks' | 'correos' | 'brands' | 'users' | 'notices' | 'settings';
 type ThemePreference = Apariencia;
 type Params = { country?: string; validity?: string; view?: string };
 
@@ -41,6 +43,7 @@ const SCREENS: Record<Screen, ScreenDef> = {
   personal: { label: 'Personales', icon: Icono.certificadoPersonal, permission: 'certificados:leer' },
   clients: { label: 'Clientes', icon: Icono.cliente, permission: 'clientes:leer' },
   quotes: { label: 'Cotizaciones', icon: Icono.cotizacion, permission: 'cotizaciones:leer' },
+  letters: { label: 'Cartas', icon: Icono.carta, permission: 'cartas:leer' },
   tasks: { label: 'Seguimientos', icon: Icono.seguimiento, permission: 'seguimientos:leer' },
   correos: { label: 'Correos', icon: Icono.bandeja, permission: 'correos:leer' },
   notices: { label: 'Notificaciones', icon: Bell },
@@ -54,17 +57,17 @@ interface Space { name: string; key: VistaIndicadores; home: Screen; groups: Arr
 const SPACES: Array<{ roles: string[]; space: Space }> = [
   { roles: ['MASTER', 'ADMINISTRADOR'], space: { name: 'Dirección', key: 'direccion', home: 'overview', groups: [
     ['General', ['overview']], ['Certificados', ['cert-home', 'business', 'personal']],
-    ['Gestión', ['clients', 'quotes', 'tasks', 'correos']], ['Configuración', ['settings', 'brands', 'users']]] } },
+    ['Gestión', ['clients', 'quotes', 'letters', 'tasks', 'correos']], ['Configuración', ['settings', 'brands', 'users']]] } },
   { roles: ['CERTIFICADOS'], space: { name: 'Certificados', key: 'certificados', home: 'cert-home', groups: [
-    ['Certificados', ['cert-home', 'business', 'personal']], ['Configuración', ['brands']]] } },
+    ['Certificados', ['cert-home', 'business', 'personal']], ['Trabajo', ['letters']], ['Configuración', ['brands']]] } },
   { roles: ['RESPONSABLE_CERTIFICACIONES'], space: { name: 'Jefatura técnica', key: 'certificados', home: 'cert-home', groups: [
-    ['Certificados', ['cert-home', 'business', 'personal']], ['Trabajo', ['tasks']], ['Configuración', ['brands']]] } },
+    ['Certificados', ['cert-home', 'business', 'personal']], ['Trabajo', ['tasks', 'letters']], ['Configuración', ['brands']]] } },
   { roles: ['COORDINADOR_AUDITORIAS'], space: { name: 'Operaciones', key: 'operaciones', home: 'overview', groups: [
     ['Trabajo', ['overview', 'tasks', 'clients']], ['Certificados', ['business']]] } },
   { roles: ['COMERCIAL'], space: { name: 'Comercial', key: 'comercial', home: 'overview', groups: [
-    ['Trabajo', ['overview', 'correos', 'clients', 'quotes', 'tasks']], ['Consulta', ['business']]] } },
+    ['Trabajo', ['overview', 'correos', 'clients', 'quotes', 'tasks']], ['Consulta', ['business', 'letters']]] } },
   { roles: ['ADMINISTRACION_LOGISTICA'], space: { name: 'Administración', key: 'administracion', home: 'overview', groups: [
-    ['Trabajo', ['overview', 'correos', 'quotes']], ['Certificados', ['business']]] } },
+    ['Trabajo', ['overview', 'correos', 'quotes', 'letters']], ['Certificados', ['business']]] } },
 ];
 const FALLBACK: Space = { name: 'IQC Flow', key: 'direccion', home: 'overview', groups: [['Trabajo', ['overview']]] };
 /**
@@ -155,7 +158,7 @@ export function App() {
     : navigate(target.screen, { country: target.country, validity: target.validity });
 
   const temporada = tematicaActiva(tematica);
-  return <div className={`app-shell ${carrilOculto ? 'carril-oculto' : ''}`} data-tematica={temporada ?? undefined}>
+  return <ContextoTematica.Provider value={temporada}><div className={`app-shell ${carrilOculto ? 'carril-oculto' : ''}`} data-tematica={temporada ?? undefined}>
     <aside className={`sidebar ${menuOpen ? 'open' : ''}`} aria-label="Navegación">
       <SimboloIqc />
       <div className="sidebar-head"><button className="sidebar-brand" onClick={() => navigate(home)} aria-label="Ir al inicio"><BrandMark alto={64} /></button>
@@ -183,6 +186,7 @@ export function App() {
           : current === 'business' ? <Certificates canManage={can('certificados:gestionar')} initialCountry={params.country} initialValidity={params.validity} />
           : current === 'personal' ? <PersonalCertificates canManage={can('certificados:gestionar')} initialCountry={params.country} />
           : current === 'clients' ? <Clients canWrite={can('clientes:escribir')} canArchive={can('clientes:archivar')} canReadActivities={can('seguimientos:leer')} canWriteActivities={can('seguimientos:escribir')} />
+          : current === 'letters' ? <Cartas puedeGenerar={can('cartas:generar')} />
           : current === 'quotes' ? <Cotizaciones puedeGestionar={can('cotizaciones:gestionar')} puedeCrearClientes={can('clientes:escribir')} />
           : current === 'correos' ? <Correos contadores={correosNuevos} recargarContadores={recargarCorreos} puedeResponder={can('correos:responder')} puedeCotizar={can('cotizaciones:gestionar')}
             puedeSeguimiento={can('seguimientos:escribir')} puedeCrearClientes={can('clientes:escribir')} irAClientes={() => navigate('clients')} />
@@ -194,5 +198,5 @@ export function App() {
       </main>
     </div>
     {menuOpen && <button className="menu-scrim" aria-label="Cerrar menú" onClick={() => setMenuOpen(false)} />}
-  </div>;
+  </div></ContextoTematica.Provider>;
 }

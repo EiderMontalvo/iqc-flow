@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AlertTriangle, ArrowRight, CalendarCheck, CalendarClock, CalendarRange, CheckCircle2, Clock3, PauseCircle } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CalendarCheck, CalendarRange, CheckCircle2, Clock3, PauseCircle } from 'lucide-react';
 import { api, type Certificate, type TaskCounts, type TaskView } from '../../lib/api';
 import { day, errorText, number } from '../../lib/format';
 import { FilaCifras, TarjetaCifra } from '../../components/cifras/TarjetaCifra';
@@ -36,11 +36,11 @@ export function Overview({ canClients, canTasks, canCertificates, vista, go }: {
         tono="mal" alPulsar={() => go('tasks', 'ATRASADAS')} />
       <TarjetaCifra icono={CalendarCheck} etiqueta="Para hoy" valor={tasks?.hoy} detalle="Vencen hoy" tono="alerta" alPulsar={() => go('tasks', 'HOY')} />
       <TarjetaCifra icono={CalendarRange} etiqueta="Próximas" valor={tasks?.proximas} detalle="En los próximos 7 días" alPulsar={() => go('tasks', 'PROXIMAS')} />
-      <TarjetaCifra icono={PauseCircle} etiqueta="En espera" valor={tasks?.enEspera} detalle="Esperan una respuesta externa" tono="neutro" alPulsar={() => go('tasks', 'EN_ESPERA')} />
+      <TarjetaCifra icono={PauseCircle} etiqueta="En espera" valor={tasks?.enEspera} detalle="Esperan una respuesta externa" alPulsar={() => go('tasks', 'EN_ESPERA')} />
     </FilaCifras>}
 
     {canCertificates && <section className="panel">
-      <div className="panel-title"><div><h2><CalendarClock size={18} aria-hidden /> Certificados por vencer</h2><p>Vencen en los próximos 90 días: {number(expiringTotal)}</p></div>
+      <div className="panel-title"><div><h2>Certificados por vencer</h2><p>Vencen en los próximos 90 días: {number(expiringTotal)}</p></div>
         <Boton variante="texto" onClick={() => go('certificates')}>Ver todos <ArrowRight size={14} aria-hidden /></Boton></div>
       {!expiring ? <div className="skeleton-rows" aria-hidden="true"><span /><span /><span /></div>
         : expiring.length === 0 ? <p className="empty-state"><CheckCircle2 size={18} aria-hidden /> Ningún certificado vence en los próximos 90 días.</p>

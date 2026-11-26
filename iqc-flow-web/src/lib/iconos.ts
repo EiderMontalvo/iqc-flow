@@ -1,5 +1,5 @@
 import {
-  BriefcaseBusiness, Building2, ClipboardCheck, FileSignature, GraduationCap, Handshake, Inbox, ListTodo, Mail, Megaphone, MessageSquareWarning,
+  BriefcaseBusiness, Building2, ClipboardCheck, FileSignature, FileText, PenLine, GraduationCap, Handshake, Inbox, ListTodo, Mail, Megaphone, MessageSquareWarning,
   Receipt, Reply, ShieldAlert, ShieldCheck, Sparkles, UserRoundX, UserSearch,
 } from 'lucide-react';
 
@@ -16,6 +16,8 @@ export const Icono = {
   clienteActivo: Handshake,
   clienteInactivo: UserRoundX,
   cotizacion: FileSignature,
+  carta: FileText,
+  firma: PenLine,
   seguimiento: ListTodo,
   bandeja: Inbox,
   correo: Mail,

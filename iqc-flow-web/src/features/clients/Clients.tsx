@@ -140,7 +140,7 @@ export function Clients({ canWrite, canArchive, canReadActivities, canWriteActiv
       <TarjetaCifra icono={Icono.cartera} etiqueta="Cartera" valor={cuentas?.todos} detalle="Clientes y prospectos sin archivar" activa={filter === 'TODOS'} alPulsar={() => filtrar('TODOS')} />
       <TarjetaCifra icono={Icono.clienteActivo} etiqueta="Activos" valor={cuentas?.activos} detalle="Marcados como activos" tono="ok" activa={filter === 'ACTIVO'} alPulsar={() => filtrar('ACTIVO')} />
       <TarjetaCifra icono={Icono.prospecto} etiqueta="Prospectos" valor={cuentas?.prospectos} detalle="Aún no contratan un servicio" activa={filter === 'PROSPECTO'} alPulsar={() => filtrar('PROSPECTO')} />
-      <TarjetaCifra icono={Icono.clienteInactivo} etiqueta="Inactivos" valor={cuentas?.inactivos} detalle="Marcados como inactivos" tono="neutro" activa={filter === 'INACTIVO'} alPulsar={() => filtrar('INACTIVO')} />
+      <TarjetaCifra icono={Icono.clienteInactivo} etiqueta="Inactivos" valor={cuentas?.inactivos} detalle="Marcados como inactivos" activa={filter === 'INACTIVO'} alPulsar={() => filtrar('INACTIVO')} />
     </FilaCifras>
     <section className="list-panel">
       <div className="list-toolbar">

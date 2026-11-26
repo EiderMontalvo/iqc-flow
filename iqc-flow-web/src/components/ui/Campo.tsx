@@ -1,17 +1,18 @@
 import { useId, type ReactNode } from 'react';
+import { Obligatorio } from './Validacion';
 
 /**
  * Un campo con su etiqueta y, aparte, su texto de ayuda. La ayuda va fuera de la etiqueta y se liga con `aria-describedby`:
  * dentro de la etiqueta, el lector de pantalla la leería como parte del nombre del campo (y otra vez como descripción).
  * El campo recibe sus atributos por función, así sirve para input, select o textarea.
  */
-export function Campo({ etiqueta, ayuda, children }: {
-  etiqueta: string; ayuda?: string;
+export function Campo({ etiqueta, ayuda, obligatorio, children }: {
+  etiqueta: string; ayuda?: string; obligatorio?: boolean;
   children: (atributos: { id: string; 'aria-describedby'?: string }) => ReactNode;
 }) {
   const id = useId(), idAyuda = `${id}-ayuda`;
   return <div className="campo">
-    <label htmlFor={id}>{etiqueta}</label>
+    <label htmlFor={id}>{etiqueta}{obligatorio && <Obligatorio />}</label>
     {children({ id, 'aria-describedby': ayuda ? idAyuda : undefined })}
     {ayuda && <span className="field-help" id={idAyuda}>{ayuda}</span>}
   </div>;

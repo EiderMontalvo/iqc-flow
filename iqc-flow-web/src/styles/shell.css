@@ -162,7 +162,15 @@
 .fondo-tematico { position: absolute; inset: 68px 0 0; z-index: 0; overflow: hidden; pointer-events: none; background: var(--fondo); }
 .fondo-tematico span { position: absolute; display: grid; opacity: .26; }
 :root[data-theme="dark"] .fondo-tematico span { opacity: .28; }
-.app-shell[data-tematica] #contenido { position: relative; z-index: 1; }
-.app-shell[data-tematica] .cabecera { z-index: 2; }
-.cabecera-temporada { display: inline-flex; align-items: center; gap: 6px; margin-left: var(--e3); color: var(--texto-2); font-size: var(--tam-sm); font-weight: 600; }
+/* El contenido va sobre el fondo de temporada por estar posicionado y después en el HTML, SIN z-index propio: un z-index
+   aquí encerraría los cajones y formularios (fijos, z-index 50) en una capa por debajo de la cabecera (z-index 20) */
+.app-shell[data-tematica] #contenido { position: relative; }
+.cabecera-temporada { color: inherit; font-weight: inherit; }
 @media (max-width: 960px) { .fondo-tematico { inset: 56px 0 0; } }
+/* Fondo de temporada en cajones y formularios: una franja «pegajosa» de alto 0 al inicio del área que se desplaza; los
+   íconos cuelgan de ella con el alto de la ventana, así quedan quietos detrás del formulario mientras este se desplaza.
+   El contenido va después y posicionado (sin z-index), por eso se pinta encima */
+.fondo-cajon { position: sticky; top: 0; height: 0; z-index: 0; pointer-events: none; }
+.fondo-cajon .fondo-tematico { inset: 0 0 auto 0; height: 100dvh; background: none; }
+.fondo-cajon .fondo-tematico span { opacity: .14; }
+.espacio-formulario > :not(.fondo-cajon), .dialog > :not(.fondo-cajon):not(.dialog-header) { position: relative; }

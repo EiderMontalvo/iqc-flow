@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { Ban, BadgeCheck, Check, ChevronRight, Copy, ExternalLink, FileText, FilterX, Globe2, Pencil, Plus, Upload } from 'lucide-react';
 import { Icono } from '../../lib/iconos';
 import { Seccion } from '../../components/ui/Seccion';
@@ -13,9 +13,18 @@ import { Drawer } from '../../components/Drawer';
 import { Pagination } from '../../components/Pagination';
 import { SearchField } from '../../components/SearchField';
 import { Boton } from '../../components/ui/Boton';
+import { ErrorCampo, Obligatorio, correoValido, enfocarPrimerError, vacio } from '../../components/ui/Validacion';
+import { errorDocumento, errorNombre, errorTelefono, limpiarAnio, limpiarCodigo, limpiarDocumento, limpiarTelefono, nombreEnTitulo, normaConFamilia } from '../../lib/sanitizar';
 
 const stateNames: Record<PersonalState, string> = { EMITIDO: 'Emitido', ANULADO: 'Anulado' };
-const MODALIDADES = ['Presencial', 'Virtual', 'Semipresencial', 'In company'];
+const MODALIDADES = ['Presencial', 'Virtual', 'En línea', 'Semipresencial', 'In company'];
+
+/** «27701» + «2025» → «ISO 27701:2025»; si ya trae la familia (ISO, NTP…) se deja tal cual */
+export function normaPersonal(ref: string | null | undefined, anio: string | null | undefined) {
+  if (!ref) return '';
+  const base = /^\d/.test(ref.trim()) ? `ISO ${ref.trim()}` : ref.trim();
+  return anio ? `${base}:${anio}` : base;
+}
 
 function PersonalTag({ estado }: { estado: PersonalState }) {
   return <span className={`cert-tag ${estado === 'EMITIDO' ? 'vigente' : 'cancelado'}`}>{stateNames[estado]}</span>;
@@ -30,31 +39,71 @@ const payload = (d: Datos) => ({
   fechaInicio: d.fechaInicio || null, fechaFin: d.fechaFin || null, fechaEmision: d.fechaEmision, entrenador: d.entrenador.trim() || null,
 });
 
-function CourseFields({ value, onChange }: { value: Datos; onChange: (d: Datos) => void }) {
+/** Errores de los datos del curso: curso y emisión obligatorios; año de 4 dígitos, horas positivas y fin no antes del inicio */
+function erroresCurso(d: Datos, completo = false): Record<string, string> {
+  const e: Record<string, string> = {};
+  if (vacio(d.curso)) e.curso = 'Escribe el nombre del curso.';
+  // Desde plantilla el PDF se dibuja con estos datos: si faltan, el certificado sale con huecos (la API tampoco lo genera)
+  if (completo) {
+    if (vacio(d.normaReferencia)) e.normaReferencia = 'Elige la norma: sale en el certificado.';
+    if (vacio(d.normaAnio)) e.normaAnio = 'Indica el año de la norma.';
+    if (!d.duracionHoras) e.duracionHoras = 'Indica las horas del curso.';
+    if (vacio(d.modalidad)) e.modalidad = 'Elige la modalidad.';
+    if (!d.fechaInicio) e.fechaInicio = 'Indica la fecha de inicio.';
+    if (!d.fechaFin) e.fechaFin = 'Indica la fecha de fin.';
+    if (vacio(d.entrenador)) e.entrenador = 'Escribe el nombre del entrenador.';
+  }
+  if (d.normaAnio.trim() && !/^\d{4}$/.test(d.normaAnio.trim())) e.normaAnio = 'El año tiene 4 dígitos, por ejemplo 2016.';
+  else if (d.normaAnio && (Number(d.normaAnio) < 1947 || Number(d.normaAnio) > new Date().getFullYear() + 1)) e.normaAnio = 'Revisa el año de la norma.';
+  if (d.duracionHoras && !(Number(d.duracionHoras) > 0)) e.duracionHoras = 'Las horas deben ser mayores que 0.';
+  if (d.fechaInicio && d.fechaFin && d.fechaFin < d.fechaInicio) e.fechaFin = 'El fin no puede ser antes del inicio.';
+  if (!d.fechaEmision) e.fechaEmision = 'Indica la fecha de emisión.';
+  return e;
+}
+
+const OTRA_NORMA = '__otra';
+
+/** normas: las del catálogo («ISO 37001»…). La norma se elige de la lista para no escribirla mal; «Otra norma» abre un campo */
+/** completo: modo «Desde plantilla», donde los datos que imprime la plantilla son obligatorios */
+function CourseFields({ value, onChange, normas, completo, errores = {} }: { value: Datos; onChange: (d: Datos) => void; normas: string[]; completo?: boolean; errores?: Record<string, string> }) {
+  const ob = completo ? <Obligatorio /> : null;
   const set = (k: keyof Datos) => (e: { target: { value: string } }) => onChange({ ...value, [k]: e.target.value });
+  const [otra, setOtra] = useState(false);
+  // La que ya tiene el certificado (p. ej. ISO 27701, que no está en el catálogo) también aparece en la lista
+  const opciones = [...new Set([...normas, ...(value.normaReferencia && !otra ? [value.normaReferencia] : [])])];
   // Cada fila se llena de lado a lado: curso, norma con su año, duración, fechas, entrenador y descripción
   return <div className="campos">
-    <label>Curso<input required maxLength={255} value={value.curso} onChange={set('curso')} placeholder="Ej.: Auditor interno ISO 37001" /></label>
+    <label>Curso<Obligatorio /><input required aria-invalid={!!errores.curso} maxLength={255} value={value.curso} onChange={set('curso')} placeholder="Ej.: Auditor interno ISO 37001" /><ErrorCampo mensaje={errores.curso} /></label>
     <div className="form-grid largo-corto">
-      <label>Norma de referencia<input maxLength={120} value={value.normaReferencia} onChange={set('normaReferencia')} placeholder="ISO 37001" /></label>
-      <label>Año de la norma<input inputMode="numeric" pattern="\d{4}" maxLength={4} value={value.normaAnio} onChange={set('normaAnio')} placeholder="2016" /></label>
+      <div className="campos">
+        <label>Norma de referencia{ob}<select aria-invalid={!!errores.normaReferencia} value={otra ? OTRA_NORMA : value.normaReferencia} onChange={e => {
+          const v = e.target.value; setOtra(v === OTRA_NORMA); onChange({ ...value, normaReferencia: v === OTRA_NORMA ? '' : v }); }}>
+          <option value="">Sin norma</option>
+          {opciones.map(n => <option key={n} value={n}>{n}</option>)}
+          <option value={OTRA_NORMA}>Otra norma…</option></select><ErrorCampo mensaje={errores.normaReferencia} /></label>
+        {otra && <label>Otra norma<input maxLength={120} value={value.normaReferencia} placeholder="ISO 27701" autoFocus
+          onChange={set('normaReferencia')} onBlur={() => onChange({ ...value, normaReferencia: normaConFamilia(value.normaReferencia) })} /></label>}
+      </div>
+      <label>Año de la norma{ob}<input inputMode="numeric" aria-invalid={!!errores.normaAnio} maxLength={4} value={value.normaAnio} onChange={e => onChange({ ...value, normaAnio: limpiarAnio(e.target.value) })} placeholder="2016" /><ErrorCampo mensaje={errores.normaAnio} /></label>
     </div>
     <label>Subtítulo<input maxLength={255} value={value.subtitulo} onChange={set('subtitulo')} /></label>
     <div className="form-grid corto-largo">
-      <label>Horas<input type="number" min="0.5" step="0.5" value={value.duracionHoras} onChange={set('duracionHoras')} /></label>
-      <label>Modalidad<input list="modalidades" maxLength={50} value={value.modalidad} onChange={set('modalidad')} /><datalist id="modalidades">{MODALIDADES.map(m => <option key={m} value={m} />)}</datalist></label>
+      <label>Horas{ob}<input type="number" min="0.5" step="0.5" aria-invalid={!!errores.duracionHoras} value={value.duracionHoras} onChange={set('duracionHoras')} /><ErrorCampo mensaje={errores.duracionHoras} /></label>
+      <label>Modalidad{ob}<select aria-invalid={!!errores.modalidad} value={value.modalidad} onChange={set('modalidad')}>
+        <option value="">Sin indicar</option>
+        {[...MODALIDADES, ...(value.modalidad && !MODALIDADES.includes(value.modalidad) ? [value.modalidad] : [])].map(m => <option key={m} value={m}>{m}</option>)}</select><ErrorCampo mensaje={errores.modalidad} /></label>
     </div>
     <div className="form-grid fechas">
-      <label>Inicio<input type="date" value={value.fechaInicio} onChange={set('fechaInicio')} /></label>
-      <label>Fin<input type="date" value={value.fechaFin} min={value.fechaInicio || undefined} onChange={set('fechaFin')} /></label>
-      <label>Emisión<input type="date" required value={value.fechaEmision} onChange={set('fechaEmision')} /></label>
+      <label>Inicio{ob}<input type="date" aria-invalid={!!errores.fechaInicio} value={value.fechaInicio} onChange={set('fechaInicio')} /><ErrorCampo mensaje={errores.fechaInicio} /></label>
+      <label>Fin{ob}<input type="date" aria-invalid={!!errores.fechaFin} value={value.fechaFin} min={value.fechaInicio || undefined} onChange={set('fechaFin')} /><ErrorCampo mensaje={errores.fechaFin} /></label>
+      <label>Emisión<Obligatorio /><input type="date" required aria-invalid={!!errores.fechaEmision} value={value.fechaEmision} onChange={set('fechaEmision')} /><ErrorCampo mensaje={errores.fechaEmision} /></label>
     </div>
-    <label>Entrenador<input maxLength={255} value={value.entrenador} onChange={set('entrenador')} /></label>
+    <label>Entrenador{ob}<input aria-invalid={!!errores.entrenador} maxLength={255} value={value.entrenador} onChange={set('entrenador')} /><ErrorCampo mensaje={errores.entrenador} /></label>
     <label>Descripción<textarea rows={3} maxLength={4000} value={value.descripcion} onChange={set('descripcion')} /></label>
   </div>;
 }
 
-function RegisterPersonal({ types, brands, tools, onClose, onDone }: { types: Record<string, DocumentType[]>; brands: Brand[]; tools: Tools | null; onClose: () => void; onDone: (c: PersonalCertificate) => void }) {
+function RegisterPersonal({ types, brands, tools, normas, onClose, onDone }: { types: Record<string, DocumentType[]>; brands: Brand[]; tools: Tools | null; normas: string[]; onClose: () => void; onDone: (c: PersonalCertificate) => void }) {
   const modes = tools?.modosPersonal ?? ['MANUAL'];
   const [mode, setMode] = useState<RegistrationMode>(modes[0] ?? 'MANUAL'), [readId, setReadId] = useState<string | null>(null), [formKey, setFormKey] = useState(0);
   const countries = Object.keys(types);
@@ -86,25 +135,50 @@ function RegisterPersonal({ types, brands, tools, onClose, onDone }: { types: Re
       entrenador: p.entrenador || d.entrenador }));
     setFormKey(k => k + 1);
   }
-  const ayuda = tiposPais.find(t => t.codigo === tipo)?.ayuda;
-  const [segunSunat, setSegunSunat] = useState(false);
+  const tipoDoc = tiposPais.find(t => t.codigo === tipo), ayuda = tipoDoc?.ayuda;
+  // Código ya usado por otro certificado: se avisa en el campo antes de enviar (la API también lo rechaza)
+  const [codigoUsado, setCodigoUsado] = useState<string | null>(null);
+  useEffect(() => {
+    const c = codigo.trim(); setCodigoUsado(null);
+    if (c.length < 4) return;
+    let vigente = true;
+    const t = window.setTimeout(() => api.personalCertificates(new URLSearchParams({ texto: c, tamano: '5' })).then(r => {
+      const igual = r.contenido.find(x => x.codigo.toUpperCase() === c);
+      if (vigente && igual) setCodigoUsado(igual.persona?.nombres || 'otra persona');
+    }).catch(() => {}), 400);
+    return () => { vigente = false; window.clearTimeout(t); };
+  }, [codigo]);
   /** Primero en IQC Flow (persona ya registrada); si no está y es un DNI de Perú, se completa el nombre con SUNAT */
   async function lookup() {
     if (!numero.trim() || !tipo) return;
-    setSegunSunat(false);
     try { const p = await api.personByDocument(pais, tipo, numero.trim()); setNombres(p.nombres); setCorreo(p.correo || ''); setTelefono(p.telefono || ''); setKnown(true); return; }
     catch { setKnown(false); }
     if (pais === 'PE' && tipo === 'DNI' && /^\d{8}$/.test(numero.trim()) && !nombres.trim()) {
-      try { const d = await api.padronDni(numero.trim()); setNombres(d.nombreCompleto); setSegunSunat(true); } catch { /* se escribe a mano */ }
+      try { const d = await api.padronDni(numero.trim()); setNombres(nombreEnTitulo(d.nombreCompleto)); } catch { /* se escribe a mano */ }
     }
   }
-  async function submit(event: FormEvent) {
-    event.preventDefault(); setError('');
+  const [intentado, setIntentado] = useState(false);
+  /** Errores del formulario completo; se muestran desde el primer intento de enviar y se actualizan al corregir */
+  function erroresRegistro(): Record<string, string> {
+    const e: Record<string, string> = {};
+    const doc = errorDocumento(numero, tipoDoc?.patron, ayuda); if (doc) e.numero = doc;
+    const nom = errorNombre(nombres); if (nom) e.nombres = nom;
+    if (correo.trim() && !correoValido(correo)) e.correo = 'Revisa el correo, por ejemplo ana@empresa.com.';
+    const tel = errorTelefono(telefono); if (tel) e.telefono = tel;
+    if (vacio(codigo)) e.codigo = 'Escribe el código del certificado.';
+    else if (!/^[A-Z0-9][A-Z0-9/._-]{3,63}$/.test(codigo.trim())) e.codigo = 'Usa el formato del código, por ejemplo IQC/PE/ABM6400.';
+    else if (codigoUsado) e.codigo = `Ese código ya es de ${codigoUsado}. Cada certificado lleva un código distinto.`;
+    return { ...e, ...erroresCurso(datos, mode === 'PLANTILLA') };
+  }
+  const errores = intentado ? erroresRegistro() : {};
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); setError(''); setIntentado(true);
+    if (Object.keys(erroresRegistro()).length) { setError('Revisa los campos marcados en rojo.'); enfocarPrimerError(event.currentTarget); return; }
     try {
       let documentoPdfId: string | undefined = mode === 'AUTOMATIZADO' && readId ? readId : undefined;
       if (!documentoPdfId && file && mode !== 'PLANTILLA') { setBusy('Subiendo PDF…'); documentoPdfId = (await api.uploadDocument('CERTIFICADO_PDF', file)).id; }
       setBusy('Registrando…');
-      const creado = await api.registerPersonal({ persona: { codigoPais: pais, tipoDocumento: tipo, numeroDocumento: numero.trim(), nombres: nombres.trim(), correo: correo.trim() || null, telefono: telefono.trim() || null },
+      const creado = await api.registerPersonal({ persona: { codigoPais: pais, tipoDocumento: tipo, numeroDocumento: numero.trim(), nombres: nombreEnTitulo(nombres), correo: correo.trim() || null, telefono: telefono.trim() || null },
         codigo: codigo.trim(), datos: payload(datos), ...(documentoPdfId ? { documentoPdfId } : {}) });
       if (mode !== 'PLANTILLA') return onDone(creado);
       setBusy('Generando el PDF con la plantilla…');
@@ -120,25 +194,26 @@ function RegisterPersonal({ types, brands, tools, onClose, onDone }: { types: Re
     : <VistaPdf fuente={archivoVista ? { tipo: 'archivo', archivo: archivoVista } : null} ocupado={leyendo}
         alElegir={f => mode === 'AUTOMATIZADO' ? setArchivoLectura(f) : setFile(f)} />;
   return <Drawer onClose={onClose} title="Registrar certificado personal" subtitle="Curso o competencia de una persona" vista={vista}>
-    <form className="client-form" onSubmit={submit}>
+    <form className="client-form" onSubmit={submit} noValidate>
       <ModeTabs modes={modes} value={mode} onChange={m => { setMode(m); setReadId(null); setArchivoLeido(null); }} />
       {mode === 'AUTOMATIZADO' && <PdfReader tipo="PERSONAL" onRead={applyReading} archivoExterno={archivoLectura} alOcupado={setLeyendo} />}
       <Seccion key={formKey} titulo="Persona"><div className="form-grid three">
         <label>País<select value={pais} onChange={e => { setPais(e.target.value); setKnown(false); }}>{countries.map(c => <option key={c} value={c}>{brandName(c)}</option>)}</select></label>
         <label>Documento<select value={tipo} onChange={e => { setTipo(e.target.value); setKnown(false); }}>{tiposPais.map(t => <option key={t.codigo} value={t.codigo}>{t.etiqueta}</option>)}</select></label>
-        <label>Número<input required value={numero} onChange={e => { setNumero(e.target.value); setKnown(false); }} onBlur={lookup} autoComplete="off" />{ayuda && <span className="field-help">{ayuda}</span>}</label>
-        <label className="full">Nombres y apellidos<input required maxLength={255} value={nombres} onChange={e => setNombres(e.target.value)} />{known && <span className="field-help"><Check size={14} aria-hidden /> Persona ya registrada: se usarán sus datos y se actualizarán si los cambias.</span>}
-          {segunSunat && <span className="field-help"><Check size={14} aria-hidden /> Completado con SUNAT. Revisa tildes y el orden contra el PDF.</span>}</label>
-        <label className="span-2c">Correo<input type="email" maxLength={255} value={correo} onChange={e => setCorreo(e.target.value)} /></label>
-        <label>Teléfono<input maxLength={30} value={telefono} onChange={e => setTelefono(e.target.value)} /></label>
+        <label>Número<Obligatorio /><input required aria-invalid={!!errores.numero} inputMode={tipoDoc?.patron?.startsWith('[0-9]') ? 'numeric' : undefined} value={numero}
+          onChange={e => { setNumero(limpiarDocumento(e.target.value, tipoDoc?.patron)); setKnown(false); }} onBlur={lookup} autoComplete="off" />{errores.numero ? <ErrorCampo mensaje={errores.numero} /> : ayuda && <span className="field-help">{ayuda}</span>}</label>
+        <label className="full">Nombres y apellidos<Obligatorio /><input required aria-invalid={!!errores.nombres} maxLength={120} value={nombres} onChange={e => setNombres(e.target.value)} onBlur={() => setNombres(nombreEnTitulo(nombres))} autoComplete="off" /><ErrorCampo mensaje={errores.nombres} />{known && <span className="field-help"><Check size={14} aria-hidden /> Persona ya registrada: se usarán sus datos y se actualizarán si los cambias.</span>}</label>
+        <label className="span-2c">Correo (opcional)<input type="email" aria-invalid={!!errores.correo} maxLength={255} value={correo} onChange={e => setCorreo(e.target.value.trim())} autoComplete="off" /><ErrorCampo mensaje={errores.correo} /></label>
+        <label>Teléfono (opcional)<input type="tel" aria-invalid={!!errores.telefono} maxLength={20} value={telefono} onChange={e => setTelefono(limpiarTelefono(e.target.value))} autoComplete="off" /><ErrorCampo mensaje={errores.telefono} /></label>
       </div></Seccion>
       <Seccion titulo="Certificado">
-        <div className="form-grid"><label>Código<input required maxLength={64} pattern="[A-Za-z0-9/._-]+" className="mono" value={codigo} onChange={e => setCodigo(e.target.value)} placeholder="IQC/PE/ABM6400" spellCheck={false} /></label>
+        <div className="form-grid"><label className={mode === 'PLANTILLA' ? 'full' : undefined}>Código<Obligatorio /><input required aria-invalid={!!errores.codigo} maxLength={64} className="mono" value={codigo} onChange={e => setCodigo(limpiarCodigo(e.target.value))} placeholder="IQC/PE/ABM6400" spellCheck={false} autoComplete="off" />
+          {errores.codigo ? <ErrorCampo mensaje={errores.codigo} /> : codigoUsado && <ErrorCampo mensaje={`Ese código ya es de ${codigoUsado}.`} />}</label>
           {mode === 'MANUAL' && (file ? <p className="pdf-adjunto viendo"><FileText size={14} aria-hidden /><span>{file.name}</span></p>
             : <ElegirPdf alElegir={setFile} />)}
           {mode === 'AUTOMATIZADO' && <p className="field-help">{readId ? 'Se adjuntará el PDF leído (a la derecha).' : 'Elige o arrastra el PDF para leerlo.'}</p>}
 </div>
-        <CourseFields value={datos} onChange={setDatos} />
+        <CourseFields value={datos} onChange={setDatos} normas={normas} completo={mode === 'PLANTILLA'} errores={errores} />
       </Seccion>
       {error && <p className="form-error" role="alert">{error}</p>}
       <div className="form-actions"><Boton type="button" variante="secundario" onClick={onClose}>Cancelar</Boton><Boton type="submit" variante="primario" disabled={!!busy}>{busy || 'Registrar certificado'}</Boton></div>
@@ -146,9 +221,13 @@ function RegisterPersonal({ types, brands, tools, onClose, onDone }: { types: Re
   </Drawer>;
 }
 
-function PersonalDetail({ id, brands, canManage, canGeneratePdf, onClose, onChanged }: { id: string; brands: Brand[]; canManage: boolean; canGeneratePdf: boolean; onClose: () => void; onChanged: () => void }) {
-  const [cert, setCert] = useState<PersonalCertificate | null>(null), [mode, setMode] = useState<'view' | 'edit' | 'void'>('view');
-  const [datos, setDatos] = useState<Datos>(datosVacios), [reason, setReason] = useState(''), [file, setFile] = useState<File | null>(null);
+/** inicial: la fila de la lista; la ficha se muestra con ella al instante y se actualiza con la respuesta de la API */
+function PersonalDetail({ id, inicial, brands, normas, canManage, canGeneratePdf, onClose, onChanged }: { id: string; inicial?: PersonalCertificate; brands: Brand[]; normas: string[]; canManage: boolean; canGeneratePdf: boolean; onClose: () => void; onChanged: () => void }) {
+  const [cert, setCert] = useState<PersonalCertificate | null>(inicial ?? null), [mode, setMode] = useState<'view' | 'edit' | 'void'>('view');
+  const [datos, setDatos] = useState<Datos>(() => inicial ? datosDe(inicial) : datosVacios()), [reason, setReason] = useState(''), [file, setFile] = useState<File | null>(null);
+  const elegirReemplazo = useRef<HTMLInputElement>(null);
+  const [corrigiendo, setCorrigiendo] = useState(false);
+  const erroresCorreccion = () => ({ ...erroresCurso(datos), ...(vacio(reason) ? { motivo: 'falta' } : {}) });
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState(''), [copied, setCopied] = useState(false);
   const load = () => api.personalCertificate(id).then(c => { setCert(c); setDatos(datosDe(c)); }).catch(e => setError(errorText(e)));
   useEffect(() => { load(); }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -172,15 +251,19 @@ function PersonalDetail({ id, brands, canManage, canGeneratePdf, onClose, onChan
         {cert.persona && <><h3 className="titular">{cert.persona.nombres}</h3>
           <p>{[`${cert.persona.tipoDocumento} ${cert.persona.numeroDocumento}`, cert.persona.correo, cert.persona.telefono].filter(Boolean).join(' · ')}</p></>}
       </section>
-      {mode === 'edit' ? <form className="client-form" onSubmit={e => { e.preventDefault(); run(() => api.correctPersonal(cert.id, { datos: payload(datos), motivo: reason.trim(), version: cert.version }), 'Datos corregidos.'); }}>
+      {mode === 'edit' ? <form className="client-form" noValidate onSubmit={e => {
+        e.preventDefault(); setCorrigiendo(true);
+        if (Object.keys(erroresCorreccion()).length) { enfocarPrimerError(e.currentTarget); return; }
+        run(() => api.correctPersonal(cert.id, { datos: payload(datos), motivo: reason.trim(), version: cert.version }), 'Datos corregidos.'); }}>
         <p className="field-help">Corrige los datos mirando el PDF de la derecha.</p>
-        <CourseFields value={datos} onChange={setDatos} />
-        <label>Motivo de la corrección<input required maxLength={500} value={reason} onChange={e => setReason(e.target.value)} placeholder="Queda en la bitácora" /></label>
+        <CourseFields value={datos} onChange={setDatos} normas={normas} errores={corrigiendo ? erroresCorreccion() : {}} />
+        <label>Motivo de la corrección<Obligatorio /><input required aria-invalid={corrigiendo && vacio(reason)} maxLength={500} value={reason} onChange={e => setReason(e.target.value)} placeholder="Queda en la bitácora" />
+          <ErrorCampo mensaje={corrigiendo && vacio(reason) ? 'Escribe el motivo: queda en la bitácora.' : undefined} /></label>
         <div className="form-actions"><Boton type="button" variante="secundario" onClick={() => { setMode('view'); setDatos(datosDe(cert)); }}>Cancelar</Boton><Boton type="submit" variante="primario" disabled={busy}>{busy ? 'Guardando…' : 'Guardar corrección'}</Boton></div>
       </form> : <>
         <dl className="ficha-datos">
           <div className="span-2"><dt>Curso</dt><dd>{cert.curso}{cert.subtitulo ? ` — ${cert.subtitulo}` : ''}</dd></div>
-          <div><dt>Norma</dt><dd>{[cert.normaReferencia, cert.normaAnio].filter(Boolean).join(':') || '—'}</dd></div>
+          <div><dt>Norma</dt><dd>{normaPersonal(cert.normaReferencia, cert.normaAnio) || '—'}</dd></div>
           <div><dt>Horas · modalidad</dt><dd>{[cert.duracionHoras != null ? `${cert.duracionHoras} h` : null, cert.modalidad].filter(Boolean).join(' · ') || '—'}</dd></div>
           <div><dt>Fechas del curso</dt><dd className="tabular">{cert.fechaInicio ? `${day(cert.fechaInicio)} – ${day(cert.fechaFin)}` : '—'}</dd></div>
           <div><dt>Emisión</dt><dd className="tabular">{day(cert.fechaEmision)}</dd></div>
@@ -192,13 +275,16 @@ function PersonalDetail({ id, brands, canManage, canGeneratePdf, onClose, onChan
           <div className="qr-actions"><Boton type="button" variante="secundario" pequeno onClick={async () => { try { await navigator.clipboard.writeText(cert.urlConsulta); setCopied(true); window.setTimeout(() => setCopied(false), 1600); } catch { setNotice(cert.urlConsulta); } }}>{copied ? <><Check size={14} aria-hidden /> Copiado</> : <><Copy size={14} aria-hidden /> Copiar enlace</>}</Boton></div>
         </section>
         {canManage && cert.estado === 'EMITIDO' && <section className="ficha-seccion"><h3>Documento PDF</h3>
-          {canGeneratePdf && <Boton variante="secundario" pequeno icono={FileText} cargando={busy} onClick={() => run(() => api.generatePersonalPdf(cert.id), 'PDF generado con la plantilla.')}>{cert.tienePdf ? 'Regenerar PDF con la plantilla' : 'Generar PDF con la plantilla'}</Boton>}
-          <form className="inline-form" onSubmit={async e => { e.preventDefault(); if (!file) return; await run(async () => { const doc = await api.uploadDocument('CERTIFICADO_PDF', file); return api.setPersonalPdf(cert.id, { documentoId: doc.id, version: cert.version }); }, 'PDF actualizado.'); }}>
-            <div><ElegirPdf etiqueta="Reemplazar PDF" texto={file ? 'Elegir otro' : 'Elegir PDF'} requerido alElegir={setFile} />
-              {file && <span className="field-help">{file.name}: revísalo en la vista previa antes de subirlo.</span>}</div>
-            <span />
-            <Boton type="submit" variante="primario" disabled={busy || !file}><Upload size={16} aria-hidden /> Subir PDF</Boton>
-          </form>
+          <div className="acciones-pdf">
+            <input ref={elegirReemplazo} type="file" accept="application/pdf" className="sr-only" onChange={e => setFile(e.target.files?.[0] || null)} />
+            {canGeneratePdf && !file && <Boton variante="secundario" pequeno icono={FileText} cargando={busy} onClick={() => run(() => api.generatePersonalPdf(cert.id), 'PDF generado con la plantilla.')}>{cert.tienePdf ? 'Regenerar PDF con la plantilla' : 'Generar PDF con la plantilla'}</Boton>}
+            {!file && <Boton variante="secundario" pequeno icono={Upload} onClick={() => elegirReemplazo.current?.click()}>Reemplazar por otro PDF</Boton>}
+            {file && <>
+              <span className="field-help">{file.name}: revísalo a la derecha antes de subirlo.</span>
+              <Boton variante="secundario" pequeno onClick={() => { setFile(null); if (elegirReemplazo.current) elegirReemplazo.current.value = ''; }}>Cancelar</Boton>
+              <Boton variante="primario" pequeno icono={Upload} cargando={busy} onClick={() => run(async () => { const doc = await api.uploadDocument('CERTIFICADO_PDF', file); return api.setPersonalPdf(cert.id, { documentoId: doc.id, version: cert.version }); }, 'PDF actualizado.')}>Subir este PDF</Boton>
+            </>}
+          </div>
         </section>}
         {mode === 'void' && <form className="task-action-form" onSubmit={e => { e.preventDefault(); run(() => api.voidPersonal(cert.id, { motivo: reason.trim(), version: cert.version }), 'Certificado anulado. Deja de mostrarse en la consulta pública.'); }}>
           <h3>Anular certificado</h3>
@@ -222,7 +308,9 @@ export function PersonalCertificates({ canManage, initialCountry = '' }: { canMa
   const [open, setOpen] = useState<string | null>(null), [registering, setRegistering] = useState(false);
   const [tools, setTools] = useState<Tools | null>(null), [resumen, setResumen] = useState<PersonalSummary[] | null>(null);
   useEffect(() => { api.personalSummary().then(setResumen).catch(() => {}); }, [refresh]);
-  useEffect(() => { api.brands().then(setBrands).catch(() => {}); api.documentTypes().then(setTypes).catch(() => {}); api.tools().then(setTools).catch(() => {}); }, []);
+  const [normas, setNormas] = useState<string[]>([]);
+  useEffect(() => { api.brands().then(setBrands).catch(() => {}); api.documentTypes().then(setTypes).catch(() => {}); api.tools().then(setTools).catch(() => {});
+    api.standards().then(l => setNormas(l.map(n => n.nombreCorto))).catch(() => {}); }, []);
   useEffect(() => { const t = window.setTimeout(() => setDebounced(text.trim()), 300); return () => window.clearTimeout(t); }, [text]);
   const query = useMemo(() => { const q = new URLSearchParams(); if (debounced) q.set('texto', debounced); if (country) q.set('pais', country); if (state) q.set('estado', state); return q; }, [debounced, country, state]);
   useEffect(() => {
@@ -243,9 +331,9 @@ export function PersonalCertificates({ canManage, initialCountry = '' }: { canMa
       <TarjetaCifra icono={BadgeCheck} etiqueta="Emitidos" valor={resumen?.reduce((t, r) => t + r.emitidos, 0)} detalle="Válidos en la consulta pública"
         tono="ok" activa={state === 'EMITIDO'} alPulsar={() => reset(() => setState(state === 'EMITIDO' ? '' : 'EMITIDO'))} />
       <TarjetaCifra icono={Ban} etiqueta="Anulados" valor={resumen?.reduce((t, r) => t + r.anulados, 0)} detalle="La consulta los muestra como anulados"
-        tono="neutro" activa={state === 'ANULADO'} alPulsar={() => reset(() => setState(state === 'ANULADO' ? '' : 'ANULADO'))} />
+        activa={state === 'ANULADO'} alPulsar={() => reset(() => setState(state === 'ANULADO' ? '' : 'ANULADO'))} />
       <TarjetaCifra icono={Globe2} etiqueta="Marcas con certificados" valor={resumen?.filter(r => r.emitidos + r.anulados > 0).length}
-        detalle={resumen ? resumen.filter(r => r.emitidos + r.anulados > 0).map(r => brandName(r.codigoPais)).join(' · ') || 'Ninguna todavía' : '…'} tono="neutro" />
+        detalle={resumen ? resumen.filter(r => r.emitidos + r.anulados > 0).map(r => brandName(r.codigoPais)).join(' · ') || 'Ninguna todavía' : '…'} />
     </FilaCifras>
     <section className="list-panel">
       <div className="list-toolbar">
@@ -259,8 +347,8 @@ export function PersonalCertificates({ canManage, initialCountry = '' }: { canMa
         <tbody>{!data && <tr className="skeleton-row"><td colSpan={7}><span /></td></tr>}{data?.contenido.map(c => <tr key={c.id} className="clickable" onClick={() => setOpen(c.id)}>
           <td><span className="mono code">{c.codigo}</span></td>
           <td><strong>{c.persona?.nombres || '—'}</strong><small className="tabular">{c.persona ? `${c.persona.tipoDocumento} ${c.persona.numeroDocumento}` : ''}</small></td>
-          <td>{c.curso}{c.normaReferencia && <small>{[c.normaReferencia, c.normaAnio].filter(Boolean).join(':')}</small>}</td>
-          <td className="tabular">{day(c.fechaEmision)}</td><td>{c.persona ? brandName(c.persona.codigoPais) : '—'}</td><td><PersonalTag estado={c.estado} />{!c.tienePdf && <small className="muted">sin PDF</small>}</td>
+          <td>{c.curso}{c.normaReferencia && <small>{normaPersonal(c.normaReferencia, c.normaAnio)}</small>}</td>
+          <td className="tabular nowrap">{day(c.fechaEmision)}</td><td className="nowrap">{c.persona ? brandName(c.persona.codigoPais) : '—'}</td><td><PersonalTag estado={c.estado} />{!c.tienePdf && <small className="muted">sin PDF</small>}</td>
           <td><button className="row-link" onClick={e => { e.stopPropagation(); setOpen(c.id); }} aria-label={`Abrir ${c.codigo}`}><ChevronRight size={16} aria-hidden /></button></td></tr>)}</tbody></table></div>
       <div className="mobile-list">{data?.contenido.map(c => <button className="mobile-row" key={c.id} onClick={() => setOpen(c.id)}>
         <span className="mobile-row-main"><strong>{c.persona?.nombres || c.codigo}</strong><PersonalTag estado={c.estado} /></span>
@@ -268,7 +356,7 @@ export function PersonalCertificates({ canManage, initialCountry = '' }: { canMa
       {data && data.contenido.length === 0 && <div className="empty-state"><Icono.certificadoPersonal size={20} aria-hidden /><p>{filtered ? 'Ningún certificado personal coincide con la búsqueda.' : 'Aún no hay certificados personales.'}</p></div>}
       <Pagination page={page} totalPages={data?.totalPaginas || 1} total={data?.totalElementos ?? null} noun="certificados" onPage={setPage} />
     </section>
-    {open && <PersonalDetail id={open} brands={brands} canManage={canManage} canGeneratePdf={!!tools?.generacionPdf} onClose={() => setOpen(null)} onChanged={() => setRefresh(n => n + 1)} />}
-    {registering && <RegisterPersonal types={types} brands={brands} tools={tools} onClose={() => setRegistering(false)} onDone={c => { setRegistering(false); setRefresh(n => n + 1); setOpen(c.id); }} />}
+    {open && <PersonalDetail id={open} inicial={data?.contenido.find(c => c.id === open)} brands={brands} normas={normas} canManage={canManage} canGeneratePdf={!!tools?.generacionPdf} onClose={() => setOpen(null)} onChanged={() => setRefresh(n => n + 1)} />}
+    {registering && <RegisterPersonal types={types} brands={brands} tools={tools} normas={normas} onClose={() => setRegistering(false)} onDone={c => { setRegistering(false); setRefresh(n => n + 1); setOpen(c.id); }} />}
   </div>;
 }

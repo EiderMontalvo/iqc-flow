@@ -148,7 +148,7 @@ export interface PersonalCertificate {
   fechaInicio: string | null; fechaFin: string | null; fechaEmision: string; entrenador: string | null; motivoAnulacion: string | null;
   documentoPdfId: string | null; urlDocumentoLegado: string | null; tienePdf: boolean; urlConsulta: string; actualizadoEn: string; version: number;
 }
-export interface DocumentType { codigo: string; etiqueta: string; ayuda: string }
+export interface DocumentType { codigo: string; etiqueta: string; ayuda: string; /** regla del número (expresión regular), la misma que aplica la API */ patron?: string }
 export type RegistrationMode = 'MANUAL' | 'AUTOMATIZADO' | 'PLANTILLA';
 export interface Tools { modosEmpresarial: RegistrationMode[]; modosPersonal: RegistrationMode[]; autocompletado: boolean; generacionPdf: boolean; ia: boolean; automatizaciones: boolean }
 export interface BusinessReading { codigo: string | null; esquema: string | null; titular: string | null; direccion: string | null; normaTexto: string | null; normaNombre: string | null; edicion: string | null; alcance: string | null; ciclo: number | null; fechaOtorgamiento: string | null; fechaEmision: string | null; limiteVigilancia1: string | null; limiteVigilancia2: string | null; fechaExpiracion: string | null; subdivision: string | null; clase: string | null; procesosNoAplicables: string | null; anexos: string | null }
@@ -188,6 +188,20 @@ export interface RequestAnalysis {
   alcance: string | null; numeroSedes: number | null; sedesDetalle: string | null; numeroTrabajadores: number | null; plazo: string | null;
   /** Lo que la API leyó del archivo y del texto pegado (con remitente, fecha y asunto si era un correo) */
   texto: string;
+}
+export type LetterType = 'CERTIFICACION' | 'CONTINUIDAD' | 'SUSPENSION_PAGO' | 'LIBRE';
+export interface LetterTypeInfo { codigo: LetterType; nombre: string; descripcion: string; requiereCertificados: boolean }
+export interface LetterCertificate { id: string; codigo: string; norma: string; sistema: string; alcance: string | null; estado: string; fechaExpiracion: string | null }
+export interface LetterSigner { usuarioId: string; nombre: string; cargo: string }
+export interface MySignature { tieneFirma: boolean; nombreUsuario: string | null; nombreMostrado: string | null; cargo: string | null; actualizadoEn: string | null }
+export interface LetterSummary {
+  id: string; numero: string; tipo: LetterType; tipoNombre: string; cliente: { id: string; nombre: string | null }; asunto: string;
+  fecha: string; firmante: string | null; creadoPor: string | null; creadoEn: string;
+}
+/** Pedido de vista previa o de emisión de una carta; los campos que no usa el tipo se ignoran */
+export interface LetterRequest {
+  tipo: LetterType; clienteId: string; certificadoIds: string[]; fecha: string | null; ciudad: string | null; firmanteId: string | null;
+  tipoServicio: string | null; etapa: string | null; alcance: string | null; asunto: string | null; cuerpo: string | null;
 }
 export class ApiError extends Error { constructor(message: string, public status: number) { super(message); } }
 
@@ -308,6 +322,20 @@ export const api = {
   padronDni: (dni: string) => request<DatosDni>(`/padron/dni/${encodeURIComponent(dni)}`),
   analyzeRequest: (data: FormData) => request<RequestAnalysis>('/cotizaciones/analisis-solicitud', { method: 'POST', body: data }),
   quotes: (query: URLSearchParams) => request<Page<QuoteSummary>>(`/cotizaciones?${query}`),
+  letterTypes: () => request<LetterTypeInfo[]>('/cartas/tipos'),
+  letters: (query: URLSearchParams) => request<Page<LetterSummary>>(`/cartas?${query}`),
+  letterCertificates: (clienteId: string) => request<LetterCertificate[]>(`/cartas/clientes/${clienteId}/certificados`),
+  letterSigners: () => request<LetterSigner[]>('/cartas/firmantes'),
+  issueLetter: (data: LetterRequest) => request<LetterSummary>('/cartas', { method: 'POST', body: JSON.stringify(data) }),
+  /** PDF o Word de una carta emitida, con la sesión (la API no se deja mostrar en marcos) */
+  letterFile: async (id: string, formato: 'pdf' | 'word') => {
+    const r = await fetch(`${BASE}/cartas/${id}/${formato}`, { credentials: CREDENTIALS });
+    if (!r.ok) throw new ApiError(r.status === 404 ? 'La carta ya no existe.' : `No se pudo abrir la carta (${r.status}).`, r.status);
+    return r.blob();
+  },
+  mySignature: () => request<MySignature>('/cartas/mi-firma'),
+  saveMySignature: (data: FormData) => request<MySignature>('/cartas/mi-firma', { method: 'PUT', body: data }),
+  deleteMySignature: () => request<void>('/cartas/mi-firma', { method: 'DELETE' }),
   quoteCounts: () => request<QuoteCounts>('/cotizaciones/resumen'),
   quote: (id: string) => request<Quote>(`/cotizaciones/${id}`),
   createQuote: (data: object) => request<Quote>('/cotizaciones', { method: 'POST', body: JSON.stringify(data) }),

@@ -4,8 +4,9 @@ import { api, type CurrentUser } from '../../lib/api';
 import { errorText, initials } from '../../lib/format';
 import { LONGITUD_MINIMA_CONTRASENA } from '../../lib/politicaContrasena';
 import { Boton, BotonIcono } from '../../components/ui/Boton';
+import { MiFirma } from './MiFirma';
 
-/** Datos de la cuenta y cambio de contraseña voluntario */
+/** Datos de la cuenta, firma para las cartas y cambio de contraseña voluntario */
 export function PerfilDialogo({ user, espacio, cerrar }: { user: CurrentUser; espacio: string; cerrar: () => void }) {
   const [actual, setActual] = useState(''), [nueva, setNueva] = useState(''), [confirmar, setConfirmar] = useState('');
   const [error, setError] = useState(''), [listo, setListo] = useState(false), [ocupado, setOcupado] = useState(false);
@@ -25,6 +26,7 @@ export function PerfilDialogo({ user, espacio, cerrar }: { user: CurrentUser; es
         <span className="avatar-cabecera grande" aria-hidden>{initials(user.nombre)}</span>
         <div><strong>{user.nombre}</strong><span>{user.correo}</span><span>{espacio} · {user.organizacion.nombre}</span></div>
       </div>
+      <MiFirma />
       <form className="client-form" onSubmit={guardar}>
         <h3>Cambiar contraseña</h3>
         <div className="form-grid">

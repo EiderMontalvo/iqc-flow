@@ -1,6 +1,8 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { BotonIcono } from '../components/ui/Boton';
+import { FondoTematico } from '../app/tematica/FondoTematico';
+import { useTematica } from '../app/tematica/contexto';
 
 /** Panel lateral con foco protegido: Escape o el fondo lo cierran y el foco vuelve a donde estaba */
 export function Drawer({ title, subtitle, onClose, wide, vista, children }: {
@@ -8,7 +10,9 @@ export function Drawer({ title, subtitle, onClose, wide, vista, children }: {
   /** Panel a la derecha (p. ej. el PDF): el cajón pasa a espacio de trabajo dividido, cada lado con su desplazamiento */
   vista?: ReactNode; children: ReactNode;
 }) {
-  const panel = useRef<HTMLElement>(null);
+  const panel = useRef<HTMLElement>(null), tematica = useTematica();
+  // En temporada, los íconos de la fecha también van detrás del formulario (fijos mientras se desplaza)
+  const fondo = tematica ? <div className="fondo-cajon" aria-hidden><FondoTematico clave={tematica} enCajon /></div> : null;
   const close = useRef(onClose);
   close.current = onClose;
   useEffect(() => {
@@ -25,8 +29,8 @@ export function Drawer({ title, subtitle, onClose, wide, vista, children }: {
         <div><h2 id="drawer-title">{title}</h2>{subtitle && <p className="dialog-subtitle">{subtitle}</p>}</div>
         <BotonIcono etiqueta="Cerrar" icono={X} tamano={18} type="button" onClick={onClose} />
       </header>
-      {vista ? <div className="espacio-trabajo"><div className="espacio-formulario">{children}</div><aside className="espacio-vista" aria-label="Vista previa">{vista}</aside></div>
-        : children}
+      {vista ? <div className="espacio-trabajo"><div className="espacio-formulario">{fondo}{children}</div><aside className="espacio-vista" aria-label="Vista previa">{vista}</aside></div>
+        : <>{fondo}{children}</>}
     </section>
   </div>;
 }

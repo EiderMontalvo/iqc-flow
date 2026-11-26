@@ -40,7 +40,7 @@ export function Cotizaciones({ puedeGestionar, puedeCrearClientes }: { puedeGest
     {error && <div className="notice" role="alert">{error}</div>}
 
     <FilaCifras etiqueta="Resumen de cotizaciones">
-      <TarjetaCifra icono={FilePen} etiqueta="Borradores" valor={cifras?.borradores} detalle="Por terminar y enviar" tono="neutro" activa={filtro === 'BORRADOR'} alPulsar={() => elegir('BORRADOR')} />
+      <TarjetaCifra icono={FilePen} etiqueta="Borradores" valor={cifras?.borradores} detalle="Por terminar y enviar" activa={filtro === 'BORRADOR'} alPulsar={() => elegir('BORRADOR')} />
       <TarjetaCifra icono={Hourglass} etiqueta="Sin respuesta" valor={cifras?.enviadasSinRespuesta}
         detalle={cifras ? `Enviadas hace ${cifras.diasSinRespuesta} días o más` : 'Enviadas sin respuesta'} tono="alerta" activa={filtro === 'SIN_RESPUESTA'} alPulsar={() => elegir('SIN_RESPUESTA')} />
       <TarjetaCifra icono={CircleCheck} etiqueta="Aceptadas este mes" valor={cifras?.aceptadasMes} detalle={cifras ? `${cifras.emitidasMes} enviadas este mes` : '…'} tono="ok" activa={filtro === 'ACEPTADA'} alPulsar={() => elegir('ACEPTADA')} />
