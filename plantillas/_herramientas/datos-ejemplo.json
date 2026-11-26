@@ -18,11 +18,18 @@
   "normas": "ISO 9001:2015 e ISO 14001:2015",
   "normasSinEdicion": "ISO 9001 e ISO 14001",
   "normasLista": [
-    { "codigo": "ISO 9001", "nombre": "Sistema de Gestión de la Calidad" },
-    { "codigo": "ISO 14001", "nombre": "Sistema de Gestión Ambiental" }
+    {
+      "codigo": "ISO 9001",
+      "nombre": "Sistema de Gestión de la Calidad"
+    },
+    {
+      "codigo": "ISO 14001",
+      "nombre": "Sistema de Gestión Ambiental"
+    }
   ],
   "alcance": "Diseño, fabricación y comercialización de estructuras metálicas.",
   "etapa": "1ra Vigilancia",
   "sistema": "Sistema Integrado de Gestión",
-  "_imagenes": {}
+  "_imagenes": {},
+  "cuerpo": "Texto de prueba de la carta libre."
 }

@@ -14,5 +14,9 @@ public enum CategoriaDocumento {
   CERTIFICADO_PDF,
   /**logo de una marca (IQC Perú, IQC Ecuador...) para el QR, la consulta y los documentos; PNG o JPEG*/
   LOGO_MARCA,
+  /**PDF de una carta emitida a un cliente (módulo cartas)*/
+  CARTA_PDF,
+  /**imagen de la firma de una persona; solo la lee el sistema al generar documentos, nunca se descarga*/
+  FIRMA_USUARIO,
   OTRO
 }

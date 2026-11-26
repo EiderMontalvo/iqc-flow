@@ -15,6 +15,9 @@ public interface CertificadoRepository extends JpaRepository<Certificado, UUID>,
   /**certificados que pueden mostrarse en la consulta pública (ya emitidos alguna vez)*/
   List<Certificado> findByEstadoIn(Collection<Certificado.Estado> estados);
 
+  List<Certificado> findByOrganizacionIdAndClienteIdAndEstadoIn(UUID organizacionId, UUID clienteId,
+      Collection<Certificado.Estado> estados);
+
   List<Certificado> findByExpedienteIdOrderByNormaCodigoAscCreadoEnAsc(UUID expedienteId);
 
   Optional<Certificado> findByIdAndExpedienteId(UUID id, UUID expedienteId);

@@ -45,6 +45,12 @@ class CertificadosPublicablesJpa implements CertificadosPublicables {
         .map(c -> convertir(List.of(c)).get(0));
   }
 
+  @Override
+  @Transactional(readOnly = true)
+  public List<CertificadoPublicable> porCliente(UUID organizacionId, UUID clienteId) {
+    return convertir(certificados.findByOrganizacionIdAndClienteIdAndEstadoIn(organizacionId, clienteId, PUBLICABLES));
+  }
+
   private List<CertificadoPublicable> convertir(Collection<Certificado> lista) {
     Map<UUID, List<String>> legados = lista.isEmpty() ? Map.of()
         : qrs.findByCertificadoIdInAndActivoTrue(lista.stream().map(Certificado::getId).toList()).stream()

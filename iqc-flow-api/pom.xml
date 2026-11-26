@@ -162,6 +162,19 @@
   </dependencies>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+      <!-- Plantillas Word de las cartas: la fuente es plantillas/cartas del repositorio; viajan dentro del JAR -->
+      <resource>
+        <directory>../plantillas/cartas</directory>
+        <targetPath>plantillas/cartas</targetPath>
+        <includes>
+          <include>*.docx</include>
+        </includes>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>org.springframework.boot</groupId>

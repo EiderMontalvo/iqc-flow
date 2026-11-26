@@ -247,7 +247,8 @@ def carta_continuidad(logo, firma):
 
 
 def carta_base(logo, firma):
-    """punto de partida para cartas nuevas: se cambia solo el cuerpo, el membrete y el cierre ya están"""
+    """carta libre y punto de partida para cartas nuevas: {{cuerpo}} se convierte en los párrafos que escriba la persona
+    (línea en blanco = párrafo nuevo); el membrete y el cierre ya están"""
     d = base(logo)
     fecha(d)
     parrafo(d, 'Señores:', WD_ALIGN_PARAGRAPH.LEFT, despues=0)
@@ -255,10 +256,7 @@ def carta_base(logo, firma):
     parrafo(d, 'Presente.–', WD_ALIGN_PARAGRAPH.LEFT, despues=12)
     parrafo(d, '**Asunto:** {{asunto}}', WD_ALIGN_PARAGRAPH.LEFT, despues=12)
     parrafo(d, 'De nuestra consideración:')
-    parrafo(d, 'Escriba aquí el cuerpo de la carta. Puede usar cualquier campo de la lista, por ejemplo {{razonSocial}}, '
-               '{{normas}} o {{marcaRazonSocial}}. Agregue o quite párrafos libremente: el bloque de firma de abajo es un marco '
-               'anclado al pie de la página y se mantiene siempre al final de la última hoja.')
-    parrafo(d, 'Sin otro particular, quedamos a su disposición.')
+    parrafo(d, '{{cuerpo}}')
     cierre(d, logo, firma)
     return d
 

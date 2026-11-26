@@ -11,7 +11,8 @@ es la copia de referencia versionada en git.
 >   (con datos reales de clientes, fuera de git) están en `certificados/*/_originales/`.
 > - **Cotización y contrato:** los Word de IQC (GCO-FRM-003, 004, 005 y 008) ya están en `cotizaciones/` y `contratos/`, pero aún
 >   **sin campos** `{{…}}`. Falta marcarlos y generar el PDF con LibreOffice (instalado en el servidor desde el 25/11/2026).
-> - Hay cuatro cartas listas en `cartas/`, con la firma siempre al pie de la última página (ver «Cartas»).
+> - **Cartas:** cuatro plantillas en `cartas/`, con la firma siempre al pie de la última página. **Se emiten desde el panel**
+>   (pantalla **Cartas**, desde el 26/11/2026) con vista previa en vivo, número `CAR-AAAA-0001` y la firma que cada persona sube en su perfil.
 > - Los correos de `correos/comerciales/` son borradores para revisar.
 > - El detalle del plan: [docs/architecture/pendiente-configuracion-master-plantillas.md](../docs/architecture/pendiente-configuracion-master-plantillas.md).
 
@@ -142,7 +143,7 @@ La lista final se cierra cuando se construya el módulo de contratos.
 
 | Archivo | Carta |
 |---|---|
-| `cartas/carta-base.docx` | **Punto de partida para cartas nuevas**: membrete y cierre listos, cuerpo libre |
+| `cartas/carta-base.docx` | **Carta libre** en el panel y punto de partida para cartas nuevas: membrete y cierre listos; el cuerpo es `{{cuerpo}}` |
 | `cartas/carta-certificacion.docx` | Aprobación o recertificación del sistema de gestión, con alcance |
 | `cartas/carta-continuidad.docx` | Continuidad de las certificaciones tras una vigilancia (`{{etapa}}`) |
 | `cartas/carta-suspension-pago.docx` | Suspensión por falta de pago, con la lista de normas |
@@ -157,14 +158,27 @@ La lista final se cierra cuando se construya el módulo de contratos.
   - Probado con LibreOffice con cartas de 1 y 2 páginas: el cierre cae en la misma posición en todas.
 - **La firma es dinámica:** la imagen de la plantilla es solo una muestra («Firma»). Al generar la carta, IQC Flow pone
   la firma guardada de la persona que firma, con su nombre y cargo.
-  - La firma real no se guarda en el repositorio.
-  - Falta que el panel permita subir la firma de cada persona.
+  - La firma real no se guarda en el repositorio. Cada persona sube la suya en el panel: menú con su nombre → **«Mi perfil, firma y contraseña»**.
+  - Por seguridad, la imagen guardada no se puede descargar: solo la usa IQC Flow al emitir una carta.
 
-**Para hacer una carta nueva:**
-1. Copia `cartas/carta-base.docx` con su nuevo nombre, por ejemplo `carta-retiro.docx`.
-2. Cambia solo el cuerpo, entre «Presente.–» y la última frase. **No borres ni muevas el bloque de firma.**
+**Dónde se hacen las cartas:** en el panel, pantalla **Cartas** → «Nueva carta».
+1. Se elige el tipo (certificación, continuidad, suspensión por falta de pago o carta libre) y el cliente.
+2. Se marcan los certificados que menciona: las normas y ediciones salen de ellos. Se completan la etapa, el alcance o el
+   texto, según el tipo, y quién firma.
+3. A la derecha se ve la carta armada mientras se escribe.
+4. «Emitir carta» le da su número (`CAR-2026-0001`) y guarda el PDF. Desde la lista se vuelve a abrir, se descarga el PDF
+   y, para corregirla a mano, el Word.
+
+**`{{cuerpo}}`** (solo en la carta libre): un párrafo cuyo único texto es `{{cuerpo}}` se convierte en lo que escriba la
+persona. Una línea en blanco empieza un párrafo nuevo y un salto simple es un salto de línea.
+
+**Para agregar un tipo de carta nuevo** (por ejemplo, retiro):
+1. Copia `cartas/carta-base.docx` con su nuevo nombre, por ejemplo `carta-retiro.docx`, y escribe el cuerpo con los
+   campos de la lista. **No borres ni muevas el bloque de firma.**
    - Si al editar en Word el cierre aparece en un recuadro, es el marco: déjalo como está.
-3. Revisa el resultado con la vista previa (abajo).
+2. Revísalo con la vista previa (abajo).
+3. Para que aparezca en el panel hay que agregarlo en `TipoCarta` (API) y en la migración de `cartas.tipo`; pídeselo al
+   equipo técnico. Las plantillas de `cartas/` viajan dentro del JAR al compilar (`pom.xml`).
 
 **Tus cartas originales** (las que subiste el 24/11) quedaron en `cartas/_originales/` como referencia. Esa carpeta no
 se sube al repositorio porque tiene datos reales de clientes.

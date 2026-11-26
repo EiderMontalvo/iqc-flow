@@ -297,6 +297,19 @@ Los errores siguen RFC 9457 (`application/problem+json`) con `codigo` estable e 
 - **Pendiente:** la configuración de los correos (buzón entrante `cotizaciones@` en Google Workspace y cuenta de envío) y la clave de IA. Variables previstas en `/etc/iqc-flow/api.env`: `ANTHROPIC_API_KEY`, `IQC_CORREO_ENTRADA_USUARIO`, `IQC_CORREO_ENTRADA_CONTRASENA`.
 - Ejemplos: `docs/api/http/cotizaciones.http`.
 
+### Cartas a clientes (V21)
+
+| Método y ruta | Permiso |
+|---|---|
+| `GET /api/v1/cartas` (`texto`, `clienteId`, `pagina`, `tamano`), `/tipos`, `/{id}/pdf` | `cartas:leer` |
+| `POST /api/v1/cartas/vista-previa` (PDF sin guardar), `POST /api/v1/cartas` (emite `CAR-AAAA-0001`), `GET /{id}/word` | `cartas:generar` |
+| `GET /api/v1/cartas/clientes/{clienteId}/certificados`, `GET /api/v1/cartas/firmantes` | `cartas:generar` |
+| `GET`, `PUT` (multipart `archivo`, `cargo`, `nombreMostrado`), `DELETE /api/v1/cartas/mi-firma` | autenticado (su propia firma) |
+
+- Plantillas en `plantillas/cartas` (se copian al JAR al compilar); detalle en [plantillas/README.md](plantillas/README.md) y ADR-046.
+- Requiere LibreOffice en el servidor (`soffice`; `iqc.cartas.soffice` para otra ruta). Datos legales de la empresa en
+  `iqc.cartas.empresa` (razón social, RUC, dirección fiscal).
+
 ### Roles iniciales
 
 | Rol | Permisos |

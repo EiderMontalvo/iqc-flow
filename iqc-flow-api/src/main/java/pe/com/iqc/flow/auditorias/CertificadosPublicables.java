@@ -15,6 +15,9 @@ public interface CertificadosPublicables {
 
   Optional<CertificadoPublicable> buscar(UUID organizacionId, UUID certificadoId);
 
+  /**certificados publicables de un cliente (para cartas y documentos dirigidos a él)*/
+  List<CertificadoPublicable> porCliente(UUID organizacionId, UUID clienteId);
+
   /**
    *paisMarca: marca elegida a mano, o nula para usar la del país del cliente. qrsLegados: identificadores de QR ya
    *impresos (activos), el primero es el que se vuelve a imprimir

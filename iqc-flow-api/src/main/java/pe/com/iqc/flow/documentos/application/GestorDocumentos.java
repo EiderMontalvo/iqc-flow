@@ -151,6 +151,8 @@ public class GestorDocumentos implements ServicioDocumentos {
   private Documento cargar(UUID id) {
     Documento documento = documentos.findByIdAndOrganizacionId(id, actorActual.requerido().organizacionId())
         .orElseThrow(() -> new RecursoNoEncontradoException("Documento", id));
+    // La firma de una persona no se descarga nunca: solo la usa el sistema al generar cartas (leerContenido)
+    if (documento.getCategoria() == CategoriaDocumento.FIRMA_USUARIO) throw new RecursoNoEncontradoException("Documento", id);
     // Quien solo lee certificados (rol Certificados) ve sus PDF y los logos de marca, nunca actas, declaraciones
     // ni otros documentos de expedientes; se responde como inexistente para no revelar que existe
     if (!lecturaCompleta() && !CATEGORIAS_CERTIFICADOS.contains(documento.getCategoria())) {
