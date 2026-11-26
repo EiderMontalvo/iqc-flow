@@ -85,10 +85,45 @@ export interface Certificate {
   cliente: { id: string; razonSocial: string; tipoDocumento: string | null; numeroDocumento: string | null; codigoPais: string };
   paisMarca: string; marcaManual: boolean; alcance: string | null;
   fechaOtorgamiento: string | null; fechaEmision: string | null; fechaExpiracion: string | null;
-  tienePdf: boolean; documentoPdfId: string | null; urlDocumentoLegado: string | null; version: number;
+  tienePdf: boolean; documentoPdfId: string | null; urlDocumentoLegado: string | null;
+  /** Solo el certificado de IQC Global los lleva; nulos en los demás esquemas */
+  subdivision: string | null; clase: string | null; procesosNoAplicables: string | null; anexos: string | null; version: number;
 }
 export interface PdfVersion { numero: number; documentoId: string; nombre: string; tamanoBytes: number; motivo: string | null; subidoPor: { id: string; nombre: string } | null; subidoEn: string; vigente: boolean }
 export interface ConsultLink { certificadoId: string; codigo: string; token: string; url: string; paisMarca: string; marca: string }
+/** Una cuenta de correo del servidor y si tiene credenciales, sin su contraseña */
+export interface MailAccount { cuenta: string; configurado: boolean; remitente: string | null; servidor: string | null }
+/* Bandeja de correo */
+export type MailType = 'COTIZACION' | 'PAGO' | 'AUDITORIA' | 'CERTIFICADO' | 'RECLAMO' | 'PUBLICIDAD' | 'OTRO';
+export type MailState = 'NUEVO' | 'EN_CURSO' | 'ATENDIDO' | 'DESCARTADO';
+export interface MailSummary {
+  id: string; cuenta: string; remitenteCorreo: string; remitenteNombre: string | null; asunto: string; fecha: string; extracto: string;
+  tipo: MailType; origenTipo: 'REGLA' | 'MANUAL' | 'IA'; estado: MailState; responsableId: string | null; clienteId: string | null;
+  adjuntos: number; version: number;
+}
+export interface MailAttachment { indice: number; nombre: string; tipo: string; tamano: number }
+export interface MailSent {
+  id: string; cuenta: string; para: string; asunto: string; texto: string; messageId: string | null;
+  correoRecibidoId: string | null; enviadoPor: string | null; enviadoEn: string;
+}
+export interface MailThreadItem { id: string; asunto: string; remitenteCorreo: string; fecha: string }
+export interface MailDetail extends Omit<MailSummary, 'extracto' | 'adjuntos' | 'clienteId'> {
+  para: string | null; cc: string | null; texto: string; textoTruncado: boolean; motivoTipo: string | null;
+  cliente: { id: string; razonSocial: string } | null; tieneEml: boolean;
+  adjuntos: MailAttachment[]; hilo: MailThreadItem[]; respuestas: MailSent[];
+}
+export interface MailCounters { nuevos: number; enCurso: number; publicidad: number; nuevosPorCuenta: Record<string, number>; nuevosPorTipo: Partial<Record<MailType, number>> }
+export interface MailSyncAccount { cuenta: string; sincronizable: boolean; ultimaPasada: string | null; nuevosUltimaPasada: number; error: string | null }
+export interface MailSyncRun { enCurso: boolean; cuentas: Array<{ cuenta: string; nuevos: number; error: string | null }> }
+export interface MailQuery {
+  cuenta?: string; tipo?: MailType; estado?: MailState; texto?: string; desde?: string; hasta?: string;
+  sinAtender?: boolean; incluirPublicidad?: boolean; pagina?: number; tamano?: number;
+}
+/** Asistente de correo (IA): siempre propone, nunca envía ni cambia nada por su cuenta */
+export interface MailAssistantStatus { disponible: boolean; motivo?: string | null }
+export interface MailAiSummary { resumen: string; puntosClave: string[]; accionSugerida?: string | null; tipoSugerido?: MailType | null }
+export interface MailAiDraft { asunto: string; cuerpo: string }
+export interface MailAiAnswer { respuesta: string; correos: Array<{ id: string; asunto: string; remitenteCorreo: string; fecha: string }> }
 export interface DirectRegistration { expedienteId: string; expedienteCodigo: string; certificados: Certificate[]; vigilancias: number; tareas: number }
 export interface Scheme { codigo: string; nombre: string; organismoAcreditador: string; prefijoCertificado: string }
 export interface Standard { codigo: string; nombreCorto: string; titulo: string; ediciones: Array<{ edicion: string; designacion: string; vigente: boolean }> }
@@ -116,7 +151,7 @@ export interface PersonalCertificate {
 export interface DocumentType { codigo: string; etiqueta: string; ayuda: string }
 export type RegistrationMode = 'MANUAL' | 'AUTOMATIZADO' | 'PLANTILLA';
 export interface Tools { modosEmpresarial: RegistrationMode[]; modosPersonal: RegistrationMode[]; autocompletado: boolean; generacionPdf: boolean; ia: boolean; automatizaciones: boolean }
-export interface BusinessReading { codigo: string | null; esquema: string | null; titular: string | null; direccion: string | null; normaTexto: string | null; normaNombre: string | null; edicion: string | null; alcance: string | null; ciclo: number | null; fechaOtorgamiento: string | null; fechaEmision: string | null; limiteVigilancia1: string | null; limiteVigilancia2: string | null; fechaExpiracion: string | null; subdivision: string | null; clase: string | null }
+export interface BusinessReading { codigo: string | null; esquema: string | null; titular: string | null; direccion: string | null; normaTexto: string | null; normaNombre: string | null; edicion: string | null; alcance: string | null; ciclo: number | null; fechaOtorgamiento: string | null; fechaEmision: string | null; limiteVigilancia1: string | null; limiteVigilancia2: string | null; fechaExpiracion: string | null; subdivision: string | null; clase: string | null; procesosNoAplicables: string | null; anexos: string | null }
 export interface PersonalReading { codigo: string | null; nombres: string | null; tipoDocumento: string | null; numeroDocumento: string | null; curso: string | null; normaReferencia: string | null; normaAnio: string | null; subtitulo: string | null; descripcion: string | null; duracionHoras: number | null; modalidad: string | null; fechaInicio: string | null; fechaFin: string | null; fechaEmision: string | null; entrenador: string | null }
 export interface PdfReading { formato: 'INACAL_SAE' | 'IQC_GLOBAL' | 'PERSONAL' | 'DESCONOCIDO'; origen: 'LOCAL' | 'IA'; empresarial: BusinessReading | null; normaCodigo: string | null; edicionValida: boolean; personal: PersonalReading | null; advertencias: string[] }
 export interface OrgParameter {
@@ -156,17 +191,18 @@ export interface RequestAnalysis {
 }
 export class ApiError extends Error { constructor(message: string, public status: number) { super(message); } }
 
+/** Token CSRF que exige la API en toda solicitud que cambia algo (y en las vistas previas, que son POST) */
+async function csrfToken(): Promise<string> {
+  let csrf: Response;
+  try { csrf = await fetch(`${BASE}/autenticacion/csrf`, { credentials: CREDENTIALS }); }
+  catch { throw new ApiError('No se pudo conectar con la API. Verifica que el servidor esté iniciado.', 0); }
+  if (!csrf.ok) throw new ApiError('No se pudo preparar la solicitud. Intenta de nuevo.', csrf.status);
+  return ((await csrf.json()) as { token: string }).token;
+}
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers = new Headers(options.headers);
   if (options.body && !(options.body instanceof URLSearchParams) && !(options.body instanceof FormData)) headers.set('Content-Type', 'application/json');
-  if (options.method && options.method !== 'GET') {
-    let csrf: Response;
-    try { csrf = await fetch(`${BASE}/autenticacion/csrf`, { credentials: CREDENTIALS }); }
-    catch { throw new ApiError('No se pudo conectar con la API. Verifica que el servidor esté iniciado.', 0); }
-    if (!csrf.ok) throw new ApiError('No se pudo preparar la solicitud. Intenta de nuevo.', csrf.status);
-    const { token } = await csrf.json() as { token: string };
-    headers.set('X-XSRF-TOKEN', token);
-  }
+  if (options.method && options.method !== 'GET') headers.set('X-XSRF-TOKEN', await csrfToken());
   let response: Response;
   try { response = await fetch(`${BASE}${path}`, { ...options, headers, credentials: CREDENTIALS }); }
   catch { throw new ApiError('No se pudo conectar con la API. Verifica que el servidor esté iniciado.', 0); }
@@ -178,7 +214,45 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (response.status === 204 || response.headers.get('content-length') === '0' || !response.headers.get('content-type')?.includes('json')) return undefined as T;
   return response.json() as Promise<T>;
 }
+/** PDF dibujado por la API a partir de lo escrito en un formulario; no guarda nada. `señal` cancela la petición anterior */
+async function previewPdf(path: string, body: object, signal: AbortSignal): Promise<Blob> {
+  let response: Response;
+  try {
+    response = await fetch(`${BASE}${path}`, { method: 'POST', body: JSON.stringify(body), signal, credentials: CREDENTIALS,
+      headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': await csrfToken() } });
+  } catch (e) { if (signal.aborted) throw e; throw new ApiError('No se pudo conectar con la API. Verifica que el servidor esté iniciado.', 0); }
+  if (!response.ok) {
+    const problem = await response.json().catch(() => ({})) as { detail?: string; title?: string };
+    throw new ApiError(problem.detail || problem.title || `La solicitud falló (${response.status}).`, response.status);
+  }
+  return response.blob();
+}
 export const api = {
+  previewPdf,
+  mailAccounts: () => request<MailAccount[]>('/correos/estado'),
+  sendTestMail: (cuenta: string, para: string) => request<void>('/correos/prueba', { method: 'POST', body: JSON.stringify({ cuenta, para }) }),
+  mailInbox: (q: MailQuery) => request<Page<MailSummary>>(`/correos/bandeja?${new URLSearchParams(Object.entries(q).filter(([, v]) => v !== undefined && v !== '').map(([k, v]) => [k, String(v)]))}`),
+  mailMessage: (id: string) => request<MailDetail>(`/correos/bandeja/${id}`),
+  updateMailMessage: (id: string, data: object) => request<MailDetail>(`/correos/bandeja/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  mailCounters: () => request<MailCounters>('/correos/bandeja/contadores'),
+  mailSyncStatus: () => request<MailSyncAccount[]>('/correos/bandeja/sincronizacion'),
+  mailSyncNow: () => request<MailSyncRun>('/correos/bandeja/sincronizacion', { method: 'POST' }),
+  replyMail: (id: string, data: object) => request<MailSent>(`/correos/bandeja/${id}/respuestas`, { method: 'POST', body: JSON.stringify(data) }),
+  composeMail: (data: object) => request<MailSent>('/correos/enviados', { method: 'POST', body: JSON.stringify(data) }),
+  discardMailAds: () => request<{ descartados: number }>('/correos/bandeja/descartar-publicidad', { method: 'POST' }),
+  reclassifyMail: () => request<{ revisados: number; cambiaron: number }>('/correos/bandeja/reclasificacion', { method: 'POST' }),
+  mailAttachmentUrl: (id: string, indice: number) => `${BASE}/correos/bandeja/${id}/adjuntos/${indice}`,
+  mailEmlUrl: (id: string) => `${BASE}/correos/bandeja/${id}/eml`,
+  /** El .eml original como archivo, para que «Crear cotización» lo analice igual que uno soltado a mano */
+  mailEmlFile: async (id: string, nombre: string) => {
+    const r = await fetch(`${BASE}/correos/bandeja/${id}/eml`, { credentials: CREDENTIALS });
+    if (!r.ok) throw new ApiError(`No se pudo abrir el correo original (${r.status}).`, r.status);
+    return new File([await r.blob()], nombre, { type: 'message/rfc822' });
+  },
+  mailAssistantStatus: () => request<MailAssistantStatus>('/correos/asistente/estado'),
+  mailAiSummary: (id: string) => request<MailAiSummary>(`/correos/bandeja/${id}/resumen`, { method: 'POST' }),
+  mailAiDraft: (id: string, data: object) => request<MailAiDraft>(`/correos/bandeja/${id}/borrador-respuesta`, { method: 'POST', body: JSON.stringify(data) }),
+  mailAiAsk: (data: object) => request<MailAiAnswer>('/correos/asistente/consulta', { method: 'POST', body: JSON.stringify(data) }),
   me: () => request<CurrentUser>('/autenticacion/yo'),
   login: (correo: string, contrasena: string) => request<void>('/autenticacion/inicio-sesion', { method: 'POST', body: new URLSearchParams({ correo, contrasena }) }),
   logout: () => request<void>('/autenticacion/cierre-sesion', { method: 'POST' }),
@@ -222,6 +296,8 @@ export const api = {
   certificate: (id: string) => request<Certificate>(`/certificados/${id}`),
   certificateExportUrl: (query: URLSearchParams) => `${BASE}/certificados/exportacion?${query}`,
   registerCertificates: (data: object) => request<DirectRegistration>('/certificados/registro-directo', { method: 'POST', body: JSON.stringify(data) }),
+  /** Genera el PDF del certificado emitido con la plantilla y lo guarda como versión vigente */
+  generateCertificatePdf: (id: string) => request<{ certificadoId: string; documentoId: string; nombreArchivo: string; tamanoBytes: number }>(`/certificados/${id}/pdf-plantilla`, { method: 'POST' }),
   setCertificatePdf: (id: string, data: object) => request<Certificate>(`/certificados/${id}/pdf`, { method: 'PUT', body: JSON.stringify(data) }),
   pdfVersions: (id: string) => request<PdfVersion[]>(`/certificados/${id}/pdf/versiones`),
   setCertificateBrand: (id: string, data: object) => request<Certificate>(`/certificados/${id}/marca`, { method: 'PUT', body: JSON.stringify(data) }),
@@ -264,6 +340,7 @@ export const api = {
   registerPersonal: (data: object) => request<PersonalCertificate>('/certificados-personales', { method: 'POST', body: JSON.stringify(data) }),
   correctPersonal: (id: string, data: object) => request<PersonalCertificate>(`/certificados-personales/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   voidPersonal: (id: string, data: object) => request<PersonalCertificate>(`/certificados-personales/${id}/anulacion`, { method: 'POST', body: JSON.stringify(data) }),
+  generatePersonalPdf: (id: string) => request<PersonalCertificate>(`/certificados-personales/${id}/pdf-plantilla`, { method: 'POST' }),
   setPersonalPdf: (id: string, data: object) => request<PersonalCertificate>(`/certificados-personales/${id}/pdf`, { method: 'PUT', body: JSON.stringify(data) }),
   tools: () => request<Tools>('/certificados/herramientas'),
   readPdf: (tipo: 'EMPRESARIAL' | 'PERSONAL', documentoId: string) => request<PdfReading>('/certificados/lectura', { method: 'POST', body: JSON.stringify({ tipo, documentoId }) }),

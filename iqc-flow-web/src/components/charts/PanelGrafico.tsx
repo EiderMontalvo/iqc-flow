@@ -2,6 +2,7 @@ import { useId, type ReactNode } from 'react';
 import { Maximize2 } from 'lucide-react';
 import type { Punto } from '../../lib/api';
 import { formatoNumero } from './escala';
+import { BotonIcono } from '../../components/ui/Boton';
 
 interface Props {
   titulo: string;
@@ -32,8 +33,8 @@ export function PanelGrafico({ titulo, detalle, datos, vacio, ancho, unica, alAm
   return <section className={clase} aria-labelledby={id} onClick={ampliable ? alAmpliar : undefined}>
     <div className="panel-title">
       <div><h2 id={id}>{titulo}</h2><p>{detalle}</p></div>
-      {ampliable && <button type="button" className="icon-button" onClick={e => { e.stopPropagation(); alAmpliar!(); }}
-        title="Ver detalle" aria-label={`Ver detalle de ${titulo}`}><Maximize2 size={16} aria-hidden /></button>}
+      {ampliable && <BotonIcono etiqueta={`Ver detalle de ${titulo}`} icono={Maximize2} tamano={16} type="button" onClick={e => { e.stopPropagation(); alAmpliar!(); }}
+        title="Ver detalle" />}
     </div>
     {sinDatos ? <p className="grafico-vacio">{vacio}</p>
       : soloUna && unica ? <p className="grafico-cifra"><strong>{formatoNumero.format(soloUna.cantidad)}</strong> {unica(soloUna)}</p>

@@ -4,6 +4,7 @@ import { api, type ClientSummary, type Country, type Quote, type QuoteService, t
 import { errorText } from '../../lib/format';
 import { BuscadorCliente } from '../../components/BuscadorCliente';
 import { SERVICIOS, dinero } from './textos';
+import { Boton, BotonIcono } from '../../components/ui/Boton';
 
 type Linea = { clave: number; norma: string; edicion: string; descripcion: string; dias: string; monto: string; montoTocado: boolean };
 const lineaVacia = (clave: number): Linea => ({ clave, norma: '', edicion: '', descripcion: '', dias: '', monto: '', montoTocado: false });
@@ -120,9 +121,9 @@ export function FormularioCotizacion({ inicial, propuesta, cliente: clienteExter
         <label>Días auditor<input inputMode="decimal" value={l.dias} onChange={e => cambiar(l.clave, { dias: e.target.value })} placeholder="0" /></label>
         <label>Monto<input inputMode="decimal" required value={l.monto} onChange={e => cambiar(l.clave, { monto: e.target.value, montoTocado: true })} placeholder="0.00" /></label>
         <label className="cot-linea-desc">Descripción<input required maxLength={500} value={l.descripcion} onChange={e => cambiar(l.clave, { descripcion: e.target.value })} placeholder="Ej.: Certificación ISO 9001:2015" /></label>
-        {lineas.length > 1 && <button type="button" className="icon-button danger" onClick={() => setLineas(t => t.filter(x => x.clave !== l.clave))} aria-label={`Quitar línea ${i + 1}`}><Trash2 size={16} aria-hidden /></button>}
+        {lineas.length > 1 && <BotonIcono etiqueta={`Quitar línea ${i + 1}`} icono={Trash2} tamano={16} peligro type="button" onClick={() => setLineas(t => t.filter(x => x.clave !== l.clave))} />}
       </div>)}</div>
-      <button type="button" className="secondary" onClick={() => setLineas(t => [...t, lineaVacia(Date.now())])}><Plus size={16} aria-hidden /> Agregar norma o servicio</button>
+      <Boton type="button" variante="secundario" onClick={() => setLineas(t => [...t, lineaVacia(Date.now())])}><Plus size={16} aria-hidden /> Agregar norma o servicio</Boton>
       <dl className="cot-totales" aria-live="polite">
         <div><dt>Días auditor</dt><dd className="tabular">{dias.toLocaleString('es-PE')}</dd></div>
         <div><dt>Subtotal</dt><dd className="tabular">{dinero(subtotal, moneda)}</dd></div>
@@ -140,7 +141,7 @@ export function FormularioCotizacion({ inicial, propuesta, cliente: clienteExter
     </fieldset>
 
     {error && <p className="form-error" role="alert">{error}</p>}
-    <div className="form-actions"><button type="button" className="secondary" onClick={alCancelar}>Cancelar</button>
-      <button className="primary" disabled={ocupado}>{ocupado ? 'Guardando…' : inicial ? 'Guardar cambios' : 'Crear cotización'}</button></div>
+    <div className="form-actions"><Boton type="button" variante="secundario" onClick={alCancelar}>Cancelar</Boton>
+      <Boton type="submit" variante="primario" disabled={ocupado}>{ocupado ? 'Guardando…' : inicial ? 'Guardar cambios' : 'Crear cotización'}</Boton></div>
   </form>;
 }

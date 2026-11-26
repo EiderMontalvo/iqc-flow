@@ -6,7 +6,7 @@ import { errorText } from '../lib/format';
 const MODES: Record<RegistrationMode, { label: string; icon: LucideIcon; help: string }> = {
   MANUAL: { label: 'Manual', icon: FilePen, help: 'Sube el PDF del certificado y completa los datos a mano.' },
   AUTOMATIZADO: { label: 'Automatizado', icon: FileScan, help: 'Sube el PDF: el sistema lee sus datos y completa el formulario para que lo revises.' },
-  PLANTILLA: { label: 'Desde plantilla', icon: FileText, help: 'Completa el formulario y el PDF se genera con una plantilla Word.' },
+  PLANTILLA: { label: 'Desde plantilla', icon: FileText, help: 'Completa el formulario y el PDF se genera con la plantilla de IQC.' },
 };
 
 export function ModeTabs({ modes, value, onChange }: { modes: RegistrationMode[]; value: RegistrationMode; onChange: (m: RegistrationMode) => void }) {

@@ -2,10 +2,11 @@ import { Plus } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { api, type Address, type ClientDetail, type Contact } from '../../lib/api';
 import { ClientActivity } from './ClientActivity';
+import { Boton } from '../../components/ui/Boton';
+import { errorText } from '../../lib/format';
 
 const roles = ['GERENCIA', 'CALIDAD', 'COMERCIAL', 'FACTURACION', 'OPERACIONES', 'REPRESENTANTE_LEGAL', 'OTRO'];
 const addressTypes: Array<Address['tipo']> = ['FISCAL', 'SEDE', 'CORRESPONDENCIA'];
-const errorText = (error: unknown) => error instanceof Error ? error.message : 'Ocurrió un error inesperado.';
 
 function ContactForm({ initial, onSave, onCancel, busy, error }: {
   initial?: Contact; onSave: (data: object) => void; onCancel: () => void; busy: boolean; error: string;
@@ -23,7 +24,7 @@ function ContactForm({ initial, onSave, onCancel, busy, error }: {
       notas: initial?.notas || '', ...(initial ? { version: initial.version } : {}) });
   }
   return <form className="extras-form" onSubmit={submit}>
-    <div className="extras-form-head"><h4>{initial ? 'Editar contacto' : 'Nuevo contacto'}</h4><button type="button" className="text-button" onClick={onCancel}>Cerrar</button></div>
+    <div className="extras-form-head"><h4>{initial ? 'Editar contacto' : 'Nuevo contacto'}</h4><Boton type="button" variante="texto" onClick={onCancel}>Cerrar</Boton></div>
     <div className="form-grid">
       <label className="full">Nombre completo<input value={name} onChange={event => setName(event.target.value)} required maxLength={200} /></label>
       <label>Cargo<input value={position} onChange={event => setPosition(event.target.value)} maxLength={120} /></label>
@@ -33,7 +34,7 @@ function ContactForm({ initial, onSave, onCancel, busy, error }: {
       <label className="inline-check full"><input type="checkbox" checked={principal} onChange={event => setPrincipal(event.target.checked)} /> Contacto principal</label>
     </div>
     {error && <p className="form-error" role="alert">{error}</p>}
-    <div className="form-actions"><button type="button" className="secondary" onClick={onCancel}>Cancelar</button><button className="primary" disabled={busy}>{busy ? 'Guardando…' : 'Guardar contacto'}</button></div>
+    <div className="form-actions"><Boton type="button" variante="secundario" onClick={onCancel}>Cancelar</Boton><Boton type="submit" variante="primario" disabled={busy}>{busy ? 'Guardando…' : 'Guardar contacto'}</Boton></div>
   </form>;
 }
 
@@ -55,7 +56,7 @@ function AddressForm({ initial, onSave, onCancel, busy, error }: {
       ...(initial ? { version: initial.version } : {}) });
   }
   return <form className="extras-form" onSubmit={submit}>
-    <div className="extras-form-head"><h4>{initial ? 'Editar dirección' : 'Nueva dirección'}</h4><button type="button" className="text-button" onClick={onCancel}>Cerrar</button></div>
+    <div className="extras-form-head"><h4>{initial ? 'Editar dirección' : 'Nueva dirección'}</h4><Boton type="button" variante="texto" onClick={onCancel}>Cerrar</Boton></div>
     <div className="form-grid">
       <label>Tipo<select value={type} onChange={event => setType(event.target.value as Address['tipo'])}>{addressTypes.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
       <label>Nombre de sede (opcional)<input value={name} onChange={event => setName(event.target.value)} maxLength={120} /></label>
@@ -66,7 +67,7 @@ function AddressForm({ initial, onSave, onCancel, busy, error }: {
       <label>Ubigeo (opcional)<input value={ubigeo} onChange={event => setUbigeo(event.target.value)} inputMode="numeric" pattern="[0-9]{6}" maxLength={6} /></label>
     </div>
     {error && <p className="form-error" role="alert">{error}</p>}
-    <div className="form-actions"><button type="button" className="secondary" onClick={onCancel}>Cancelar</button><button className="primary" disabled={busy}>{busy ? 'Guardando…' : 'Guardar dirección'}</button></div>
+    <div className="form-actions"><Boton type="button" variante="secundario" onClick={onCancel}>Cancelar</Boton><Boton type="submit" variante="primario" disabled={busy}>{busy ? 'Guardando…' : 'Guardar dirección'}</Boton></div>
   </form>;
 }
 
@@ -107,17 +108,17 @@ export function ClientExtras({ detail, onChanged, canReadActivities, canWriteAct
     } catch (e) { setError(errorText(e)); } finally { setBusy(false); }
   }
   return <>
-    <div className="extras-section-head"><h3>Contactos</h3>{editable && <button className="text-button" onClick={() => { close(); setKind('contact'); }}><Plus size={14} aria-hidden /> Agregar contacto</button>}</div>
+    <div className="extras-section-head"><h3>Contactos</h3>{editable && <Boton variante="texto" onClick={() => { close(); setKind('contact'); }}><Plus size={14} aria-hidden /> Agregar contacto</Boton>}</div>
     {detail.contactos.length ? detail.contactos.map(item => <div className="detail-item extras-item" key={item.id}>
       <div><strong>{item.nombreCompleto}{item.esPrincipal ? ' · Principal' : ''}</strong>
         <span>{[item.cargo, item.correo, item.telefono].filter(Boolean).join(' · ')}</span></div>
-      {editable && <div className="extras-actions"><button onClick={() => { setContact(item); setAddress(null); setKind('contact'); setError(''); }}>Editar</button><button disabled={busy} onClick={() => remove(item, 'contact')}>Eliminar</button></div>}
+      {editable && <div className="extras-actions"><Boton variante="texto" onClick={() => { setContact(item); setAddress(null); setKind('contact'); setError(''); }}>Editar</Boton><Boton variante="texto" className="danger" disabled={busy} onClick={() => remove(item, 'contact')}>Eliminar</Boton></div>}
     </div>) : <p className="detail-empty">Sin contactos registrados.</p>}
     {kind === 'contact' && <ContactForm key={contact?.id || 'new'} initial={contact || undefined} onSave={saveContact} onCancel={close} busy={busy} error={error} />}
-    <div className="extras-section-head"><h3>Direcciones</h3>{editable && <button className="text-button" onClick={() => { close(); setKind('address'); }}><Plus size={14} aria-hidden /> Agregar dirección</button>}</div>
+    <div className="extras-section-head"><h3>Direcciones</h3>{editable && <Boton variante="texto" onClick={() => { close(); setKind('address'); }}><Plus size={14} aria-hidden /> Agregar dirección</Boton>}</div>
     {detail.direcciones.length ? detail.direcciones.map(item => <div className="detail-item extras-item" key={item.id}>
       <div><strong>{item.nombre || item.tipo}</strong><span>{[item.direccion, item.distrito, item.provincia].filter(Boolean).join(' · ')}</span></div>
-      {editable && <div className="extras-actions"><button onClick={() => { setAddress(item); setContact(null); setKind('address'); setError(''); }}>Editar</button><button disabled={busy} onClick={() => remove(item, 'address')}>Eliminar</button></div>}
+      {editable && <div className="extras-actions"><Boton variante="texto" onClick={() => { setAddress(item); setContact(null); setKind('address'); setError(''); }}>Editar</Boton><Boton variante="texto" className="danger" disabled={busy} onClick={() => remove(item, 'address')}>Eliminar</Boton></div>}
     </div>) : <p className="detail-empty">Sin direcciones registradas.</p>}
     {kind === 'address' && <AddressForm key={address?.id || 'new'} initial={address || undefined} onSave={saveAddress} onCancel={close} busy={busy} error={error} />}
     {canReadActivities && <ClientActivity clientId={detail.id} canWrite={canWriteActivities} />}

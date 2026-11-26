@@ -11,7 +11,7 @@
 .panel-grafico .panel-title { margin-bottom: var(--e3); }
 .panel-grafico-acciones { display: flex; align-items: center; gap: var(--e1); }
 .panel-grafico.ampliable { cursor: pointer; transition: border-color var(--rapido) var(--salida), box-shadow var(--rapido) var(--salida); }
-.panel-grafico.ampliable:hover { border-color: var(--borde-fuerte); box-shadow: 0 8px 24px -16px rgb(10 14 40 / .35); }
+.panel-grafico.ampliable:hover { border-color: var(--borde-fuerte); box-shadow: var(--sombra-elevada-grande); }
 .panel-grafico.ampliable .panel-title .icon-button { color: var(--texto-3); }
 .panel-grafico.ampliable:hover .panel-title .icon-button { color: var(--accion); }
 /* Año bajo el mes, solo en el primer periodo y cuando cambia */
@@ -45,7 +45,7 @@
 .grafico-tooltip {
   position: absolute; z-index: 3; transform: translate(-50%, -100%); pointer-events: none;
   display: grid; gap: 1px; padding: 6px 10px; border-radius: var(--radio-sm);
-  background: var(--iqc-negro); color: #fff; box-shadow: var(--sombra-flotante); white-space: nowrap;
+  background: var(--iqc-negro); color: var(--texto-inverso); box-shadow: var(--sombra-flotante); white-space: nowrap;
 }
 .grafico-tooltip strong { font-size: var(--tam-lg); font-weight: 700; font-variant-numeric: tabular-nums; }
 .grafico-tooltip span { font-size: var(--tam-xs); color: var(--cromo-texto-2); }
@@ -92,9 +92,9 @@
 .barra-segmentada { display: grid; gap: var(--e4); padding-top: var(--e2); }
 .barra-segmentada .segmentos { display: flex; gap: 2px; height: 28px; }
 .barra-segmentada .segmento { position: relative; display: flex; align-items: center; min-width: 4px; padding: 0 8px; border-radius: 4px; outline: none; cursor: default; transition: filter var(--rapido) var(--salida); }
-.barra-segmentada .segmento span { color: #fff; font-size: var(--tam-xs); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.barra-segmentada .segmento.serie-2 span, .barra-segmentada .segmento.serie-3 span { color: #0b0d1a; }
-:root[data-theme="dark"] .barra-segmentada .segmento span { color: #0b0d1a; }
+.barra-segmentada .segmento span { color: var(--texto-inverso); font-size: var(--tam-xs); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.barra-segmentada .segmento.serie-2 span, .barra-segmentada .segmento.serie-3 span { color: var(--texto-sobre-serie-clara); }
+:root[data-theme="dark"] .barra-segmentada .segmento span { color: var(--texto-sobre-serie-clara); }
 .barra-segmentada .segmento.activo { filter: brightness(1.1); }
 .barra-segmentada .segmento:focus-visible { box-shadow: 0 0 0 2px var(--superficie), 0 0 0 4px var(--foco); }
 .barra-segmentada .grafico-tooltip { left: 50%; top: -8px; }

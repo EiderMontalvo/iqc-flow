@@ -5,6 +5,7 @@ import type { CurrentUser } from '../../lib/api';
 import { initials } from '../../lib/format';
 import { PerfilDialogo } from './PerfilDialogo';
 import type { Tematica } from '../tematica/tematicas';
+import { BotonIcono } from '../../components/ui/Boton';
 
 const fechaLarga = new Intl.DateTimeFormat('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 const saludo = (hora: number) => hora < 12 ? 'Buenos días' : hora < 19 ? 'Buenas tardes' : 'Buenas noches';
@@ -40,7 +41,7 @@ export function Cabecera({ user, espacio, titulo, noLeidas, verNotificaciones, t
   const fecha = fechaLarga.format(ahora);
 
   return <header className="cabecera">
-    <button className="icon-button menu-button" onClick={abrirMenu} aria-label="Abrir menú"><Menu size={20} aria-hidden /></button>
+    <BotonIcono etiqueta="Abrir menú" icono={Menu} tamano={20} className="menu-button" onClick={abrirMenu} />
     <button className="cabecera-boton alternar-carril" onClick={alternarCarril} aria-pressed={carrilOculto}
       aria-label={carrilOculto ? 'Mostrar menú lateral' : 'Ocultar menú lateral'} title={carrilOculto ? 'Mostrar menú lateral' : 'Ocultar menú lateral'}>
       {carrilOculto ? <PanelLeftOpen size={19} aria-hidden /> : <PanelLeftClose size={19} aria-hidden />}

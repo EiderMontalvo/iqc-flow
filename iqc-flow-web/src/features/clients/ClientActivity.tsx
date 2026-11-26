@@ -1,13 +1,14 @@
 import { Plus } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
 import { api, type Activity, type Page } from '../../lib/api';
+import { Boton } from '../../components/ui/Boton';
+import { errorText } from '../../lib/format';
 
 const types: Array<[Activity['tipo'], string]> = [
   ['LLAMADA', 'Llamada'], ['CORREO', 'Correo'], ['REUNION', 'Reunión'],
   ['WHATSAPP', 'WhatsApp'], ['VISITA', 'Visita'], ['NOTA', 'Nota'],
 ];
 const label = (value: string) => types.find(item => item[0] === value)?.[1] || value;
-const errorText = (error: unknown) => error instanceof Error ? error.message : 'Ocurrió un error inesperado.';
 
 export function ClientActivity({ clientId, canWrite }: { clientId: string; canWrite: boolean }) {
   const [page, setPage] = useState(0), [refresh, setRefresh] = useState(0);
@@ -32,13 +33,13 @@ export function ClientActivity({ clientId, canWrite }: { clientId: string; canWr
     finally { setBusy(false); }
   }
   return <section className="client-activity">
-    <div className="extras-section-head"><h3>Actividad</h3>{canWrite && <button className="text-button" onClick={() => setAdding(value => !value)}>{adding ? 'Cerrar' : <><Plus size={14} aria-hidden /> Registrar actividad</>}</button>}</div>
+    <div className="extras-section-head"><h3>Actividad</h3>{canWrite && <Boton variante="texto" onClick={() => setAdding(value => !value)}>{adding ? 'Cerrar' : <><Plus size={14} aria-hidden /> Registrar actividad</>}</Boton>}</div>
     {adding && <form className="extras-form" onSubmit={submit}><div className="form-grid">
       <label>Tipo<select value={type} onChange={event => setType(event.target.value as Activity['tipo'])}>{types.map(([key, name]) => <option key={key} value={key}>{name}</option>)}</select></label>
       {type !== 'NOTA' && <label>Dirección<select value={direction} onChange={event => setDirection(event.target.value as 'ENTRANTE' | 'SALIENTE')}>
         <option value="SALIENTE">Saliente</option><option value="ENTRANTE">Entrante</option></select></label>}
       <label className="full">Resumen<textarea value={summary} onChange={event => setSummary(event.target.value)} rows={3} required maxLength={2000} /></label>
-    </div><div className="form-actions"><button className="primary" disabled={busy}>{busy ? 'Guardando…' : 'Guardar actividad'}</button></div></form>}
+    </div><div className="form-actions"><Boton type="submit" variante="primario" disabled={busy}>{busy ? 'Guardando…' : 'Guardar actividad'}</Boton></div></form>}
     {error && <p className="form-error" role="alert">{error}</p>}
     {data?.contenido.map(item => <div className="detail-item" key={item.id}><strong>{label(item.tipo)}</strong>
       <span>{new Intl.DateTimeFormat('es-PE', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(item.ocurridaEn))} · {item.registradaPor?.nombre || 'Sistema'}</span>

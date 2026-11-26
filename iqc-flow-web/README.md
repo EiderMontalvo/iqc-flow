@@ -107,8 +107,15 @@ El demo interno, protegido con contraseña de Apache, se compila con `VITE_API_U
 ## Diseño
 
 - **Claro, oscuro o Sistema:** se elige en el carril y se guarda en `localStorage`.
-- **Carril y acceso:** en el negro de marca, con el símbolo IQC.
+- **Carril:** negro de marca liso, sin degradado. El degradado del logo queda solo para la pantalla de acceso.
+- **Acceso:** en el negro de marca, con el símbolo IQC.
 - **Área de trabajo:** en papel.
 - **Tokens:** todos los colores vienen del sistema compartido. Un color nuevo se agrega ahí, para claro y oscuro, no en `src/styles`.
 - **Gráficos:** siguen la skill de visualización. Una serie por gráfico, con tooltip al pasar el mouse o con el teclado y vista de tabla en cada uno.
 - **Detalle de diseño:** en `DESIGN.md`.
+- **Botones:** se usan `Boton` y `BotonIcono` de `src/components/ui/Boton.tsx`, no `<button className="primary">` a mano. `BotonIcono` exige `etiqueta`, así que ningún botón de solo ícono queda sin nombre accesible. Los botones de intención propia (filas de tabla, pestañas, tarjetas de cifra, navegación) siguen siendo elementos con su clase, a propósito.
+- **Íconos:** un ícono por concepto del negocio en `src/lib/iconos.ts` (empresarial, personal, cliente, cartera, prospecto…). El mismo ícono en el carril, las cifras y los resúmenes. Librería: lucide, un solo trazo.
+- **Colores sin tokens:** no se escriben `#hex` ni `rgb()` en `src/styles` ni en los componentes. Si falta un color, se agrega como token semántico en `iqc-flow-diseno/css/tokens.css` (claro y oscuro). Excepciones: las banderas de las temáticas de temporada.
+- **Vista previa en vivo:** en el modo «Desde plantilla», `useVistaPreviaEnVivo` pide a la API el PDF de lo escrito en el formulario (700 ms después de la última pulsación, cancelando la petición anterior). La API no guarda nada: `POST /certificados/vista-previa-borrador` y `POST /certificados-personales/vista-previa-borrador`.
+- **Correos (`src/features/correos`):** bandeja de los buzones de IQC con lista y lectura (`Correos.tsx`, `ListaCorreos.tsx`, `LecturaCorreo.tsx`), compositor de respuestas y correos nuevos (`Compositor.tsx`), y consulta a la IA (`PreguntarBandeja.tsx`). Los datos salen de los hooks de `hooks.ts` (el contador del carril se renueva cada minuto y solo con la pestaña visible). El texto de un correo se pinta siempre como texto, nunca como HTML. Los borradores de respuesta se conservan al abrir otro correo mientras la pantalla siga abierta. La IA solo propone (resumen, borrador de respuesta, consulta): nada se envía sin que una persona lo revise, y sin asistente disponible los botones se muestran apagados con el motivo. Desde un correo se abren los formularios que ya existen: `NuevaCotizacion` (con el `.eml` cargado) y `NewTask` (con título y cliente sugeridos).
+- **Elegir sin guardar, y elegir guardando:** `Segmentado` (radios) es solo para filtros y formularios: mover el foco con una flecha ya cambia el valor. Cuando elegir GUARDA un dato (estado de un correo), se usa `GrupoBotones`, que se activa con Enter o clic y nunca con una flecha; y un cambio con efecto que no es una simple opción (el tipo de un correo) va con un botón «Aplicar».

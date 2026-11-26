@@ -1,5 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { X } from 'lucide-react';
+import { BotonIcono } from '../components/ui/Boton';
 
 /** Panel lateral con foco protegido: Escape o el fondo lo cierran y el foco vuelve a donde estaba */
 export function Drawer({ title, subtitle, onClose, wide, vista, children }: {
@@ -22,7 +23,7 @@ export function Drawer({ title, subtitle, onClose, wide, vista, children }: {
     <section ref={panel} tabIndex={-1} className={`dialog ${vista ? 'dialog-espacio' : wide ? 'dialog-wide' : ''}`} role="dialog" aria-modal="true" aria-labelledby="drawer-title">
       <header className="dialog-header">
         <div><h2 id="drawer-title">{title}</h2>{subtitle && <p className="dialog-subtitle">{subtitle}</p>}</div>
-        <button type="button" className="icon-button" onClick={onClose} aria-label="Cerrar"><X size={18} aria-hidden /></button>
+        <BotonIcono etiqueta="Cerrar" icono={X} tamano={18} type="button" onClick={onClose} />
       </header>
       {vista ? <div className="espacio-trabajo"><div className="espacio-formulario">{children}</div><aside className="espacio-vista" aria-label="Vista previa">{vista}</aside></div>
         : children}

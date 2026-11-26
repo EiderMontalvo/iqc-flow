@@ -5,6 +5,7 @@ import { day, errorText, number } from '../../lib/format';
 import { FilaCifras, TarjetaCifra } from '../../components/cifras/TarjetaCifra';
 import { VenceEn } from '../../components/VenceEn';
 import { Indicators, type VistaIndicadores } from '../indicators/Indicators';
+import { Boton } from '../../components/ui/Boton';
 
 export function Overview({ canClients, canTasks, canCertificates, vista, go }: {
   canClients: boolean; canTasks: boolean; canCertificates: boolean; vista: VistaIndicadores;
@@ -40,7 +41,7 @@ export function Overview({ canClients, canTasks, canCertificates, vista, go }: {
 
     {canCertificates && <section className="panel">
       <div className="panel-title"><div><h2><CalendarClock size={18} aria-hidden /> Certificados por vencer</h2><p>Vencen en los próximos 90 días: {number(expiringTotal)}</p></div>
-        <button className="text-button" onClick={() => go('certificates')}>Ver todos <ArrowRight size={14} aria-hidden /></button></div>
+        <Boton variante="texto" onClick={() => go('certificates')}>Ver todos <ArrowRight size={14} aria-hidden /></Boton></div>
       {!expiring ? <div className="skeleton-rows" aria-hidden="true"><span /><span /><span /></div>
         : expiring.length === 0 ? <p className="empty-state"><CheckCircle2 size={18} aria-hidden /> Ningún certificado vence en los próximos 90 días.</p>
         : <ul className="expiring-list dos-columnas">{expiring.map(c => <li key={c.id}>

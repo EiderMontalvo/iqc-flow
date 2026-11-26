@@ -63,6 +63,35 @@
   --cromo-borde: rgb(255 255 255 / .1);
   --foco-cromo: #8f9bff;
 
+  /* Cromo ampliado: texto, campos y avisos sobre las zonas negras (carril y acceso) */
+  --cromo-texto-nav: #c9cedb;
+  --cromo-texto-suave: #b8bfcd;
+  --cromo-etiqueta: #e6e9f0;
+  --cromo-enlace: #aab4ff;
+  --cromo-error: #ff7a8a;
+  --cromo-ok: #56d2a4;
+  --cromo-velo: rgb(255 255 255 / .06);
+  --cromo-velo-fuerte: rgb(255 255 255 / .14);
+  --cromo-borde-fuerte: rgb(255 255 255 / .32);
+  --cromo-scroll: rgb(255 255 255 / .2);
+  --cromo-campo: rgb(8 10 14 / .72);
+  --cromo-campo-foco: rgb(8 10 14 / .85);
+  --cromo-campo-borde: rgb(255 255 255 / .18);
+  --cromo-campo-borde-hover: rgb(255 255 255 / .32);
+  --cromo-anillo: rgb(143 155 255 / .25);
+  --cromo-aviso: rgb(18 19 26 / .96);
+  --cromo-aviso-texto: #e6e8ee;
+  --cromo-aura: rgb(103 1 224 / .16);
+
+  /* Texto y lienzos que no cambian con el tema */
+  --luz-neon: #c9b6ff;                 /* la luz que recorre el contorno del símbolo IQC */
+  --luz-neon-halo: #8f6bff;
+  --texto-inverso: #ffffff;            /* sobre acción, negro de marca y avatares */
+  --texto-sobre-serie-clara: #0b0d1a;  /* sobre las series naranja y verde de los gráficos */
+  --lienzo-blanco: #ffffff;            /* detrás de QR y logos: el QR necesita fondo blanco siempre */
+  --fondo-visor: #525659;              /* alrededor del PDF incrustado */
+  --fondo-tematica: #ffffff;
+
   /* Gráficos: una serie, un tono (validado con la skill de visualización contra cada superficie) */
   --grafico: #1a33e0;
   --grafico-hover: #0019d2;
@@ -74,6 +103,10 @@
   --sombra-flotante: 0 8px 24px -4px rgb(0 25 45 / .16);
   --sombra-lateral: -12px 0 32px rgb(0 25 45 / .16);
   --velo: rgb(5 6 12 / .48);
+  --sombra-sutil: 0 1px 3px rgb(10 14 40 / .12);
+  --sombra-pulgar: 0 1px 2px rgb(0 0 0 / .25);
+  --sombra-elevada: 0 6px 18px -12px rgb(10 14 40 / .35);
+  --sombra-elevada-grande: 0 8px 24px -16px rgb(10 14 40 / .35);
 
   /* ---------- 3. Escalas ---------- */
   --fuente: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -92,8 +125,13 @@
   --e1: 4px; --e2: 8px; --e3: 12px; --e4: 16px; --e5: 20px; --e6: 24px; --e8: 32px; --e10: 40px; --e12: 48px;
 
   --radio-sm: 6px;
+  --radio-pildora: 999px;           /* etiquetas y chips */
   --radio: 8px;
   --radio-lg: 10px;
+
+  /* Pesos de letra: énfasis dentro de un texto, y títulos de producto */
+  --peso-fuerte: 600;
+  --peso-titulo: 650;
 
   --salida: cubic-bezier(.16, 1, .3, 1);
   --rapido: 150ms;
@@ -141,6 +179,10 @@
   --sombra-flotante: 0 8px 24px -4px rgb(0 0 0 / .55);
   --sombra-lateral: -12px 0 32px rgb(0 0 0 / .5);
   --velo: rgb(0 0 0 / .62);
+  --sombra-sutil: 0 1px 3px rgb(0 0 0 / .5);
+  --sombra-elevada: 0 6px 18px -12px rgb(0 0 0 / .7);
+  --sombra-elevada-grande: 0 8px 24px -16px rgb(0 0 0 / .7);
+  --fondo-tematica: #0b0c11;
 
   color-scheme: dark;
 }

@@ -1,6 +1,7 @@
 import type { ComponentType, ReactNode } from 'react';
 import { ArrowRight, type LucideProps } from 'lucide-react';
 import { number } from '../../../lib/format';
+import { Boton } from '../../../components/ui/Boton';
 
 export interface DatoTipo { etiqueta: string; valor: ReactNode; tono?: 'alerta' | 'mal' | 'neutro'; alPulsar?: () => void }
 
@@ -15,7 +16,7 @@ export function TarjetaTipo({ icono: Icono, titulo, valor, unidad, datos, alAbri
     <header>
       <span className="tarjeta-tipo-icono" aria-hidden><Icono size={20} /></span>
       <h2>{titulo}</h2>
-      <button type="button" className="text-button" onClick={alAbrir}>Ver todos <ArrowRight size={14} aria-hidden /></button>
+      <Boton type="button" variante="texto" onClick={alAbrir}>Ver todos <ArrowRight size={14} aria-hidden /></Boton>
     </header>
     <p className="tarjeta-tipo-cifra"><strong>{number(valor)}</strong> {unidad}</p>
     <dl className="tarjeta-tipo-datos">{datos.map(d => <div key={d.etiqueta} className={d.tono ? `tono-${d.tono}` : undefined}>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
 import { api, type ClientSummary } from '../lib/api';
+import { Boton } from '../components/ui/Boton';
 
 /**
  * Busca un cliente por razón social, código o RUC. Si se busca un RUC que no es cliente, muestra qué empresa es según
@@ -31,7 +32,7 @@ export function BuscadorCliente({ etiqueta = 'Cliente', value, onChange, initial
   }, [rucBuscado, value, matches.length]);
   return <div className="client-picker full">
     <label>{etiqueta}<input value={query} required onChange={event => { setQuery(event.target.value); onChange(null); }} placeholder="Razón social, código o RUC" autoComplete="off" /></label>
-    {value && <p className="field-help"><Check size={14} aria-hidden /> {value.codigo} · {value.tipoDocumento || 'Documento'} {value.numeroDocumento || 'sin registrar'} <button type="button" className="text-button" onClick={() => { setQuery(''); onChange(null); }}>Cambiar</button></p>}
+    {value && <p className="field-help"><Check size={14} aria-hidden /> {value.codigo} · {value.tipoDocumento || 'Documento'} {value.numeroDocumento || 'sin registrar'} <Boton type="button" variante="texto" onClick={() => { setQuery(''); onChange(null); }}>Cambiar</Boton></p>}
     {!value && matches.length > 0 && <div className="picker-results" role="listbox">{matches.map(client =>
       <button type="button" role="option" aria-selected="false" key={client.id} onClick={() => { onChange(client); setQuery(client.razonSocial); setMatches([]); }}>
         <strong>{client.razonSocial}</strong><span className="tabular">{client.codigo} · {client.numeroDocumento || 'sin documento'}</span>

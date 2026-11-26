@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { AlertTriangle, ArrowRight, BadgeCheck, CalendarClock, CheckCircle2, Plus, UserRound } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CalendarClock, CheckCircle2, Plus } from 'lucide-react';
+import { Icono } from '../../lib/iconos';
 import { api, type Brand, type BrandSummary, type Certificate, type PersonalCertificate, type PersonalSummary, type PublicationStatus } from '../../lib/api';
 import { day, errorText, number } from '../../lib/format';
 import { VenceEn } from '../../components/VenceEn';
 import { TarjetaTipo } from './resumen/TarjetaTipo';
 import { Indicators } from '../indicators/Indicators';
+import { Boton } from '../../components/ui/Boton';
 
 export type CertificatesTarget = { screen: 'business' | 'personal'; country?: string; validity?: 'VIGENTE' | 'POR_VENCER' | 'VENCIDO' };
 
@@ -38,18 +40,18 @@ export function CertificatesHome({ canManage, go }: { canManage: boolean; go: (t
   return <div className="screen-body">
     <div className="page-heading"><div><h1>Certificados</h1><p>Empresariales y personales de IQC Perú e IQC LATAM.</p></div>
       {canManage && <div className="heading-actions">
-        <button className="secondary" onClick={() => go({ screen: 'personal' })}><Plus size={16} aria-hidden /> Personal</button>
-        <button className="primary" onClick={() => go({ screen: 'business' })}><Plus size={16} aria-hidden /> Empresarial</button></div>}</div>
+        <Boton variante="secundario" onClick={() => go({ screen: 'personal' })}><Plus size={16} aria-hidden /> Personal</Boton>
+        <Boton variante="primario" onClick={() => go({ screen: 'business' })}><Plus size={16} aria-hidden /> Empresarial</Boton></div>}</div>
     {error && <div className="notice" role="alert"><AlertTriangle size={16} aria-hidden /> {error}</div>}
 
     <section className="kind-split" aria-label="Resumen por tipo">
-      <TarjetaTipo icono={BadgeCheck} titulo="Certificados empresariales" valor={sum('vigentes')} unidad="vigentes" alAbrir={() => go({ screen: 'business' })}
+      <TarjetaTipo icono={Icono.certificadoEmpresarial} titulo="Certificados empresariales" valor={sum('vigentes')} unidad="vigentes" alAbrir={() => go({ screen: 'business' })}
         datos={[
           { etiqueta: 'Vencen en 90 días', valor: number(sum('porVencer')), tono: 'alerta', alPulsar: () => go({ screen: 'business', validity: 'POR_VENCER' }) },
           { etiqueta: 'Vencidos sin renovar', valor: number(sum('vencidos')), tono: 'mal', alPulsar: () => go({ screen: 'business', validity: 'VENCIDO' }) },
           { etiqueta: 'Suspendidos', valor: number(sum('suspendidos')), tono: 'neutro' },
         ]} />
-      <TarjetaTipo icono={UserRound} titulo="Certificados personales" valor={personalTotal} unidad="emitidos" alAbrir={() => go({ screen: 'personal' })}
+      <TarjetaTipo icono={Icono.certificadoPersonal} titulo="Certificados personales" valor={personalTotal} unidad="emitidos" alAbrir={() => go({ screen: 'personal' })}
         datos={[
           { etiqueta: 'Último emitido', valor: latest?.[0] ? day(latest[0].fechaEmision) : '—' },
           { etiqueta: 'Anulados', valor: number(personalVoid), tono: 'neutro' },
@@ -59,15 +61,15 @@ export function CertificatesHome({ canManage, go }: { canManage: boolean; go: (t
     <div className="overview-grid">
       <section className="panel">
         <div className="panel-title"><div><h2><CalendarClock size={18} aria-hidden /> Vencen pronto</h2><p>Empresariales en los próximos 90 días</p></div>
-          <button className="text-button" onClick={() => go({ screen: 'business', validity: 'POR_VENCER' })}>Ver todos <ArrowRight size={14} aria-hidden /></button></div>
+          <Boton variante="texto" onClick={() => go({ screen: 'business', validity: 'POR_VENCER' })}>Ver todos <ArrowRight size={14} aria-hidden /></Boton></div>
         {!expiring ? <div className="skeleton-rows" aria-hidden="true"><span /><span /></div> : expiring.length === 0
           ? <p className="empty-state"><CheckCircle2 size={18} aria-hidden /> Ningún certificado vence en los próximos 90 días.</p>
           : <ul className="expiring-list">{expiring.map(c => <li key={c.id}><div><strong>{c.cliente.razonSocial}</strong><span className="mono">{c.codigo}</span><span>{c.designacion} · vence {day(c.fechaExpiracion)}</span></div>
             <VenceEn fecha={c.fechaExpiracion} /></li>)}</ul>}
       </section>
       <section className="panel">
-        <div className="panel-title"><div><h2><UserRound size={18} aria-hidden /> Últimos personales</h2><p>Emitidos más recientemente</p></div>
-          <button className="text-button" onClick={() => go({ screen: 'personal' })}>Ver todos <ArrowRight size={14} aria-hidden /></button></div>
+        <div className="panel-title"><div><h2><Icono.certificadoPersonal size={18} aria-hidden /> Últimos personales</h2><p>Emitidos más recientemente</p></div>
+          <Boton variante="texto" onClick={() => go({ screen: 'personal' })}>Ver todos <ArrowRight size={14} aria-hidden /></Boton></div>
         {!latest ? <div className="skeleton-rows" aria-hidden="true"><span /><span /></div> : latest.length === 0
           ? <p className="empty-state">Aún no hay certificados personales.</p>
           : <ul className="latest-list">{latest.map(c => <li key={c.id}><div><strong>{c.persona?.nombres || '—'}</strong><span>{c.curso}</span></div><span className="mono">{c.codigo}</span><span className="tabular">{day(c.fechaEmision)}</span></li>)}</ul>}
@@ -78,7 +80,7 @@ export function CertificatesHome({ canManage, go }: { canManage: boolean; go: (t
 
     <section className="panel">
       <div className="panel-title"><div><h2>Por país y marca</h2><p>Certificados de cada marca y estado de su portal de consulta.</p></div>
-        <button className="text-button" onClick={() => go('brands')}>Marcas y portal <ArrowRight size={14} aria-hidden /></button></div>
+        <Boton variante="texto" onClick={() => go('brands')}>Marcas y portal <ArrowRight size={14} aria-hidden /></Boton></div>
       <div className="table-wrap"><table className="brand-table">
         <thead><tr><th>Marca</th><th className="num">Empresariales vigentes</th><th className="num">Por vencer</th><th className="num">Vencidos</th><th className="num">Suspendidos</th><th className="num">Personales</th><th>Portal de consulta</th></tr></thead>
         <tbody>{countries.map(code => { const b = rowB(code), p = rowP(code); const connected = publication?.paises.includes(code); return <tr key={code}>
@@ -90,7 +92,7 @@ export function CertificatesHome({ canManage, go }: { canManage: boolean; go: (t
           <td className="num"><button className="cell-link" disabled={!p?.emitidos} onClick={() => go({ screen: 'personal', country: code })}>{number(p?.emitidos ?? 0)}</button></td>
           <td>{publication ? <span className="status-label"><span className={`status-dot ${connected ? 'activo' : 'inactivo'}`} />{connected ? 'En línea' : 'Sin publicar'}</span> : '—'}</td>
         </tr>; })}</tbody></table></div>
-      {failures > 0 && <button className="text-button danger" onClick={() => go('brands')}><AlertTriangle size={14} aria-hidden /> {failures} certificados con error de publicación</button>}
+      {failures > 0 && <Boton variante="texto" className="danger" onClick={() => go('brands')}><AlertTriangle size={14} aria-hidden /> {failures} certificados con error de publicación</Boton>}
     </section>
 
   </div>;

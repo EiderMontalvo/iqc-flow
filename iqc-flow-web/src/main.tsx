@@ -8,5 +8,6 @@ import './styles/components.css';
 import './styles/screens.css';
 import './styles/certificates.css';
 import './styles/charts.css';
+import './styles/correos.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(<StrictMode><App /></StrictMode>);

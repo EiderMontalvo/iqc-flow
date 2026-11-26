@@ -22,7 +22,8 @@ button:disabled { cursor: not-allowed; }
   padding: var(--e1) 0; background: none; border: 0;
   color: var(--accion); font-size: var(--tam-sm); font-weight: 600; text-decoration: none;
 }
-.text-button:hover { color: var(--accion-hover); text-decoration: underline; }
+.text-button:hover:not(:disabled) { color: var(--accion-hover); text-decoration: underline; }
+.text-button:disabled { opacity: .5; text-decoration: none; }
 .text-button.danger, .icon-button.danger { color: var(--mal); }
 .icon-button {
   display: inline-grid; place-items: center; width: 34px; height: 34px; flex: none;
@@ -169,7 +170,7 @@ p.empty-state { display: flex; align-items: center; justify-content: center; gap
 .picker-results button:hover, .picker-results button:focus-visible { background: var(--accion-suave); }
 .picker-results strong { font-size: var(--tam-md); color: var(--texto); }
 .picker-results span { font-size: var(--tam-xs); color: var(--texto-2); }
-.picker-clear { justify-self: start; padding: 0; border: 0; background: none; color: var(--accion); font-size: var(--tam-sm); font-weight: 600; }
+.picker-clear { justify-self: start; min-height: 24px; padding: 0; border: 0; background: none; color: var(--accion); font-size: var(--tam-sm); font-weight: 600; }
 
 @media (max-width: 760px) {
   .table-wrap { display: none; }
@@ -198,7 +199,7 @@ p.empty-state { display: flex; align-items: center; justify-content: center; gap
   transition: border-color var(--rapido) var(--salida), box-shadow var(--rapido) var(--salida), transform var(--rapido) var(--salida);
 }
 button.tarjeta-cifra { cursor: pointer; }
-button.tarjeta-cifra:hover { border-color: var(--borde-fuerte); box-shadow: 0 6px 18px -12px rgb(10 14 40 / .35); transform: translateY(-1px); }
+button.tarjeta-cifra:hover { border-color: var(--borde-fuerte); box-shadow: var(--sombra-elevada); transform: translateY(-1px); }
 button.tarjeta-cifra:active { transform: none; }
 .tarjeta-cifra.tono-mal { --tinta: var(--mal); --tinta-suave: var(--mal-suave); }
 .tarjeta-cifra.tono-alerta { --tinta: var(--alerta); --tinta-suave: var(--alerta-suave); }
@@ -248,7 +249,7 @@ button.tarjeta-cifra:active { transform: none; }
 .vista-pdf-barra strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--tam-sm); font-weight: 600; }
 .vista-pdf-barra span { color: var(--texto-3); font-size: var(--tam-xs); }
 .vista-pdf-cuerpo { position: relative; flex: 1; min-height: 0; display: flex; }
-.vista-pdf-cuerpo iframe { flex: 1; width: 100%; height: 100%; border: 0; background: #525659; }
+.vista-pdf-cuerpo iframe { flex: 1; width: 100%; height: 100%; border: 0; background: var(--fondo-visor); }
 .vista-pdf-vacio {
   flex: 1; display: grid; place-content: center; justify-items: center; gap: var(--e2); padding: var(--e8); margin: var(--e5);
   border: 1.5px dashed var(--borde-fuerte); border-radius: var(--radio-lg); background: transparent; color: var(--texto-2); font: inherit; text-align: center;
@@ -287,3 +288,34 @@ button.tarjeta-cifra:active { transform: none; }
 .fiscal-sunat .text-button { justify-self: start; margin-top: var(--e2); }
 @media (max-width: 480px) { .ruc-busqueda-fila { grid-template-columns: 1fr; } }
 .ruc-busqueda-fila .ruc-buscar { min-width: 112px; justify-content: center; }
+
+/* Formularios: secciones, selector segmentado y bloque desplegable (components/ui). El segmentado se ve distinto de las pestañas de modo
+   (.mode-tabs) a propósito: elige un valor y por eso la elegida lleva el color de acción y un contorno; las pestañas solo cambian de vista */
+.seccion-form { display: grid; gap: var(--e3); }
+.seccion-form ~ .seccion-form { padding-top: var(--e4); border-top: 1px solid var(--borde-suave); }
+.resumen-vigencia { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); gap: var(--e2) var(--e4); margin: 0; font-variant-numeric: tabular-nums; }
+.resumen-vigencia div { display: grid; gap: 1px; }
+.resumen-vigencia dt { font-size: var(--tam-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--texto-2); }
+.resumen-vigencia dd { margin: 0; font-size: var(--tam-sm); color: var(--texto); }
+.form-grid.alinear-inicio { align-items: start; }
+.campo { display: grid; align-content: start; gap: 6px; }
+.etiqueta-campo { font-size: var(--tam-sm); font-weight: 600; color: var(--texto-suave); }
+.segmentado { display: flex; gap: 2px; padding: 3px; border-radius: var(--radio); background: var(--superficie-hundida); }
+.segmentado-opcion { position: relative; flex: 1; display: grid; font-weight: 500; }
+.segmentado-opcion input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.segmentado-opcion span, .segmentado-boton { display: grid; place-items: center; min-height: 36px; padding: 0 var(--e3); border-radius: var(--radio-sm); color: var(--texto-2); font-size: var(--tam-md); text-align: center; transition: background-color var(--rapido) var(--salida), color var(--rapido) var(--salida); }
+.segmentado-opcion:hover span, .segmentado-boton:hover:not(:disabled):not([aria-pressed="true"]) { background: var(--superficie-2); color: var(--texto); }
+.segmentado-opcion input:checked + span, .segmentado-boton[aria-pressed="true"] { background: var(--accion-suave); color: var(--accion); font-weight: var(--peso-fuerte); box-shadow: inset 0 0 0 1px var(--accion); }
+.segmentado-boton { flex: 1; border: 0; font: inherit; font-size: var(--tam-md); cursor: pointer; }
+.segmentado-boton:disabled { opacity: .5; cursor: not-allowed; }
+.segmentado-boton:focus-visible { outline: 2px solid var(--foco); outline-offset: 1px; }
+.segmentado-opcion input:focus-visible + span { outline: 2px solid var(--foco); outline-offset: 1px; }
+.desplegable { border: 1px solid var(--borde); border-radius: var(--radio); background: var(--superficie); }
+.desplegable > summary { display: flex; align-items: center; gap: var(--e2); min-height: 40px; padding: 0 var(--e3); border-radius: var(--radio); color: var(--texto-suave); font-size: var(--tam-md); font-weight: 600; cursor: pointer; list-style: none; }
+.desplegable > summary::-webkit-details-marker { display: none; }
+.desplegable > summary:hover { color: var(--texto); background: var(--superficie-2); }
+.desplegable > summary:focus-visible { outline: 2px solid var(--foco); outline-offset: 1px; }
+.desplegable > summary svg { color: var(--texto-3); transition: transform var(--rapido) var(--salida); }
+.desplegable[open] > summary svg { transform: rotate(90deg); }
+.desplegable-cuerpo { display: grid; gap: var(--e4); padding: var(--e3) var(--e3) var(--e4); border-top: 1px solid var(--borde-suave); }
+@media (prefers-reduced-motion: reduce) { .desplegable > summary svg, .segmentado-opcion span, .segmentado-boton { transition: none; } }

@@ -1,8 +1,9 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { AlertTriangle, CheckCircle2, ExternalLink, Pencil, RefreshCw } from 'lucide-react';
 import { api, type Brand, type PublicationStatus } from '../../lib/api';
+import { Boton } from '../../components/ui/Boton';
+import { errorText } from '../../lib/format';
 
-const errorText = (error: unknown) => error instanceof Error ? error.message : 'Ocurrió un error inesperado.';
 const stamp = (value: string) => new Intl.DateTimeFormat('es-PE', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
 const relativo = new Intl.RelativeTimeFormat('es', { numeric: 'auto' });
 /** «hace 3 minutos», «hace 2 horas»: cuándo se actualizó el portal por última vez */
@@ -38,7 +39,7 @@ function BrandForm({ brand, onSaved, onCancel }: { brand: Brand; onSaved: () => 
   </div>
     {brand.codigoPais === 'PE' && <p className="form-hint">La consulta de Perú está impresa en los certificados y QR emitidos: no la cambies salvo que el dominio anterior siga redirigiendo.</p>}
     {error && <p className="form-error" role="alert">{error}</p>}
-    <div className="form-actions"><button type="button" className="secondary" onClick={onCancel}>Cancelar</button><button className="primary" disabled={busy}>{busy ? 'Guardando…' : 'Guardar marca'}</button></div>
+    <div className="form-actions"><Boton type="button" variante="secundario" onClick={onCancel}>Cancelar</Boton><Boton type="submit" variante="primario" disabled={busy}>{busy ? 'Guardando…' : 'Guardar marca'}</Boton></div>
   </form>;
 }
 
@@ -66,7 +67,7 @@ export function Brands({ canConfigure, canPublish }: { canConfigure: boolean; ca
     {notice && <p className="form-success" role="status"><CheckCircle2 size={14} aria-hidden /> {notice}</p>}
     <section className="panel portal-estado">
       <div className="panel-title"><div><h2>Portal de consulta</h2><p>Los cambios se publican solos cada minuto: no hace falta hacer nada.</p></div>
-        {canPublish && <button className="secondary" disabled={busy} onClick={() => publish(false)}><RefreshCw size={16} aria-hidden /> Actualizar ahora</button>}</div>
+        {canPublish && <Boton variante="secundario" disabled={busy} onClick={() => publish(false)}><RefreshCw size={16} aria-hidden /> Actualizar ahora</Boton>}</div>
       {!status ? <div className="skeleton-rows" aria-hidden><span /><span /></div> : <>
         <div className="portal-estado-cifras">
           <div><span>Estado</span>{status.errores.length
@@ -78,7 +79,7 @@ export function Brands({ canConfigure, canPublish }: { canConfigure: boolean; ca
         {status.errores.length > 0 && <p className="portal-aviso"><AlertTriangle size={16} aria-hidden /> Algunos certificados no se pudieron publicar. Se reintenta solo; si siguen pendientes después de «Actualizar ahora», avisa a soporte.</p>}
         {canPublish && <details className="opciones-avanzadas"><summary>Opciones avanzadas</summary>
           <p>Si el portal muestra datos desactualizados aunque el estado diga «Al día», puedes volver a enviar todos los certificados. Tarda unos minutos.</p>
-          <button className="secondary small" disabled={busy} onClick={() => publish(true)}><RefreshCw size={14} aria-hidden /> Volver a enviar todo</button>
+          <Boton variante="secundario" pequeno disabled={busy} onClick={() => publish(true)}><RefreshCw size={14} aria-hidden /> Volver a enviar todo</Boton>
           {status.errores.length > 0 && <ul className="error-list">{status.errores.map(e => <li key={e.certificadoId}><code>{e.certificadoId.slice(0, 8)}</code> {e.error} <span>({e.intentos} intentos, {stamp(e.ultimoIntentoEn)})</span></li>)}</ul>}
         </details>}
       </>}
@@ -90,7 +91,7 @@ export function Brands({ canConfigure, canPublish }: { canConfigure: boolean; ca
         <dl><dt>Portal</dt><dd><a href={b.urlConsulta} target="_blank" rel="noreferrer">{sinProtocolo(b.urlConsulta)} <ExternalLink size={12} aria-hidden /></a></dd>
           <dt>Sitio web</dt><dd>{b.sitioWeb ? <a href={b.sitioWeb} target="_blank" rel="noreferrer">{sinProtocolo(b.sitioWeb)} <ExternalLink size={12} aria-hidden /></a> : '—'}</dd>
           <dt>Correo</dt><dd>{b.correo || '—'}</dd></dl>
-        {canConfigure && <button className="secondary small" onClick={() => setEditing(b.codigoPais)}><Pencil size={14} aria-hidden /> Editar</button>}</>}
+        {canConfigure && <Boton variante="secundario" pequeno onClick={() => setEditing(b.codigoPais)}><Pencil size={14} aria-hidden /> Editar</Boton>}</>}
     </article>)}</section>
   </div>;
 }

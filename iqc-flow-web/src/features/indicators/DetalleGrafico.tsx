@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { X } from 'lucide-react';
 import { formatoNumero, periodo } from '../../components/charts/escala';
 import { DibujoGrafico, total, type DefinicionGrafico } from './graficos';
+import { BotonIcono } from '../../components/ui/Boton';
 
 const n = (v: number) => formatoNumero.format(v);
 const pct = (v: number, t: number) => t ? `${Math.round((v / t) * 100)} %` : '—';
@@ -30,7 +31,7 @@ export function DetalleGrafico({ d, cerrar }: { d: DefinicionGrafico; cerrar: ()
   return <div className="dialog-backdrop" onMouseDown={e => { if (e.target === e.currentTarget) cerrar(); }}>
     <section className="dialog detalle-grafico" role="dialog" aria-modal="true" aria-labelledby="detalle-grafico-titulo">
       <div className="dialog-header"><div><h2 id="detalle-grafico-titulo">{d.titulo}</h2><p>{d.detalle}</p></div>
-        <button type="button" className="icon-button" onClick={cerrar} aria-label="Cerrar"><X size={18} aria-hidden /></button></div>
+        <BotonIcono etiqueta="Cerrar" icono={X} tamano={18} type="button" onClick={cerrar} /></div>
       <dl className="detalle-grafico-resumen">{resumen.map(([t, v]) => <div key={t}><dt>{t}</dt><dd>{v}</dd></div>)}</dl>
       <div className="detalle-grafico-dibujo">{suma ? <DibujoGrafico d={d} alto={300} /> : <p className="grafico-vacio">{d.vacio}</p>}</div>
       <div className="table-wrap"><table className="tabla-grafico">

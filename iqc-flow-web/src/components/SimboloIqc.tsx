@@ -4,7 +4,8 @@ import { DEGRADADO_IQC, SIMBOLO_IQC, VISTA_SIMBOLO } from '@iqc/diseno/simbolo';
 /**
  * Símbolo de IQC en línea fina con el degradado del logo, del sistema de diseño compartido con el portal.
  * Es decorativo: siempre oculto a los lectores de pantalla.
- * `dibujar`: el contorno se traza una vez al aparecer (solo en el acceso; el panel de trabajo no se anima).
+ * `dibujar`: el contorno se traza una vez al aparecer y después una luz neón lo recorre en bucle, como en el portal de consultas
+ * (solo en el acceso; el panel de trabajo no se anima).
  */
 export function SimboloIqc({ className, dibujar }: { className?: string; dibujar?: boolean }) {
   const id = `g${useId().replace(/:/g, '')}`;
@@ -17,5 +18,6 @@ export function SimboloIqc({ className, dibujar }: { className?: string; dibujar
     </defs>
     {SIMBOLO_IQC.map(d => <path key={d} d={d} className="relleno" fill={`url(#${id})`} />)}
     {SIMBOLO_IQC.map(d => <path key={d} d={d} className="trazo" fill="none" stroke={`url(#${id})`} pathLength={1} />)}
+    {dibujar && <path d={SIMBOLO_IQC[0]} className="luz" fill="none" pathLength={1} />}
   </svg>;
 }

@@ -8,6 +8,7 @@ import { FilaCifras, TarjetaCifra } from '../../components/cifras/TarjetaCifra';
 import { DetalleCotizacion } from './DetalleCotizacion';
 import { NuevaCotizacion } from './NuevaCotizacion';
 import { ESTADOS, EstadoCotizacion, SERVICIOS, dinero } from './textos';
+import { Boton } from '../../components/ui/Boton';
 
 type Filtro = '' | QuoteState | 'SIN_RESPUESTA';
 
@@ -35,7 +36,7 @@ export function Cotizaciones({ puedeGestionar, puedeCrearClientes }: { puedeGest
 
   return <div className="screen-body">
     <div className="page-heading"><div><h1>Cotizaciones</h1><p>Propuestas a clientes: de borrador a enviada y la respuesta del cliente.</p></div>
-      {puedeGestionar && <button className="primary" onClick={() => setCreando(true)}><Plus size={16} aria-hidden /> Nueva cotización</button>}</div>
+      {puedeGestionar && <Boton variante="primario" onClick={() => setCreando(true)}><Plus size={16} aria-hidden /> Nueva cotización</Boton>}</div>
     {error && <div className="notice" role="alert">{error}</div>}
 
     <FilaCifras etiqueta="Resumen de cotizaciones">

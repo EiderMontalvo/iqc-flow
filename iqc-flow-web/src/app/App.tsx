@@ -1,7 +1,7 @@
 import { useEffect, useState, type ComponentType } from 'react';
 import {
-  BadgeCheck, Bell, Building2, FileSignature, Globe2, LayoutDashboard, LayoutGrid, ListTodo,
-  SlidersHorizontal, UserRound, Users as UsersIcon, X, type LucideProps,
+  Bell, Globe2, House, LayoutDashboard,
+  SlidersHorizontal, Users as UsersIcon, X, type LucideProps,
 } from 'lucide-react';
 import { api, type CurrentUser, type TaskView } from '../lib/api';
 import { errorText } from '../lib/format';
@@ -9,6 +9,7 @@ import { Cabecera, type Apariencia } from './cabecera/Cabecera';
 import { FondoTematico } from './tematica/FondoTematico';
 import { TEMATICAS, tematicaActiva } from './tematica/tematicas';
 import { BrandMark } from '../components/BrandMark';
+import { Icono } from '../lib/iconos';
 import { SimboloIqc } from '../components/SimboloIqc';
 import type { VistaIndicadores } from '../features/indicators/Indicators';
 import { Login } from '../features/auth/Login';
@@ -24,20 +25,24 @@ import { Users } from '../features/users/Users';
 import { Notices } from '../features/notices/Notices';
 import { Settings } from '../features/settings/Settings';
 import { Cotizaciones } from '../features/quotes/Cotizaciones';
+import { BotonIcono } from '../components/ui/Boton';
+import { Correos } from '../features/correos/Correos';
+import { useContadoresCorreo } from '../features/correos/hooks';
 
-type Screen = 'overview' | 'cert-home' | 'business' | 'personal' | 'clients' | 'quotes' | 'tasks' | 'brands' | 'users' | 'notices' | 'settings';
+type Screen = 'overview' | 'cert-home' | 'business' | 'personal' | 'clients' | 'quotes' | 'tasks' | 'correos' | 'brands' | 'users' | 'notices' | 'settings';
 type ThemePreference = Apariencia;
 type Params = { country?: string; validity?: string; view?: string };
 
 interface ScreenDef { label: string; icon: ComponentType<LucideProps>; permission?: string }
 const SCREENS: Record<Screen, ScreenDef> = {
-  overview: { label: 'Hoy', icon: LayoutDashboard },
-  'cert-home': { label: 'Resumen', icon: LayoutGrid, permission: 'certificados:leer' },
-  business: { label: 'Empresariales', icon: BadgeCheck, permission: 'certificados:leer' },
-  personal: { label: 'Personales', icon: UserRound, permission: 'certificados:leer' },
-  clients: { label: 'Clientes', icon: Building2, permission: 'clientes:leer' },
-  quotes: { label: 'Cotizaciones', icon: FileSignature, permission: 'cotizaciones:leer' },
-  tasks: { label: 'Seguimientos', icon: ListTodo, permission: 'seguimientos:leer' },
+  overview: { label: 'Hoy', icon: House },
+  'cert-home': { label: 'Resumen', icon: LayoutDashboard, permission: 'certificados:leer' },
+  business: { label: 'Empresariales', icon: Icono.certificadoEmpresarial, permission: 'certificados:leer' },
+  personal: { label: 'Personales', icon: Icono.certificadoPersonal, permission: 'certificados:leer' },
+  clients: { label: 'Clientes', icon: Icono.cliente, permission: 'clientes:leer' },
+  quotes: { label: 'Cotizaciones', icon: Icono.cotizacion, permission: 'cotizaciones:leer' },
+  tasks: { label: 'Seguimientos', icon: Icono.seguimiento, permission: 'seguimientos:leer' },
+  correos: { label: 'Correos', icon: Icono.bandeja, permission: 'correos:leer' },
   notices: { label: 'Notificaciones', icon: Bell },
   brands: { label: 'Marcas y portal', icon: Globe2, permission: 'certificados:leer' },
   users: { label: 'Usuarios', icon: UsersIcon, permission: 'usuarios:leer' },
@@ -49,7 +54,7 @@ interface Space { name: string; key: VistaIndicadores; home: Screen; groups: Arr
 const SPACES: Array<{ roles: string[]; space: Space }> = [
   { roles: ['MASTER', 'ADMINISTRADOR'], space: { name: 'Dirección', key: 'direccion', home: 'overview', groups: [
     ['General', ['overview']], ['Certificados', ['cert-home', 'business', 'personal']],
-    ['Gestión', ['clients', 'quotes', 'tasks']], ['Configuración', ['settings', 'brands', 'users']]] } },
+    ['Gestión', ['clients', 'quotes', 'tasks', 'correos']], ['Configuración', ['settings', 'brands', 'users']]] } },
   { roles: ['CERTIFICADOS'], space: { name: 'Certificados', key: 'certificados', home: 'cert-home', groups: [
     ['Certificados', ['cert-home', 'business', 'personal']], ['Configuración', ['brands']]] } },
   { roles: ['RESPONSABLE_CERTIFICACIONES'], space: { name: 'Jefatura técnica', key: 'certificados', home: 'cert-home', groups: [
@@ -57,9 +62,9 @@ const SPACES: Array<{ roles: string[]; space: Space }> = [
   { roles: ['COORDINADOR_AUDITORIAS'], space: { name: 'Operaciones', key: 'operaciones', home: 'overview', groups: [
     ['Trabajo', ['overview', 'tasks', 'clients']], ['Certificados', ['business']]] } },
   { roles: ['COMERCIAL'], space: { name: 'Comercial', key: 'comercial', home: 'overview', groups: [
-    ['Trabajo', ['overview', 'clients', 'quotes', 'tasks']], ['Consulta', ['business']]] } },
+    ['Trabajo', ['overview', 'correos', 'clients', 'quotes', 'tasks']], ['Consulta', ['business']]] } },
   { roles: ['ADMINISTRACION_LOGISTICA'], space: { name: 'Administración', key: 'administracion', home: 'overview', groups: [
-    ['Trabajo', ['overview', 'quotes']], ['Certificados', ['business']]] } },
+    ['Trabajo', ['overview', 'correos', 'quotes']], ['Certificados', ['business']]] } },
 ];
 const FALLBACK: Space = { name: 'IQC Flow', key: 'direccion', home: 'overview', groups: [['Trabajo', ['overview']]] };
 /**
@@ -92,6 +97,8 @@ export function App() {
   const [screen, setScreen] = useState<Screen | null>(null), [params, setParams] = useState<Params>({}), [visit, setVisit] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false), [theme, setTheme] = useState<ThemePreference>(preferredTheme);
   const [unread, setUnread] = useState(0), [tematica, setTematica] = useState<string | undefined>();
+  // Los correos nuevos se cuentan para la insignia del carril, solo si hay permiso y la pestaña se ve (la publicidad no cuenta)
+  const { contadores: correosNuevos, recargar: recargarCorreos } = useContadoresCorreo(!!user && !user.debeCambiarContrasena && user.permisos.includes('correos:leer'));
   const [carrilOculto, setCarrilOculto] = useState(() => { try { return localStorage.getItem('iqc-flow-carril') === 'oculto'; } catch { return false; } });
   function alternarCarril() {
     setCarrilOculto(v => { try { if (v) localStorage.removeItem('iqc-flow-carril'); else localStorage.setItem('iqc-flow-carril', 'oculto'); } catch { /* solo esta sesión */ } return !v; });
@@ -152,13 +159,14 @@ export function App() {
     <aside className={`sidebar ${menuOpen ? 'open' : ''}`} aria-label="Navegación">
       <SimboloIqc />
       <div className="sidebar-head"><button className="sidebar-brand" onClick={() => navigate(home)} aria-label="Ir al inicio"><BrandMark alto={64} /></button>
-        <button className="icon-button mobile-close" onClick={() => setMenuOpen(false)} aria-label="Cerrar menú"><X size={18} aria-hidden /></button></div>
+        <BotonIcono etiqueta="Cerrar menú" icono={X} tamano={18} className="mobile-close" onClick={() => setMenuOpen(false)} /></div>
       <div className="sidebar-scroll">
       <div className="space-name" title="Espacio de trabajo"><strong>{space.name}</strong></div>
       <nav>{groups.map(([title, list]) => <div className="nav-group" key={title}><span className="nav-heading">{title}</span>{list.map(target => {
         const { label, icon: Icon } = SCREENS[target];
         return <button key={target} className={current === target ? 'active' : ''} aria-current={current === target ? 'page' : undefined} onClick={() => navigate(target)}>
           <Icon size={18} aria-hidden /><span>{label}</span>
+          {target === 'correos' && !!correosNuevos?.nuevos && <span className="nav-badge">{correosNuevos.nuevos}<span className="sr-only"> correos sin tratar</span></span>}
         </button>;
       })}</div>)}</nav>
       </div>
@@ -176,6 +184,8 @@ export function App() {
           : current === 'personal' ? <PersonalCertificates canManage={can('certificados:gestionar')} initialCountry={params.country} />
           : current === 'clients' ? <Clients canWrite={can('clientes:escribir')} canArchive={can('clientes:archivar')} canReadActivities={can('seguimientos:leer')} canWriteActivities={can('seguimientos:escribir')} />
           : current === 'quotes' ? <Cotizaciones puedeGestionar={can('cotizaciones:gestionar')} puedeCrearClientes={can('clientes:escribir')} />
+          : current === 'correos' ? <Correos contadores={correosNuevos} recargarContadores={recargarCorreos} puedeResponder={can('correos:responder')} puedeCotizar={can('cotizaciones:gestionar')}
+            puedeSeguimiento={can('seguimientos:escribir')} puedeCrearClientes={can('clientes:escribir')} irAClientes={() => navigate('clients')} />
           : current === 'tasks' ? <Tasks canWrite={can('seguimientos:escribir')} canReadAll={can('seguimientos:leer-todos')} initialView={params.view as TaskView | undefined} />
           : current === 'brands' ? <Brands canConfigure={can('organizacion:configurar')} canPublish={can('certificados:gestionar')} />
           : current === 'settings' ? <Settings />

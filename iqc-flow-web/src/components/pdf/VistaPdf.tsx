@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type DragEvent } from 'react';
 import { AlertTriangle, ExternalLink, FileText, FileUp, LoaderCircle, RefreshCw } from 'lucide-react';
 import { api } from '../../lib/api';
 import { errorText, kb } from '../../lib/format';
+import { Boton } from '../../components/ui/Boton';
 
 /** De dónde sale el PDF: un archivo recién elegido, un documento ya guardado o un enlace de la plataforma anterior */
 export type FuentePdf =
@@ -76,7 +77,7 @@ export function VistaPdf({ fuente, titulo = 'PDF del certificado', alElegir, vac
       <FileText size={16} aria-hidden />
       <div><strong>{nombre ?? titulo}</strong>{nombre && <span>{titulo}{fuente?.tipo === 'enlace' ? ' · plataforma anterior' : ''}{tamano ? ` · ${kb(tamano)}` : ''}</span>}</div>
       {abrir && <a className="icon-button" href={abrir} target="_blank" rel="noreferrer" title="Abrir en otra pestaña" aria-label="Abrir el PDF en otra pestaña"><ExternalLink size={16} aria-hidden /></a>}
-      {alElegir && fuente && <button type="button" className="secondary small" onClick={() => entrada.current?.click()}><RefreshCw size={14} aria-hidden /> Cambiar</button>}
+      {alElegir && fuente && <Boton type="button" variante="secundario" pequeno onClick={() => entrada.current?.click()}><RefreshCw size={14} aria-hidden /> Cambiar</Boton>}
     </header>
     {alElegir && <input ref={entrada} type="file" accept="application/pdf" hidden onChange={e => { const f = e.target.files?.[0]; if (f) alElegir(f); e.target.value = ''; }} />}
 

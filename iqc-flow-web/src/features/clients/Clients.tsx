@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Archive, ArchiveRestore, BadgeCheck, Building2, ChevronRight, LoaderCircle, MoonStar, Pencil, Plus, Search, Sparkles } from 'lucide-react';
+import { Archive, ArchiveRestore, ChevronRight, LoaderCircle, Pencil, Plus, Search } from 'lucide-react';
+import { Icono } from '../../lib/iconos';
 import { FilaCifras, TarjetaCifra } from '../../components/cifras/TarjetaCifra';
 import { api, ApiError, type ClientDetail, type ClientStatus, type ClientSummary, type Page } from '../../lib/api';
 import { day, errorText } from '../../lib/format';
@@ -7,6 +8,7 @@ import { Drawer } from '../../components/Drawer';
 import { Pagination } from '../../components/Pagination';
 import { SearchField } from '../../components/SearchField';
 import { ClientExtras } from './ClientExtras';
+import { Boton } from '../../components/ui/Boton';
 
 const statusNames: Record<ClientStatus, string> = { PROSPECTO: 'Prospecto', ACTIVO: 'Activo', INACTIVO: 'Inactivo' };
 
@@ -53,8 +55,8 @@ function ClientForm({ initial, onSave, onCancel, busy, error }: { initial?: Clie
         <input id="cliente-ruc" value={ruc} onChange={e => { setRuc(e.target.value.replace(/\D/g, '')); setAviso(''); }}
           onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); buscar(); } }}
           inputMode="numeric" maxLength={11} pattern="[0-9]{11}" placeholder="11 dígitos" autoFocus={!initial} aria-describedby={aviso ? "cliente-ruc-ayuda" : undefined} />
-        <button type="button" className="primary ruc-buscar" onClick={buscar} disabled={consultando || !ruc.trim()} aria-label="Buscar los datos de este RUC">
-          {consultando ? <LoaderCircle size={16} className="spin" aria-hidden /> : <Search size={16} aria-hidden />} {consultando ? 'Buscando…' : 'Buscar'}</button>
+        <Boton variante="primario" className="ruc-buscar" onClick={buscar} disabled={consultando || !ruc.trim()} aria-label="Buscar los datos de este RUC">
+          {consultando ? <LoaderCircle size={16} className="spin" aria-hidden /> : <Search size={16} aria-hidden />} {consultando ? 'Buscando…' : 'Buscar'}</Boton>
       </div>
       {/* Solo se avisa cuando no se pudo consultar; si se encuentra, los datos aparecen abajo sin mensaje */}
       {aviso && <span id="cliente-ruc-ayuda" className="field-help aviso" role="alert">{aviso}</span>}
@@ -74,11 +76,11 @@ function ClientForm({ initial, onSave, onCancel, busy, error }: { initial?: Clie
         <label>Provincia<input value={fiscal.provincia} onChange={setF('provincia')} maxLength={100} /></label>
         <label>Departamento<input value={fiscal.departamento} onChange={setF('departamento')} maxLength={100} /></label>
       </div>
-      <button type="button" className="text-button" onClick={() => setFiscal(null)}>No guardar esta dirección</button></fieldset>}
+      <Boton type="button" variante="texto" onClick={() => setFiscal(null)}>No guardar esta dirección</Boton></fieldset>}
     <label>Notas<textarea value={notes} onChange={e => setNotes(e.target.value)} rows={4} maxLength={4000} /></label>
     {status === 'ACTIVO' && !ruc && <p className="form-hint">Un cliente activo necesita un RUC válido.</p>}
     {error && <p className="form-error" role="alert">{error}</p>}
-    <div className="form-actions"><button type="button" className="secondary" onClick={onCancel}>Cancelar</button><button className="primary" disabled={busy || (status === 'ACTIVO' && !ruc)}>{busy ? 'Guardando…' : initial ? 'Guardar cambios' : 'Crear cliente'}</button></div></form>;
+    <div className="form-actions"><Boton type="button" variante="secundario" onClick={onCancel}>Cancelar</Boton><Boton type="submit" variante="primario" disabled={busy || (status === 'ACTIVO' && !ruc)}>{busy ? 'Guardando…' : initial ? 'Guardar cambios' : 'Crear cliente'}</Boton></div></form>;
 }
 
 export function Clients({ canWrite, canArchive, canReadActivities, canWriteActivities }: {
@@ -133,12 +135,12 @@ export function Clients({ canWrite, canArchive, canReadActivities, canWriteActiv
   }
   return <div className="screen-body">
     <div className="page-heading"><div><h1>Clientes</h1><p>Cartera de IQC Perú e IQC LATAM: datos, contactos, sedes y actividad.</p></div>
-      {canWrite && <button className="primary" onClick={() => { setDetail(null); setFormError(''); setMode('create'); }}><Plus size={16} aria-hidden /> Nuevo cliente</button>}</div>
+      {canWrite && <Boton variante="primario" onClick={() => { setDetail(null); setFormError(''); setMode('create'); }}><Plus size={16} aria-hidden /> Nuevo cliente</Boton>}</div>
     <FilaCifras etiqueta="Filtrar por estado">
-      <TarjetaCifra icono={Building2} etiqueta="Cartera" valor={cuentas?.todos} detalle="Clientes y prospectos sin archivar" activa={filter === 'TODOS'} alPulsar={() => filtrar('TODOS')} />
-      <TarjetaCifra icono={BadgeCheck} etiqueta="Activos" valor={cuentas?.activos} detalle="Marcados como activos" tono="ok" activa={filter === 'ACTIVO'} alPulsar={() => filtrar('ACTIVO')} />
-      <TarjetaCifra icono={Sparkles} etiqueta="Prospectos" valor={cuentas?.prospectos} detalle="Aún no contratan un servicio" activa={filter === 'PROSPECTO'} alPulsar={() => filtrar('PROSPECTO')} />
-      <TarjetaCifra icono={MoonStar} etiqueta="Inactivos" valor={cuentas?.inactivos} detalle="Marcados como inactivos" tono="neutro" activa={filter === 'INACTIVO'} alPulsar={() => filtrar('INACTIVO')} />
+      <TarjetaCifra icono={Icono.cartera} etiqueta="Cartera" valor={cuentas?.todos} detalle="Clientes y prospectos sin archivar" activa={filter === 'TODOS'} alPulsar={() => filtrar('TODOS')} />
+      <TarjetaCifra icono={Icono.clienteActivo} etiqueta="Activos" valor={cuentas?.activos} detalle="Marcados como activos" tono="ok" activa={filter === 'ACTIVO'} alPulsar={() => filtrar('ACTIVO')} />
+      <TarjetaCifra icono={Icono.prospecto} etiqueta="Prospectos" valor={cuentas?.prospectos} detalle="Aún no contratan un servicio" activa={filter === 'PROSPECTO'} alPulsar={() => filtrar('PROSPECTO')} />
+      <TarjetaCifra icono={Icono.clienteInactivo} etiqueta="Inactivos" valor={cuentas?.inactivos} detalle="Marcados como inactivos" tono="neutro" activa={filter === 'INACTIVO'} alPulsar={() => filtrar('INACTIVO')} />
     </FilaCifras>
     <section className="list-panel">
       <div className="list-toolbar">
@@ -146,7 +148,7 @@ export function Clients({ canWrite, canArchive, canReadActivities, canWriteActiv
         <select aria-label="Filtrar por estado" value={filter} onChange={e => { setFilter(e.target.value as ClientStatus | 'TODOS'); setPage(0); }}><option value="TODOS">Todos los estados</option><option value="PROSPECTO">Prospectos</option><option value="ACTIVO">Activos</option><option value="INACTIVO">Inactivos</option></select>
         <label className="check-row"><input type="checkbox" checked={archived} onChange={e => { setArchived(e.target.checked); setPage(0); }} /> Incluir archivados</label>
       </div>
-      {error && <div className="notice" role="alert">{error} <button className="text-button" onClick={reload}>Reintentar</button></div>}
+      {error && <div className="notice" role="alert">{error} <Boton variante="texto" onClick={reload}>Reintentar</Boton></div>}
       <div className="table-wrap"><table><thead><tr><th>Cliente</th><th>Código</th><th>Estado</th><th>Responsable</th><th>Actualizado</th><th><span className="sr-only">Abrir</span></th></tr></thead>
         <tbody>{!data && <tr className="skeleton-row"><td colSpan={6}><span /></td></tr>}{data?.contenido.map(client => <tr key={client.id} className="clickable" onClick={() => open(client.id)}>
           <td><strong>{client.razonSocial}</strong>{client.numeroDocumento && <small className="tabular">{client.numeroDocumento}</small>}</td>
@@ -174,8 +176,8 @@ export function Clients({ canWrite, canArchive, canReadActivities, canWriteActiv
           {detail.notas && <><h3>Notas</h3><p className="detail-notes">{detail.notas}</p></>}
           {formError && <p className="form-error" role="alert">{formError}</p>}
           <div className="form-actions">
-            {canArchive && <button className="secondary" disabled={busy} onClick={toggleArchive}>{detail.archivado ? <><ArchiveRestore size={16} aria-hidden /> Restaurar</> : <><Archive size={16} aria-hidden /> Archivar</>}</button>}
-            {detail.puedeEditar && !detail.archivado && <button className="primary" onClick={() => setMode('edit')}><Pencil size={16} aria-hidden /> Editar cliente</button>}
+            {canArchive && <Boton variante="secundario" disabled={busy} onClick={toggleArchive}>{detail.archivado ? <><ArchiveRestore size={16} aria-hidden /> Restaurar</> : <><Archive size={16} aria-hidden /> Archivar</>}</Boton>}
+            {detail.puedeEditar && !detail.archivado && <Boton variante="primario" onClick={() => setMode('edit')}><Pencil size={16} aria-hidden /> Editar cliente</Boton>}
           </div>
         </div>}
     </Drawer>}

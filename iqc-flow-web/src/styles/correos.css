@@ -1,0 +1,123 @@
+/* Correos: bandeja con la lista a la izquierda y la lectura a la derecha. Solo tokens del sistema de diseño.
+   El panel es un contenedor: pasa a una sola columna según SU ancho (no el de la ventana), así el carril abierto o cerrado no la rompe. */
+.correos { display: flex; flex-direction: column; height: 100%; padding-bottom: var(--e6); }
+.correos .page-heading { flex: none; margin-bottom: var(--e4); }
+.correos .page-heading p strong { color: var(--texto); font-weight: var(--peso-titulo); }
+.correos-ia-motivo { flex: none; flex-wrap: nowrap; align-items: flex-start; margin: calc(var(--e2) * -1) 0 var(--e3); }
+.correos-ia-motivo svg { flex: none; margin-top: 2px; }
+.correos-avisos:empty { display: none; }
+.correos-avisos { flex: none; }
+.correos-aviso { justify-content: space-between; margin-bottom: var(--e3); }
+.correos-aviso > span { flex: 1; min-width: 0; }
+.correos .notice { flex: none; }
+
+.correos-panel { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 520px; container: correos / inline-size; }
+.correos-filtros { flex: none; align-items: center; }
+.correos-filtros .campo { min-width: 0; max-width: 100%; }
+.correos-filtros .segmentado { overflow-x: auto; scrollbar-width: thin; }
+.correos-filtros .segmentado-opcion span { min-height: 34px; padding: 0 var(--e2); white-space: nowrap; }
+.correos-filtros .search-field { flex: 1 1 180px; }
+.correos-tipo-filtro select { width: auto; min-width: 9.5rem; }
+.correos-mas { flex: none; padding: var(--e1) var(--e3); border-bottom: 1px solid var(--borde); background: var(--superficie-2); }
+.correos-mas .desplegable { border: 0; background: transparent; }
+.correos-mas .desplegable > summary { min-height: 32px; font-size: var(--tam-sm); }
+.correos-mas .desplegable-cuerpo { border-top: 0; padding: var(--e1) var(--e3) var(--e3); }
+.correos-publicidad { flex: none; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--e2) var(--e4); padding: var(--e3) var(--e4); border-bottom: 1px solid var(--borde); background: var(--superficie-2); font-size: var(--tam-sm); color: var(--texto-2); }
+.correos-confirmar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e2) var(--e3); color: var(--texto); font-weight: var(--peso-fuerte); }
+.correos-privacidad { align-items: flex-start; }
+.correos-privacidad svg { flex: none; margin-top: 2px; }
+
+.correos-cuerpo { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(300px, 400px) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+.correos-lista { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--borde); }
+.correos-filas { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.correos-lista .pagination { flex: none; border-top: 1px solid var(--borde); }
+.correos-lista .empty-state, .correos-lista .notice { margin: var(--e4); }
+.correos-esqueleto { padding: var(--e3); }
+.correos-esqueleto span { height: 76px; }
+.correos-lectura { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.correos-lectura > .empty-state, .correos-lectura > .notice, .correos-lectura > .skeleton-rows { margin: var(--e5); }
+
+/* Fila de la lista: una columna acotada, para que la hora y la etiqueta de cuenta nunca se recorten con un asunto largo */
+.correo-fila { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1px; width: 100%; padding: var(--e2) var(--e4); border: 0; border-bottom: 1px solid var(--borde-suave); background: transparent; color: var(--texto); text-align: left; cursor: pointer; }
+.correo-fila > * { min-width: 0; }
+.correo-fila:hover { background: var(--superficie-2); }
+.correo-fila[aria-selected="true"] { background: var(--accion-suave); box-shadow: inset 0 0 0 1px var(--accion); }
+.correo-fila:focus-visible { outline: 2px solid var(--foco); outline-offset: -2px; }
+.correo-fila-cabeza { display: flex; align-items: baseline; justify-content: space-between; gap: var(--e3); min-width: 0; }
+.correo-remitente, .correo-asunto { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.correo-remitente { flex: 1; font-size: var(--tam-md); }
+.correo-asunto { font-size: var(--tam-sm); }
+.correo-fila.nuevo .correo-remitente, .correo-fila.nuevo .correo-asunto-titulo { font-weight: var(--peso-titulo); }
+.correo-fila time { flex: none; color: var(--texto-3); font-size: var(--tam-xs); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.correo-extracto { color: var(--texto-2); }
+.correo-fila-pie { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e1) var(--e3); margin-top: var(--e1); font-size: var(--tam-xs); color: var(--texto-2); }
+.correo-fila-pie .status-label { font-size: var(--tam-xs); }
+.correo-tipo { display: inline-flex; align-items: center; gap: 4px; padding: 1px 7px; border-radius: var(--radio-pildora); background: var(--superficie-hundida); color: var(--texto-suave); font-size: var(--tam-xs); font-weight: var(--peso-fuerte); white-space: nowrap; }
+.correo-tipo svg { color: var(--texto-3); flex: none; }
+.correo-tipo.tipo-reclamo { background: var(--mal-suave); color: var(--mal); }
+.correo-tipo.tipo-reclamo svg { color: inherit; }
+.status-dot.correo-nuevo { background: var(--accion); }
+.status-dot.correo-en_curso { background: var(--alerta); }
+.status-dot.correo-atendido { background: var(--ok); }
+.status-dot.correo-descartado { background: var(--neutro); }
+.correo-adjunto { display: inline-flex; align-items: center; gap: 3px; }
+.correo-borrador { color: var(--alerta); font-weight: var(--peso-fuerte); }
+.correo-cuenta { margin-left: auto; color: var(--texto-3); }
+
+/* Lectura */
+.correo-lectura-cuerpo { display: grid; gap: var(--e4); padding: 0 var(--e5) var(--e5); align-content: start; }
+.correo-lectura-cuerpo h3 { display: flex; align-items: center; gap: var(--e2); margin-bottom: var(--e2); }
+.correo-cabecera { padding-top: var(--e5); }
+.correo-cabecera h2 { font-size: var(--tam-xl); line-height: 1.3; overflow-wrap: anywhere; }
+.correo-de { margin: var(--e1) 0 0; font-size: var(--tam-sm); overflow-wrap: anywhere; }
+.correo-direccion { color: var(--texto-2); }
+/* Las acciones se quedan arriba mientras se lee un correo largo */
+.correo-acciones { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; align-items: center; gap: var(--e2); margin: 0 calc(var(--e5) * -1); padding: var(--e2) var(--e5); background: var(--superficie); border-bottom: 1px solid var(--borde-suave); }
+.correo-clasificacion { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--e3) var(--e4); }
+.correo-clasificacion > .campo { flex: 1 1 11rem; min-width: 0; }
+.correo-clasificacion > .campo:nth-child(2) { flex: 2 1 18rem; }
+.correo-clasificacion .segmentado { overflow-x: auto; scrollbar-width: thin; }
+.correo-clasificacion .segmentado-boton { padding: 0 var(--e2); white-space: nowrap; }
+.correo-tipo-fila { display: flex; align-items: center; gap: var(--e2); }
+.correo-tipo-fila select { min-width: 0; }
+.correo-cliente-fila { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e1) var(--e2); min-height: 36px; }
+.correo-cliente-fila > svg { color: var(--texto-3); }
+.correo-para { min-height: 38px; display: flex; align-items: center; color: var(--texto-2); overflow-wrap: anywhere; }
+.correo-aviso-ia { display: flex; align-items: flex-start; gap: var(--e2); padding: var(--e2) var(--e3); border-radius: var(--radio-sm); background: var(--accion-suave); color: var(--texto); font-size: var(--tam-sm); }
+.correo-aviso-ia svg { flex: none; margin-top: 2px; color: var(--accion); }
+.correo-resumen-zona:empty { display: none; }
+.correo-resumen { display: grid; gap: var(--e2); padding: var(--e3) var(--e4); border: 1px solid var(--borde); border-radius: var(--radio); background: var(--superficie-2); font-size: var(--tam-md); }
+.correo-resumen ul { margin: 0; padding-left: 1.2em; }
+.correo-texto { max-width: 72ch; padding: var(--e4); border: 1px solid var(--borde); border-radius: var(--radio); background: var(--superficie); color: var(--texto); font-size: var(--tam-md); line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.correo-adjuntos, .correo-hilo { display: grid; gap: var(--e1); margin: 0 0 var(--e2); padding: 0; list-style: none; }
+.correo-adjuntos li, .correo-hilo li { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e1) var(--e3); }
+.correo-adjuntos a { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; }
+.correo-adjuntos span, .correo-hilo span { color: var(--texto-2); font-size: var(--tam-sm); overflow-wrap: anywhere; }
+.correo-respuesta { display: grid; gap: var(--e2); margin-bottom: var(--e3); }
+.correo-respuesta-meta { color: var(--texto-2); font-size: var(--tam-sm); }
+.correo-compositor-zona { padding-top: var(--e4); border-top: 1px solid var(--borde); }
+.correo-compositor textarea { min-height: 9rem; }
+.correo-respuesta-ia { margin: var(--e5) var(--e6); }
+.correo-respuesta-ia:empty { display: none; }
+.config-bloque { display: grid; justify-items: start; gap: var(--e3); margin-top: var(--e5); padding-top: var(--e5); border-top: 1px solid var(--borde-suave); }
+.solo-movil { display: none; justify-self: start; margin-top: var(--e3); }
+
+/* Una sola columna cuando el panel es angosto: la lista, o la lectura del correo elegido */
+@container correos (max-width: 880px) {
+  .correos-cuerpo { grid-template-columns: minmax(0, 1fr); }
+  .correos-lista { border-right: 0; }
+  .correos-cuerpo:not(.con-lectura) .correos-lectura, .correos-cuerpo.con-lectura .correos-lista { display: none; }
+  .correos-filtros:has(~ .correos-cuerpo.con-lectura), .correos-mas:has(~ .correos-cuerpo.con-lectura), .correos-publicidad:has(~ .correos-cuerpo.con-lectura) { display: none; }
+  .solo-movil { display: inline-flex; }
+}
+
+/* Celular: la página corre normal (sin alturas fijas) y, leyendo un correo, la cabecera de la pantalla sobra */
+@media (max-width: 960px) {
+  .correos { height: auto; }
+  .correos-panel { min-height: 0; }
+  .correos-cuerpo { grid-template-rows: auto; }
+  .correos-filas, .correos-lectura { overflow: visible; }
+  .correos.leyendo .page-heading, .correos.leyendo .correos-ia-motivo { display: none; }
+  .correo-lectura-cuerpo { padding: 0 var(--e4) var(--e4); }
+  .correo-acciones { margin: 0 calc(var(--e4) * -1); padding: var(--e2) var(--e4); }
+}

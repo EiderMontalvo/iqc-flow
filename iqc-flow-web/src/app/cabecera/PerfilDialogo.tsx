@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react';
 import { CheckCircle2, X } from 'lucide-react';
 import { api, type CurrentUser } from '../../lib/api';
 import { errorText, initials } from '../../lib/format';
+import { LONGITUD_MINIMA_CONTRASENA } from '../../lib/politicaContrasena';
+import { Boton, BotonIcono } from '../../components/ui/Boton';
 
 /** Datos de la cuenta y cambio de contraseña voluntario */
 export function PerfilDialogo({ user, espacio, cerrar }: { user: CurrentUser; espacio: string; cerrar: () => void }) {
@@ -9,7 +11,7 @@ export function PerfilDialogo({ user, espacio, cerrar }: { user: CurrentUser; es
   const [error, setError] = useState(''), [listo, setListo] = useState(false), [ocupado, setOcupado] = useState(false);
   async function guardar(e: FormEvent) {
     e.preventDefault(); setListo(false);
-    if (nueva.length < 12) return setError('La nueva contraseña debe tener al menos 12 caracteres.');
+    if (nueva.length < LONGITUD_MINIMA_CONTRASENA) return setError(`La nueva contraseña debe tener al menos ${LONGITUD_MINIMA_CONTRASENA} caracteres.`);
     if (nueva !== confirmar) return setError('Las contraseñas nuevas no coinciden.');
     setOcupado(true); setError('');
     try { await api.changePassword(actual, nueva); setListo(true); setActual(''); setNueva(''); setConfirmar(''); }
@@ -18,7 +20,7 @@ export function PerfilDialogo({ user, espacio, cerrar }: { user: CurrentUser; es
   return <div className="dialog-backdrop" onMouseDown={e => { if (e.target === e.currentTarget) cerrar(); }}>
     <section className="dialog perfil-dialogo" role="dialog" aria-modal="true" aria-labelledby="perfil-titulo">
       <div className="dialog-header"><div><h2 id="perfil-titulo">Mi perfil</h2></div>
-        <button type="button" className="icon-button" onClick={cerrar} aria-label="Cerrar"><X size={18} aria-hidden /></button></div>
+        <BotonIcono etiqueta="Cerrar" icono={X} tamano={18} type="button" onClick={cerrar} /></div>
       <div className="perfil-quien">
         <span className="avatar-cabecera grande" aria-hidden>{initials(user.nombre)}</span>
         <div><strong>{user.nombre}</strong><span>{user.correo}</span><span>{espacio} · {user.organizacion.nombre}</span></div>
@@ -27,14 +29,14 @@ export function PerfilDialogo({ user, espacio, cerrar }: { user: CurrentUser; es
         <h3>Cambiar contraseña</h3>
         <div className="form-grid">
           <label className="full">Contraseña actual<input type="password" autoComplete="current-password" value={actual} onChange={e => setActual(e.target.value)} required /></label>
-          <label>Nueva contraseña<input type="password" autoComplete="new-password" minLength={12} value={nueva} onChange={e => setNueva(e.target.value)} required /></label>
-          <label>Confirmar<input type="password" autoComplete="new-password" minLength={12} value={confirmar} onChange={e => setConfirmar(e.target.value)} required /></label>
+          <label>Nueva contraseña<input type="password" autoComplete="new-password" minLength={LONGITUD_MINIMA_CONTRASENA} value={nueva} onChange={e => setNueva(e.target.value)} required /></label>
+          <label>Confirmar<input type="password" autoComplete="new-password" minLength={LONGITUD_MINIMA_CONTRASENA} value={confirmar} onChange={e => setConfirmar(e.target.value)} required /></label>
         </div>
-        <span className="field-help">Al menos 12 caracteres. Una frase larga es más segura y fácil de recordar.</span>
+        <span className="field-help">Al menos {LONGITUD_MINIMA_CONTRASENA} caracteres. Una frase larga es más segura y fácil de recordar.</span>
         {error && <p className="form-error" role="alert">{error}</p>}
         {listo && <p className="form-success" role="status"><CheckCircle2 size={14} aria-hidden /> Contraseña actualizada.</p>}
-        <div className="form-actions"><button type="button" className="secondary" onClick={cerrar}>Cerrar</button>
-          <button className="primary" disabled={ocupado}>{ocupado ? 'Guardando…' : 'Guardar contraseña'}</button></div>
+        <div className="form-actions"><Boton type="button" variante="secundario" onClick={cerrar}>Cerrar</Boton>
+          <Boton type="submit" variante="primario" disabled={ocupado}>{ocupado ? 'Guardando…' : 'Guardar contraseña'}</Boton></div>
       </form>
     </section>
   </div>;

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { api, type Notice, type Page } from '../../lib/api';
+import { Boton } from '../../components/ui/Boton';
+import { errorText } from '../../lib/format';
 
-const errorText = (error: unknown) => error instanceof Error ? error.message : 'Ocurrió un error inesperado.';
 const formatDate = (value: string) => new Intl.DateTimeFormat('es-PE', {
   day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
 }).format(new Date(value));
@@ -31,16 +32,16 @@ export function Notices() {
   }
   return <div className="screen-body">
     <div className="page-heading"><div><h1>Notificaciones</h1><p>Avisos sobre tus tareas y cambios relevantes.</p></div>
-      <button className="text-button" onClick={markAll} disabled={busy}>Marcar todas como leídas</button></div>
+      <Boton variante="texto" onClick={markAll} disabled={busy}>Marcar todas como leídas</Boton></div>
     <section className="list-panel">
       <div className="task-toolbar"><label className="check-row"><input type="checkbox" checked={unreadOnly}
         onChange={event => { setUnreadOnly(event.target.checked); setPage(0); }} /> Solo no leídas</label>
         <span>{data ? `${data.totalElementos} avisos` : 'Cargando…'}</span></div>
-      {error && <div className="notice" role="alert">{error} <button onClick={reload}>Reintentar</button></div>}
+      {error && <div className="notice" role="alert">{error} <Boton variante="texto" onClick={reload}>Reintentar</Boton></div>}
       <div className="notice-list">{data?.contenido.map(item => <article className={`notice-item ${item.leida ? '' : 'unread'}`} key={item.id}>
         <div><div className="notice-title"><strong>{item.titulo}</strong>{!item.leida && <span>Nuevo</span>}</div>
           <p>{item.cuerpo}</p><small>{formatDate(item.creadoEn)}</small></div>
-        {!item.leida && <button className="text-button" disabled={busy} onClick={() => markRead(item.id)}>Marcar leída</button>}
+        {!item.leida && <Boton variante="texto" disabled={busy} onClick={() => markRead(item.id)}>Marcar leída</Boton>}
       </article>)}</div>
       {data && !data.contenido.length && <p className="empty-state">No hay notificaciones en esta vista.</p>}
       <div className="pagination"><span>{data ? `${data.totalElementos} avisos` : 'Cargando…'}</span><div>

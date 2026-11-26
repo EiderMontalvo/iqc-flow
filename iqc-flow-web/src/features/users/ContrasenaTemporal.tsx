@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react';
 import { CheckCircle2, KeyRound, Wand2 } from 'lucide-react';
 import { api, type AppUser } from '../../lib/api';
 import { errorText } from '../../lib/format';
+import { LONGITUD_MINIMA_CONTRASENA } from '../../lib/politicaContrasena';
+import { Boton } from '../../components/ui/Boton';
 
 /** Sugerencia legible y fuerte: cuatro bloques sin caracteres que se confundan (0/O, 1/l) */
 function sugerir() {
@@ -27,9 +29,9 @@ export function ContrasenaTemporal({ user, alGuardar }: { user: AppUser; alGuard
     <h3><KeyRound size={16} aria-hidden /> Contraseña temporal</h3>
     <p className="form-hint">Úsala cuando la persona olvidó su contraseña. Deberá cambiarla al ingresar; su contraseña anterior deja de funcionar.</p>
     <div className="contrasena-temporal-fila">
-      <label>Nueva contraseña temporal<input value={clave} onChange={e => setClave(e.target.value)} minLength={12} maxLength={128} required spellCheck={false} autoComplete="off" /></label>
-      <button type="button" className="secondary" onClick={() => setClave(sugerir())}><Wand2 size={16} aria-hidden /> Sugerir</button>
-      <button className="primary" disabled={ocupado}>{ocupado ? 'Guardando…' : 'Asignar'}</button>
+      <label>Nueva contraseña temporal<input value={clave} onChange={e => setClave(e.target.value)} minLength={LONGITUD_MINIMA_CONTRASENA} maxLength={128} required spellCheck={false} autoComplete="off" /></label>
+      <Boton type="button" variante="secundario" onClick={() => setClave(sugerir())}><Wand2 size={16} aria-hidden /> Sugerir</Boton>
+      <Boton type="submit" variante="primario" disabled={ocupado}>{ocupado ? 'Guardando…' : 'Asignar'}</Boton>
     </div>
     {error && <p className="form-error" role="alert">{error}</p>}
     {lista && <p className="form-success" role="status"><CheckCircle2 size={14} aria-hidden /> Asignada. Compártela con {user.nombre} por un canal seguro: <code>{lista}</code></p>}

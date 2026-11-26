@@ -1,27 +1,30 @@
 import { useEffect, useState, type ComponentType } from 'react';
-import { AlertTriangle, Bot, ClipboardList, Handshake, Palette, PenLine, UserCog, Wrench, type LucideProps } from 'lucide-react';
+import { AlertTriangle, ClipboardList, Handshake, Mail, Palette, PenLine, UserCog, Wrench, type LucideProps } from 'lucide-react';
 import { api, type AppUser, type OrgParameter } from '../../lib/api';
+import { Icono } from '../../lib/iconos';
 import { errorText, stamp } from '../../lib/format';
 import { FIRMA, GRUPOS, type GrupoOpciones } from './opciones';
+import { CorreoConfiguracion } from './CorreoConfiguracion';
 import { Interruptor } from './Interruptor';
 import { OpcionesPorPersona } from './OpcionesPorPersona';
 import { TematicaTemporada } from './TematicaTemporada';
 
-type Seccion = 'funciones' | 'registro' | 'comercial' | 'administracion' | 'firma' | 'personas' | 'tematica';
+type Seccion = 'funciones' | 'registro' | 'comercial' | 'administracion' | 'firma' | 'correo' | 'personas' | 'tematica';
 interface DefSeccion { titulo: string; resumen: string; icono: ComponentType<LucideProps> }
 
 /** Índice de Configuración, agrupado por tema */
 const INDICE: Array<[string, Seccion[]]> = [
-  ['Funciones', ['funciones', 'registro', 'comercial', 'administracion', 'firma']],
+  ['Funciones', ['funciones', 'registro', 'comercial', 'administracion', 'firma', 'correo']],
   ['Personas', ['personas']],
   ['Apariencia', ['tematica']],
 ];
 const SECCIONES: Record<Seccion, DefSeccion> = {
-  funciones: { titulo: 'Funciones generales', resumen: 'Inteligencia artificial y automatizaciones para toda la organización.', icono: Bot },
+  funciones: { titulo: 'Funciones generales', resumen: 'Inteligencia artificial y automatizaciones para toda la organización.', icono: Icono.ia },
   registro: { titulo: 'Registro de certificados', resumen: 'Qué modos aparecen al registrar certificados empresariales y personales.', icono: ClipboardList },
   comercial: { titulo: 'Comercial', resumen: 'Cuándo se avisa al responsable de una cotización sin respuesta.', icono: Handshake },
   administracion: { titulo: 'Administración y logística', resumen: 'Herramientas del rol Administración.', icono: Wrench },
   firma: { titulo: 'Firma de certificados', resumen: 'Quién firma antes de emitir (DDC-PRO-003).', icono: PenLine },
+  correo: { titulo: 'Correo', resumen: 'La cuenta con la que IQC Flow envía correos y una prueba para comprobarla.', icono: Mail },
   personas: { titulo: 'Opciones por persona', resumen: 'Apaga opciones a alguien concreto sin cambiar al resto.', icono: UserCog },
   tematica: { titulo: 'Temática de temporada', resumen: 'Fondo con íconos de la fecha y saludo para todos.', icono: Palette },
 };
@@ -109,6 +112,7 @@ export function Settings() {
             {firma.admitidos.map(v => <option key={v} value={v}>{FIRMA[v] || v}</option>)}</select></label>
           {!firma.porDefecto && firma.actualizadoEn && <small>Cambiado el {stamp(firma.actualizadoEn)}</small>}
         </div>}
+        {seccion === 'correo' && <CorreoConfiguracion />}
         {seccion === 'personas' && <OpcionesPorPersona personas={personas} params={params} guardando={guardando} guardado={guardado} alCambiar={cambiarPersona} />}
         {seccion === 'tematica' && <TematicaTemporada valor={params.TEMATICA?.valor} ocupado={guardando === 'TEMATICA'} alElegir={v => cambiar('TEMATICA', v)} />}
       </section>

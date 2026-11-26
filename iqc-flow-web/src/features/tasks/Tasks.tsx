@@ -4,6 +4,8 @@ import { Pagination } from '../../components/Pagination';
 import { FilaSeguimiento } from './FilaSeguimiento';
 import { useEffect, useState, type FormEvent } from 'react';
 import { api, type ClientSummary, type TaskCounts, type TaskDetail, type TaskSummary, type TaskType, type TaskView, type Page } from '../../lib/api';
+import { Boton, BotonIcono } from '../../components/ui/Boton';
+import { errorText } from '../../lib/format';
 
 const views: Array<[TaskView, string]> = [
   ['ABIERTAS', 'Abiertas'], ['HOY', 'Hoy'], ['ATRASADAS', 'Atrasadas'],
@@ -22,7 +24,6 @@ const localDate = (offset = 0) => {
   return [value.getFullYear(), String(value.getMonth() + 1).padStart(2, '0'), String(value.getDate()).padStart(2, '0')].join('-');
 };
 const displayDate = (value: string) => new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(value + 'T12:00:00'));
-const errorText = (error: unknown) => error instanceof Error ? error.message : 'Ocurrió un error inesperado.';
 
 function ClientPicker({ value, onChange }: { value: ClientSummary | null; onChange: (client: ClientSummary | null) => void }) {
   const [query, setQuery] = useState(value?.razonSocial || '');
@@ -47,12 +48,14 @@ function ClientPicker({ value, onChange }: { value: ClientSummary | null; onChan
   </div>;
 }
 
-function NewTask({ types, onSave, onClose, busy, error }: {
+/** `inicial` precarga el formulario (p. ej. al crear un seguimiento desde un correo) */
+export function NewTask({ types, onSave, onClose, busy, error, inicial }: {
   types: TaskType[]; onSave: (data: object) => void; onClose: () => void; busy: boolean; error: string;
+  inicial?: { titulo?: string; descripcion?: string; cliente?: ClientSummary | null };
 }) {
-  const [title, setTitle] = useState(''), [description, setDescription] = useState('');
+  const [title, setTitle] = useState(inicial?.titulo ?? ''), [description, setDescription] = useState(inicial?.descripcion ?? '');
   const [type, setType] = useState(types[0]?.codigo || ''), [due, setDue] = useState(localDate(1));
-  const [time, setTime] = useState(''), [client, setClient] = useState<ClientSummary | null>(null);
+  const [time, setTime] = useState(''), [client, setClient] = useState<ClientSummary | null>(inicial?.cliente ?? null);
   useEffect(() => { if (!type && types.length) setType(types[0].codigo); }, [type, types]);
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -62,7 +65,7 @@ function NewTask({ types, onSave, onClose, busy, error }: {
   return <div className="dialog-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) onClose(); }}>
     <section className="dialog" role="dialog" aria-modal="true" aria-labelledby="new-task-title">
       <div className="dialog-header"><div><h2 id="new-task-title">Nuevo seguimiento</h2></div>
-        <button type="button" className="icon-button" onClick={onClose} aria-label="Cerrar"><X size={18} aria-hidden /></button></div>
+        <BotonIcono etiqueta="Cerrar" icono={X} tamano={18} type="button" onClick={onClose} /></div>
       <form className="client-form" onSubmit={submit}>
         <div className="form-grid">
           <label className="full">Título<input value={title} onChange={event => setTitle(event.target.value)} maxLength={200} required autoFocus /></label>
@@ -75,8 +78,8 @@ function NewTask({ types, onSave, onClose, busy, error }: {
         </div>
         {!types.length && <p className="form-hint">Cargando tipos de seguimiento. Si no aparecen, cierra y vuelve a intentar.</p>}
         {error && <p className="form-error" role="alert">{error}</p>}
-        <div className="form-actions"><button type="button" className="secondary" onClick={onClose}>Cancelar</button>
-          <button className="primary" disabled={busy || !types.length}>{busy ? 'Guardando…' : 'Crear seguimiento'}</button></div>
+        <div className="form-actions"><Boton type="button" variante="secundario" onClick={onClose}>Cancelar</Boton>
+          <Boton type="submit" variante="primario" disabled={busy || !types.length}>{busy ? 'Guardando…' : 'Crear seguimiento'}</Boton></div>
       </form>
     </section>
   </div>;
@@ -100,7 +103,7 @@ function TaskDetailPanel({ task, onClose, onUpdate, busy, error }: {
   return <div className="dialog-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) onClose(); }}>
     <section className="dialog" role="dialog" aria-modal="true" aria-labelledby="task-detail-title">
       <div className="dialog-header"><div><h2 id="task-detail-title">{task.titulo}</h2></div>
-        <button type="button" className="icon-button" onClick={onClose} aria-label="Cerrar"><X size={18} aria-hidden /></button></div>
+        <BotonIcono etiqueta="Cerrar" icono={X} tamano={18} type="button" onClick={onClose} /></div>
       <div className="detail-body">
         <div className="detail-meta"><span className={`task-state ${task.vencida ? 'overdue' : ''}`}>{stateNames[task.estado]}</span>
           <span>{task.prioridad.toLowerCase()} · {task.responsable.nombre}</span></div>
@@ -111,11 +114,11 @@ function TaskDetailPanel({ task, onClose, onUpdate, busy, error }: {
         {task.descripcion && <><h3>Descripción</h3><p className="detail-notes">{task.descripcion}</p></>}
         {task.resultado && <><h3>Resultado</h3><p className="detail-notes">{resultNames[task.resultado] || task.resultado}{task.notasResultado ? ` · ${task.notasResultado}` : ''}</p></>}
         {open && task.puedeGestionar && <div className="task-actions">
-          {task.estado !== 'EN_CURSO' && <button className="secondary" disabled={busy} onClick={() => onUpdate('state', { estado: 'EN_CURSO', version: task.version })}>Iniciar</button>}
-          {task.estado !== 'EN_ESPERA' && <button className="secondary" disabled={busy} onClick={() => onUpdate('state', { estado: 'EN_ESPERA', version: task.version })}>En espera</button>}
-          <button className="primary" onClick={() => setAction('complete')}>Completar</button>
-          <button className="text-button" onClick={() => setAction('reschedule')}>Reprogramar</button>
-          <button className="text-button" onClick={() => setAction('cancel')}>Cancelar seguimiento</button>
+          {task.estado !== 'EN_CURSO' && <Boton variante="secundario" disabled={busy} onClick={() => onUpdate('state', { estado: 'EN_CURSO', version: task.version })}>Iniciar</Boton>}
+          {task.estado !== 'EN_ESPERA' && <Boton variante="secundario" disabled={busy} onClick={() => onUpdate('state', { estado: 'EN_ESPERA', version: task.version })}>En espera</Boton>}
+          <Boton variante="primario" onClick={() => setAction('complete')}>Completar</Boton>
+          <Boton variante="texto" onClick={() => setAction('reschedule')}>Reprogramar</Boton>
+          <Boton variante="texto" onClick={() => setAction('cancel')}>Cancelar seguimiento</Boton>
         </div>}
         {action && <form className="task-action-form" onSubmit={submit}>
           <h3>{action === 'complete' ? 'Completar seguimiento' : action === 'reschedule' ? 'Reprogramar seguimiento' : 'Cancelar seguimiento'}</h3>
@@ -125,8 +128,8 @@ function TaskDetailPanel({ task, onClose, onUpdate, busy, error }: {
             <>{action === 'reschedule' && <label>Nueva fecha<input type="date" value={due} onChange={event => setDue(event.target.value)} required /></label>}
               <label>Motivo<textarea rows={3} value={reason} onChange={event => setReason(event.target.value)} maxLength={1000} required /></label></>}
           {error && <p className="form-error" role="alert">{error}</p>}
-          <div className="form-actions"><button type="button" className="secondary" onClick={() => setAction(null)}>Volver</button>
-            <button className="primary" disabled={busy}>{busy ? 'Guardando…' : 'Confirmar'}</button></div>
+          <div className="form-actions"><Boton type="button" variante="secundario" onClick={() => setAction(null)}>Volver</Boton>
+            <Boton type="submit" variante="primario" disabled={busy}>{busy ? 'Guardando…' : 'Confirmar'}</Boton></div>
         </form>}
         {!action && error && <p className="form-error" role="alert">{error}</p>}
         <h3>Historial</h3>
@@ -178,7 +181,7 @@ export function Tasks({ canWrite, canReadAll, initialView }: { canWrite: boolean
   }
   return <div className="screen-body">
     <div className="page-heading"><div><h1>Seguimientos</h1><p>Lo que requiere respuesta, quién lo lleva y cuándo vence. Registra aquí el avance.</p></div>
-      {canWrite && <button className="primary" onClick={() => { setFormError(''); setCreating(true); }}><Plus size={16} aria-hidden /> Nuevo seguimiento</button>}</div>
+      {canWrite && <Boton variante="primario" onClick={() => { setFormError(''); setCreating(true); }}><Plus size={16} aria-hidden /> Nuevo seguimiento</Boton>}</div>
     <FilaCifras etiqueta="Resumen de seguimientos">
       <TarjetaCifra icono={Clock3} etiqueta="Atrasados" valor={counts?.atrasadas} detalle="Pasaron su fecha límite" tono="mal" activa={view === 'ATRASADAS'} alPulsar={() => elegir('ATRASADAS')} />
       <TarjetaCifra icono={CalendarCheck} etiqueta="Para hoy" valor={counts?.hoy} detalle="Vencen hoy" tono="alerta" activa={view === 'HOY'} alPulsar={() => elegir('HOY')} />
@@ -190,7 +193,7 @@ export function Tasks({ canWrite, canReadAll, initialView }: { canWrite: boolean
         onClick={() => { setView(key); setPage(0); }}>{label}</button>)}</div>
       <div className="task-toolbar"><span>{items ? `${items.totalElementos} ${items.totalElementos === 1 ? 'seguimiento' : 'seguimientos'}` : 'Cargando seguimientos…'}</span>
         {canReadAll && <label className="check-row"><input type="checkbox" checked={!mine} onChange={event => { setMine(!event.target.checked); setPage(0); }} /> Todas las visibles</label>}</div>
-      {error && <div className="notice" role="alert">{error} <button onClick={reload}>Reintentar</button></div>}
+      {error && <div className="notice" role="alert">{error} <Boton variante="texto" onClick={reload}>Reintentar</Boton></div>}
       <div className="task-list">{items?.contenido.map(task => <FilaSeguimiento key={task.id} t={task} alAbrir={() => openTask(task.id)} />)}</div>
       {items && items.contenido.length === 0 && <p className="empty-state">No hay seguimientos en esta vista.</p>}
       <Pagination page={page} totalPages={items?.totalPaginas ?? 1} total={items?.totalElementos ?? null} noun="seguimientos" onPage={setPage} />

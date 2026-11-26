@@ -1,21 +1,21 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import {
-  BadgeCheck, CalendarClock, CalendarX2, Check, ChevronRight, Copy, Download, ExternalLink, FileSpreadsheet, FileText, FilterX, Files, Plus, QrCode, Trash2, Upload,
+  BadgeCheck, CalendarClock, CalendarX2, Check, ChevronRight, Copy, Download, ExternalLink, FileSpreadsheet, FileText, FilterX, Plus, QrCode, Upload,
 } from 'lucide-react';
+import { Icono } from '../../lib/iconos';
 import { FilaCifras, TarjetaCifra } from '../../components/cifras/TarjetaCifra';
 import {
-  api, type Brand, type Certificate, type CertificateState, type ClientSummary, type ConsultLink, type Page,
-  type PdfReading, type PdfVersion, type RegistrationMode, type Scheme, type Standard, type Tools, type Validity,
+  api, type Brand, type Certificate, type CertificateState, type ConsultLink, type Page, type PdfVersion, type Scheme, type Standard, type Tools, type Validity,
 } from '../../lib/api';
-import { ModeTabs, PdfReader } from '../../components/RegistrationModes';
 import { VistaPdf, type FuentePdf } from '../../components/pdf/VistaPdf';
-import { BuscadorCliente } from '../../components/BuscadorCliente';
 import { ElegirPdf } from '../../components/pdf/ElegirPdf';
-import { day, errorText, isoDay, kb, number, plusYears, stamp } from '../../lib/format';
+import { day, errorText, kb, number, stamp } from '../../lib/format';
 import { Drawer } from '../../components/Drawer';
 import { Pagination } from '../../components/Pagination';
 import { SearchField } from '../../components/SearchField';
 import { CycleBar } from './CycleBar';
+import { RegistrarCertificados } from './RegistrarCertificados';
+import { Boton } from '../../components/ui/Boton';
 
 const stateNames: Record<CertificateState, string> = {
   BORRADOR: 'Borrador', REVISADO: 'Revisado', EMITIDO: 'Emitido', SUSPENDIDO: 'Suspendido',
@@ -31,144 +31,17 @@ export function StatusTag({ certificate }: { certificate: Certificate }) {
   return <span className={`cert-tag ${key}`}>{inactive ? stateNames[certificate.estado] : validityNames[certificate.vigencia]}</span>;
 }
 
-type Line = { key: number; norma: string; edicion: string; codigo: string; file: File | null; documentoId?: string };
-
-function RegisterCertificates({ schemes, standards, tools, onClose, onDone }: {
-  schemes: Scheme[]; standards: Standard[]; tools: Tools | null; onClose: () => void; onDone: (first: Certificate | null) => void;
-}) {
-  const modes = tools?.modosEmpresarial ?? ['MANUAL'];
-  const [mode, setMode] = useState<RegistrationMode>(modes[0] ?? 'MANUAL'), [titularLeido, setTitularLeido] = useState(''), [searchKey, setSearchKey] = useState(0);
-  const today = isoDay(new Date());
-  const [client, setClient] = useState<ClientSummary | null>(null);
-  const [scheme, setScheme] = useState(schemes[0]?.codigo || ''), [service, setService] = useState('CERTIFICACION_INICIAL');
-  const [scope, setScope] = useState(''), [granted, setGranted] = useState(today), [issued, setIssued] = useState(today);
-  const [expires, setExpires] = useState(plusYears(today, 3, -1));
-  const [watch1, setWatch1] = useState(plusYears(today, 1, -1)), [watch2, setWatch2] = useState(plusYears(today, 2, -1));
-  const [india, setIndia] = useState(false), [reason, setReason] = useState('');
-  const [lines, setLines] = useState<Line[]>([{ key: 1, norma: '', edicion: '', codigo: '', file: null }]);
-  const [busy, setBusy] = useState(''), [error, setError] = useState('');
-  // Vista previa: qué norma se está viendo, el PDF soltado para leer y lo que hace el lector
-  const [lineaVista, setLineaVista] = useState(1), [archivoLectura, setArchivoLectura] = useState<File | null>(null), [leyendo, setLeyendo] = useState('');
-  useEffect(() => { if (!scheme && schemes[0]) setScheme(schemes[0].codigo); }, [scheme, schemes]);
-  useEffect(() => { setIndia(scheme === 'IQC_GLOBAL'); }, [scheme]);
-  function grant(value: string) {
-    setGranted(value);
-    setExpires(plusYears(value, 3, -1)); setWatch1(plusYears(value, 1, -1)); setWatch2(plusYears(value, 2, -1));
-  }
-  async function applyReading(r: PdfReading, documentoId: string, archivo: File) {
-    const e = r.empresarial;
-    setLineaVista(lines[0].key);
-    if (!e) { setLines(all => [{ ...all[0], documentoId, file: archivo }, ...all.slice(1)]); return; }
-    if (e.esquema && schemes.some(x => x.codigo === e.esquema)) setScheme(e.esquema);
-    if (e.ciclo && e.ciclo > 1) setService('RECERTIFICACION');
-    if (e.alcance) setScope(e.alcance);
-    if (e.fechaOtorgamiento) setGranted(e.fechaOtorgamiento);
-    if (e.fechaEmision) setIssued(e.fechaEmision);
-    if (e.fechaExpiracion) setExpires(e.fechaExpiracion);
-    if (e.limiteVigilancia1) setWatch1(e.limiteVigilancia1);
-    if (e.limiteVigilancia2) setWatch2(e.limiteVigilancia2);
-    setLines(all => [{ ...all[0], norma: r.normaCodigo || all[0].norma, edicion: r.edicionValida && e.edicion ? e.edicion : all[0].edicion,
-      codigo: e.codigo || all[0].codigo, file: archivo, documentoId }, ...all.slice(1)]);
-    if (e.titular) {
-      const consulta = e.titular.split(/\s+/).slice(0, 3).join(' ');
-      setClient(null); setTitularLeido(consulta); setSearchKey(k => k + 1);
-      try {
-        const found = await api.clients(new URLSearchParams({ texto: consulta, tamano: '10' }));
-        const plano = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-        const exacto = found.contenido.find(c => plano(c.razonSocial) === plano(e.titular!));
-        if (exacto || found.contenido.length === 1) setClient(exacto ?? found.contenido[0]);
-      } catch { /* se elige a mano */ }
-    }
-  }
-  const update = (key: number, change: Partial<Line>) => setLines(all => all.map(line => line.key === key ? { ...line, ...change } : line));
-  const editions = (norma: string) => standards.find(s => s.codigo === norma)?.ediciones || [];
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    if (!client) return setError('Elige el titular del certificado de la lista de coincidencias.');
-    setError('');
-    try {
-      const certificados = [];
-      for (const [index, line] of lines.entries()) {
-        let documentoPdfId: string | undefined = line.documentoId;
-        if (!documentoPdfId && line.file && mode !== 'PLANTILLA') { setBusy(`Subiendo PDF ${index + 1} de ${lines.length}…`); documentoPdfId = (await api.uploadDocument('CERTIFICADO_PDF', line.file)).id; }
-        certificados.push({ norma: line.norma, edicion: line.edicion, codigo: line.codigo.trim().toUpperCase(), ...(documentoPdfId ? { documentoPdfId } : {}) });
-      }
-      setBusy('Registrando…');
-      const result = await api.registerCertificates({
-        clienteId: client.id, esquema: scheme, tipoServicio: service, alcance: scope.trim() || undefined,
-        fechaOtorgamiento: granted, fechaEmision: issued, fechaExpiracion: expires,
-        limiteVigilancia1: watch1 || undefined, limiteVigilancia2: watch2 || undefined,
-        emitidoPorIndia: india, motivo: reason.trim(), certificados,
-      });
-      onDone(result.certificados[0] || null);
-    } catch (e) { setError(errorText(e)); } finally { setBusy(''); }
-  }
-  const fuenteDe = (l: Line): FuentePdf | null => l.file ? { tipo: 'archivo', archivo: l.file } : l.documentoId ? { tipo: 'documento', id: l.documentoId } : null;
-  const nombreNorma = (l: Line, i: number) => standards.find(x => x.codigo === l.norma)?.nombreCorto || `Norma ${i + 1}`;
-  const activa = lines.find(l => l.key === lineaVista) ?? lines[0];
-  // En automatizado, el PDF de la primera norma se lee; el de las demás solo se adjunta
-  const elegirEnVista = (f: File) => mode === 'AUTOMATIZADO' && activa.key === lines[0].key ? setArchivoLectura(f) : update(activa.key, { file: f, documentoId: undefined });
-  const vista = mode === 'PLANTILLA'
-    ? <VistaPdf fuente={null} vacio="En este modo el PDF se genera con la plantilla Word al registrar." />
-    : <VistaPdf fuente={fuenteDe(activa)} titulo={`PDF de ${nombreNorma(activa, lines.indexOf(activa))}`} alElegir={elegirEnVista} ocupado={leyendo}
-        pestanas={lines.map((l, i) => ({ clave: String(l.key), etiqueta: nombreNorma(l, i), fuente: fuenteDe(l) }))}
-        activa={String(activa.key)} alCambiarPestana={k => setLineaVista(Number(k))} />;
-  return <Drawer onClose={onClose} title="Registrar certificado" subtitle="Para certificados ya emitidos: de India, atrasados o correcciones." vista={vista}>
-    <form className="client-form" onSubmit={submit}>
-      <ModeTabs modes={modes} value={mode} onChange={m => { setMode(m); setLines(all => all.map(l => ({ ...l, documentoId: undefined }))); }} />
-      {mode === 'AUTOMATIZADO' && <PdfReader tipo="EMPRESARIAL" onRead={applyReading} archivoExterno={archivoLectura} alOcupado={setLeyendo} />}
-      <fieldset><legend>Titular y servicio</legend><div className="form-grid">
-        <BuscadorCliente key={searchKey} etiqueta="Titular del certificado" value={client} onChange={setClient} initialQuery={titularLeido} />
-        <label>Esquema<select value={scheme} onChange={e => setScheme(e.target.value)} required>{schemes.map(s => <option key={s.codigo} value={s.codigo}>{s.nombre}</option>)}</select></label>
-        <label>Tipo de servicio<select value={service} onChange={e => setService(e.target.value)}>{Object.entries(serviceNames).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></label>
-        <label className="full">Alcance<textarea rows={3} maxLength={4000} value={scope} onChange={e => setScope(e.target.value)} placeholder="Tal como figura en el certificado" /></label>
-        <label className="check-row full"><input type="checkbox" checked={india} onChange={e => setIndia(e.target.checked)} /> Emitido por India (IQC Global)</label>
-      </div></fieldset>
-      <fieldset><legend>Ciclo</legend><div className="form-grid three">
-        <label>Otorgamiento<input type="date" value={granted} onChange={e => grant(e.target.value)} required /></label>
-        <label>Emisión<input type="date" value={issued} onChange={e => setIssued(e.target.value)} required /></label>
-        <label>Expiración<input type="date" value={expires} onChange={e => setExpires(e.target.value)} required /></label>
-      </div>
-      <div className="form-grid">
-        <label>Límite 1.ª vigilancia<input type="date" value={watch1} onChange={e => setWatch1(e.target.value)} /></label>
-        <label>Límite 2.ª vigilancia<input type="date" value={watch2} onChange={e => setWatch2(e.target.value)} /></label>
-      </div>
-        <CycleBar start={issued} end={expires} detailed />
-        <p className="field-help">Las vigilancias futuras crean sus tareas de seguimiento.</p>
-      </fieldset>
-      <fieldset><legend>Normas certificadas</legend>
-        <div className="cert-lines">{lines.map((line, index) => <div className="cert-line" key={line.key}>
-          <label>Norma<select required value={line.norma} onChange={e => { const ed = editions(e.target.value); update(line.key, { norma: e.target.value, edicion: (ed.find(x => x.vigente) || ed[0])?.edicion || '' }); }}>
-            <option value="">Elige…</option>{standards.map(s => <option key={s.codigo} value={s.codigo}>{s.nombreCorto}</option>)}</select></label>
-          <label>Edición<select required value={line.edicion} onChange={e => update(line.key, { edicion: e.target.value })}>
-            <option value="">—</option>{editions(line.norma).map(ed => <option key={ed.edicion} value={ed.edicion}>{ed.designacion}{ed.vigente ? '' : ' (anterior)'}</option>)}</select></label>
-          <label>Código<input required maxLength={60} value={line.codigo} onChange={e => update(line.key, { codigo: e.target.value })} placeholder="PE-INA-01520240132" spellCheck={false} className="mono" /></label>
-          {mode === 'PLANTILLA' ? <p className="field-help">El PDF se genera con la plantilla.</p>
-            : line.file || line.documentoId ? <button type="button" className={`pdf-adjunto ${activa.key === line.key ? 'viendo' : ''}`} onClick={() => setLineaVista(line.key)}
-                title="Ver en la vista previa"><FileText size={14} aria-hidden /><span>{line.file?.name || 'PDF leído'}</span></button>
-            : <ElegirPdf alElegir={f => { update(line.key, { file: f }); setLineaVista(line.key); }} />}
-          {lines.length > 1 && <button type="button" className="icon-button danger" onClick={() => setLines(all => all.filter(l => l.key !== line.key))} aria-label={`Quitar norma ${index + 1}`}><Trash2 size={16} aria-hidden /></button>}
-        </div>)}</div>
-        <button type="button" className="secondary" onClick={() => { const key = Date.now(); setLines(all => [...all, { key, norma: '', edicion: '', codigo: '', file: null }]); setLineaVista(key); }}><Plus size={16} aria-hidden /> Agregar otra norma</button>
-      </fieldset>
-      <label>Motivo del registro<input required maxLength={500} value={reason} onChange={e => setReason(e.target.value)} placeholder="Ej.: certificado recibido de India el 18/11" /><span className="field-help">Queda en la bitácora.</span></label>
-      {error && <p className="form-error" role="alert">{error}</p>}
-      <div className="form-actions"><button type="button" className="secondary" onClick={onClose}>Cancelar</button><button className="primary" disabled={!!busy}>{busy || 'Registrar certificado'}</button></div>
-    </form>
-  </Drawer>;
-}
-
 /** Alcance del certificado: largo en muchos casos; se muestran unas líneas y se despliega el resto */
 function Alcance({ texto }: { texto: string }) {
   const [abierto, setAbierto] = useState(false), largo = texto.length > 360 || texto.split('\n').length > 6;
   return <section className="ficha-seccion"><h3>Alcance</h3>
     <p className={`detail-notes ficha-alcance ${largo && !abierto ? 'recortado' : ''}`}>{texto}</p>
-    {largo && <button type="button" className="text-button" onClick={() => setAbierto(!abierto)} aria-expanded={abierto}>{abierto ? 'Ver menos' : 'Ver alcance completo'}</button>}
+    {largo && <Boton type="button" variante="texto" onClick={() => setAbierto(!abierto)} aria-expanded={abierto}>{abierto ? 'Ver menos' : 'Ver alcance completo'}</Boton>}
   </section>;
 }
 
-function CertificateDetail({ id, brands, schemes, canManage, onClose, onChanged }: {
-  id: string; brands: Brand[]; schemes: Scheme[]; canManage: boolean; onClose: () => void; onChanged: () => void;
+function CertificateDetail({ id, brands, schemes, canManage, canGeneratePdf, onClose, onChanged }: {
+  id: string; brands: Brand[]; schemes: Scheme[]; canManage: boolean; canGeneratePdf: boolean; onClose: () => void; onChanged: () => void;
 }) {
   const [cert, setCert] = useState<Certificate | null>(null), [link, setLink] = useState<ConsultLink | null>(null);
   const [versions, setVersions] = useState<PdfVersion[]>([]), [error, setError] = useState(''), [notice, setNotice] = useState('');
@@ -194,6 +67,14 @@ function CertificateDetail({ id, brands, schemes, canManage, onClose, onChanged 
       const doc = await api.uploadDocument('CERTIFICADO_PDF', file);
       await api.setCertificatePdf(cert.id, { documentoId: doc.id, motivo: pdfReason.trim() || undefined, version: cert.version });
       setFile(null); setPdfReason(''); setVersionVista(null); setNotice('PDF actualizado. La consulta pública lo mostrará en menos de un minuto.'); setSeed(n => n + 1); onChanged();
+    } catch (e) { setError(errorText(e)); } finally { setBusy(false); }
+  }
+  async function generatePdf() {
+    if (!cert) return;
+    setBusy(true); setError(''); setNotice('');
+    try {
+      await api.generateCertificatePdf(cert.id);
+      setFile(null); setVersionVista(null); setNotice('PDF generado con la plantilla. La consulta pública lo mostrará en menos de un minuto.'); setSeed(n => n + 1); onChanged();
     } catch (e) { setError(errorText(e)); } finally { setBusy(false); }
   }
   async function changeBrand(event: FormEvent) {
@@ -234,6 +115,12 @@ function CertificateDetail({ id, brands, schemes, canManage, onClose, onChanged 
         <div><dt>Acreditación</dt><dd>{schemeName}{cert.emitidoPorIndia ? ' · India' : ''}</dd></div>
         <div><dt>Otorgamiento</dt><dd className="tabular">{day(cert.fechaOtorgamiento)}</dd></div>
         <div><dt>Estado del registro</dt><dd>{stateNames[cert.estado]}</dd></div>
+        {cert.esquema === 'IQC_GLOBAL' && <>
+          <div><dt>Subdivisión</dt><dd>{cert.subdivision || '—'}</dd></div>
+          <div><dt>Clase</dt><dd>{cert.clase || '—'}</dd></div>
+          <div><dt>Procesos no aplicables</dt><dd>{cert.procesosNoAplicables || '—'}</dd></div>
+          <div><dt>Anexos</dt><dd>{cert.anexos || '—'}</dd></div>
+        </>}
       </dl>
       <section className="ficha-seccion"><h3>Ciclo de certificación</h3><CycleBar start={cert.fechaEmision} end={cert.fechaExpiracion} inactive={cert.estado !== 'EMITIDO'} detailed /></section>
       {published && <section className="ficha-seccion"><h3>Consulta pública</h3>
@@ -242,7 +129,7 @@ function CertificateDetail({ id, brands, schemes, canManage, onClose, onChanged 
           <div>
             {link ? <a className="ficha-enlace mono" href={link.url} target="_blank" rel="noreferrer">{link.url.replace(/^https?:\/\//, '')} <ExternalLink size={12} aria-hidden /></a> : <span className="muted">Generando enlace…</span>}
             <div className="qr-actions">
-              <button type="button" className="secondary small" onClick={copy} disabled={!link}>{copied ? <><Check size={14} aria-hidden /> Copiado</> : <><Copy size={14} aria-hidden /> Copiar enlace</>}</button>
+              <Boton type="button" variante="secundario" pequeno onClick={copy} disabled={!link}>{copied ? <><Check size={14} aria-hidden /> Copiado</> : <><Copy size={14} aria-hidden /> Copiar enlace</>}</Boton>
               <a className="secondary small" href={api.qrUrl(cert.id, true, 1200)} download={`QR-${cert.codigo}.png`}><Download size={14} aria-hidden /> Descargar QR</a>
             </div>
           </div>
@@ -259,11 +146,12 @@ function CertificateDetail({ id, brands, schemes, canManage, onClose, onChanged 
             {v.vigente && <span className="status-label"><span className="status-dot activo" />Vigente</span>}
             <span>{stamp(v.subidoEn)} · {v.subidoPor?.nombre || '—'} · {kb(v.tamanoBytes)}</span>{v.motivo && <em>{v.motivo}</em>}
           </li>; })}</ol>}
+        {canGeneratePdf && cert.estado === 'EMITIDO' && <Boton variante="secundario" pequeno icono={FileText} cargando={busy} onClick={generatePdf}>{versions.length ? 'Regenerar PDF con la plantilla' : 'Generar PDF con la plantilla'}</Boton>}
         {canManage && cert.estado !== 'CANCELADO' && cert.estado !== 'REEMPLAZADO' && <form className="inline-form" onSubmit={uploadPdf}>
           <div><ElegirPdf etiqueta="Nueva versión" texto={file ? 'Elegir otro' : 'Elegir PDF'} requerido alElegir={setFile} />
             {file && <span className="field-help">{file.name}: revísala en la vista previa antes de subirla.</span>}</div>
           <label>Motivo<input maxLength={500} value={pdfReason} onChange={e => setPdfReason(e.target.value)} placeholder="Ej.: corrección del alcance" /></label>
-          <button className="primary" disabled={busy || !file}><Upload size={16} aria-hidden /> {busy ? 'Subiendo…' : 'Subir PDF'}</button>
+          <Boton type="submit" variante="primario" disabled={busy || !file}><Upload size={16} aria-hidden /> {busy ? 'Subiendo…' : 'Subir PDF'}</Boton>
         </form>}
       </section>
 
@@ -273,7 +161,7 @@ function CertificateDetail({ id, brands, schemes, canManage, onClose, onChanged 
             <option value="">La del país del titular ({brandName(cert.cliente.codigoPais)})</option>
             {brands.map(b => <option key={b.codigoPais} value={b.codigoPais}>{b.nombre}</option>)}</select></label>
           <label>Motivo<input required maxLength={500} value={brandReason} onChange={e => setBrandReason(e.target.value)} placeholder="Queda en la bitácora" /></label>
-          <button className="secondary" disabled={busy || (brand || null) === (cert.marcaManual ? cert.paisMarca : null)}>Cambiar marca</button>
+          <Boton type="submit" variante="secundario" disabled={busy || (brand || null) === (cert.marcaManual ? cert.paisMarca : null)}>Cambiar marca</Boton>
         </form>
         <p className="field-help">Suspender, levantar o retirar se hace desde el expediente, con su decisión y control de imparcialidad.</p>
       </section>}
@@ -328,9 +216,9 @@ export function Certificates({ canManage, initialCountry = '', initialValidity =
   return <div className="screen-body">
     <div className="page-heading"><div><h1>Certificados empresariales</h1><p>Sistemas de gestión de IQC Perú e IQC LATAM, con su ciclo, su QR y su PDF.</p></div>
       <div className="heading-actions"><a className="secondary" href={api.certificateExportUrl(query)}><FileSpreadsheet size={16} aria-hidden /> Exportar</a>
-        {canManage && <button className="primary" onClick={() => setRegistering(true)}><Plus size={16} aria-hidden /> Registrar certificado</button>}</div></div>
+        {canManage && <Boton variante="primario" onClick={() => setRegistering(true)}><Plus size={16} aria-hidden /> Registrar certificado</Boton>}</div></div>
     <FilaCifras etiqueta="Filtrar por vigencia">
-      <TarjetaCifra icono={Files} etiqueta="Todos" valor={counts?.todos} detalle="Registrados en IQC Perú e IQC LATAM" activa={!validity}
+      <TarjetaCifra icono={Icono.certificadoEmpresarial} etiqueta="Todos" valor={counts?.todos} detalle="Registrados en IQC Perú e IQC LATAM" activa={!validity}
         alPulsar={() => reset(() => { setState(''); setValidity(''); })} />
       <TarjetaCifra icono={BadgeCheck} etiqueta="Vigentes" valor={counts?.vigentes} detalle="Emitidos y dentro de su ciclo" tono="ok"
         activa={validity === 'VIGENTE'} alPulsar={() => quick('VIGENTE')} />
@@ -346,9 +234,9 @@ export function Certificates({ canManage, initialCountry = '', initialValidity =
         <select aria-label="Norma" value={standard} onChange={e => reset(() => setStandard(e.target.value))}><option value="">Norma</option>{standards.map(s => <option key={s.codigo} value={s.codigo}>{s.nombreCorto}</option>)}</select>
         <select aria-label="Marca" value={country} onChange={e => reset(() => setCountry(e.target.value))}><option value="">Marca</option>{brands.map(b => <option key={b.codigoPais} value={b.codigoPais}>{b.nombre}</option>)}</select>
         <select aria-label="Estado" value={state} onChange={e => reset(() => setState(e.target.value))}><option value="">Estado</option>{(['EMITIDO', 'SUSPENDIDO', 'RETIRADO', 'CANCELADO', 'REEMPLAZADO', 'BORRADOR'] as CertificateState[]).map(s => <option key={s} value={s}>{stateNames[s]}</option>)}</select>
-        {filtered && <button className="text-button" onClick={clear}><FilterX size={14} aria-hidden /> Limpiar</button>}
+        {filtered && <Boton variante="texto" onClick={clear}><FilterX size={14} aria-hidden /> Limpiar</Boton>}
       </div>
-      {error && <div className="notice" role="alert">{error} <button className="text-button" onClick={() => setRefresh(n => n + 1)}>Reintentar</button></div>}
+      {error && <div className="notice" role="alert">{error} <Boton variante="texto" onClick={() => setRefresh(n => n + 1)}>Reintentar</Boton></div>}
       <div className="table-wrap"><table className="cert-table"><thead><tr><th>Certificado</th><th>Titular</th><th>Esquema</th><th>Marca</th><th>Ciclo</th><th>Situación</th><th><span className="sr-only">Abrir</span></th></tr></thead>
         <tbody>{!data && <tr className="skeleton-row"><td colSpan={7}><span /></td></tr>}
           {data?.contenido.map(c => <tr key={c.id} onClick={() => setOpen(c.id)} className={`clickable ${c.estado === 'EMITIDO' && c.vigencia !== 'VIGENTE' ? `row-${c.vigencia.toLowerCase()}` : ''}`}>
@@ -368,11 +256,11 @@ export function Certificates({ canManage, initialCountry = '', initialValidity =
         <span className="mobile-row-main"><strong className="mono">{c.codigo}</strong><StatusTag certificate={c} /></span>
         <span className="mobile-row-meta">{c.cliente.razonSocial} · {c.designacion}</span>
         <CycleBar start={c.fechaEmision} end={c.fechaExpiracion} inactive={c.estado !== 'EMITIDO'} /></button>)}</div>
-      {data && data.contenido.length === 0 && <div className="empty-state"><QrCode size={20} aria-hidden /><p>{filtered ? 'Ningún certificado coincide con estos filtros.' : 'Aún no hay certificados registrados.'}</p>{filtered && <button className="secondary small" onClick={clear}><FilterX size={14} aria-hidden /> Quitar filtros</button>}</div>}
+      {data && data.contenido.length === 0 && <div className="empty-state"><QrCode size={20} aria-hidden /><p>{filtered ? 'Ningún certificado coincide con estos filtros.' : 'Aún no hay certificados registrados.'}</p>{filtered && <Boton variante="secundario" pequeno onClick={clear}><FilterX size={14} aria-hidden /> Quitar filtros</Boton>}</div>}
       <Pagination page={page} totalPages={data?.totalPaginas || 1} total={data?.totalElementos ?? null} noun="certificados" onPage={setPage} />
     </section>
-    {open && <CertificateDetail id={open} brands={brands} schemes={schemes} canManage={canManage} onClose={() => setOpen(null)} onChanged={() => setRefresh(n => n + 1)} />}
-    {registering && <RegisterCertificates schemes={schemes} standards={standards} tools={tools} onClose={() => setRegistering(false)}
+    {open && <CertificateDetail id={open} brands={brands} schemes={schemes} canManage={canManage} canGeneratePdf={!!tools?.generacionPdf} onClose={() => setOpen(null)} onChanged={() => setRefresh(n => n + 1)} />}
+    {registering && <RegistrarCertificados schemes={schemes} standards={standards} tools={tools} onClose={() => setRegistering(false)}
       onDone={first => { setRegistering(false); setRefresh(n => n + 1); if (first) setOpen(first.id); }} />}
   </div>;
 }

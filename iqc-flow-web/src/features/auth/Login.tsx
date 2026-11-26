@@ -3,6 +3,7 @@ import { AlertTriangle, ArrowLeft, ArrowRight, CheckCircle2, LoaderCircle, LockK
 import { api, type CurrentUser } from '../../lib/api';
 import { errorText } from '../../lib/format';
 import { AccesoLayout } from './AccesoLayout';
+import { Boton } from '../../components/ui/Boton';
 
 /**
  * «Olvidé mi contraseña»: mientras no hay correo configurado, la solicitud avisa a Dirección, que asigna una contraseña
@@ -25,7 +26,7 @@ function Olvido({ correoInicial, volver }: { correoInicial: string; volver: () =
       <p className="acceso-ayuda">Escribe el correo con el que ingresas. Avisaremos a Dirección para que te asigne una contraseña temporal.</p>
       <label>Correo electrónico<input type="email" autoComplete="username" value={correo} onChange={e => setCorreo(e.target.value)} required autoFocus /></label>
       {error && <p className="acceso-error" role="alert"><AlertTriangle size={16} aria-hidden /> {error}</p>}
-      <button className="primary wide" disabled={busy}>{busy ? <><LoaderCircle size={16} className="spin" aria-hidden /> Enviando…</> : 'Pedir una contraseña temporal'}</button>
+      <Boton type="submit" variante="primario" ancho disabled={busy}>{busy ? <><LoaderCircle size={16} className="spin" aria-hidden /> Enviando…</> : 'Pedir una contraseña temporal'}</Boton>
     </>}
     <button type="button" className="acceso-enlace" onClick={volver}><ArrowLeft size={14} aria-hidden /> Volver a iniciar sesión</button>
   </form>;
@@ -46,9 +47,9 @@ export function Login({ onLogin }: { onLogin: (user: CurrentUser) => void }) {
       <label><span className="acceso-etiqueta-fila">Contraseña<button type="button" className="acceso-enlace" onClick={() => setOlvido(true)}>¿Olvidaste tu contraseña?</button></span>
         <input type="password" autoComplete="current-password" value={contrasena} onChange={e => setContrasena(e.target.value)} required /></label>
       {error && <p className="acceso-error" role="alert"><AlertTriangle size={16} aria-hidden /> {error}</p>}
-      <button className="primary wide" disabled={busy}>
+      <Boton type="submit" variante="primario" ancho disabled={busy}>
         {busy ? <><LoaderCircle size={16} className="spin" aria-hidden /> Ingresando…</> : <>Ingresar <ArrowRight size={16} aria-hidden /></>}
-      </button>
+      </Boton>
       <p className="acceso-nota"><LockKeyhole size={14} aria-hidden /> Tras 5 intentos fallidos la cuenta se bloquea 15 minutos.</p>
     </form>}
   </AccesoLayout>;

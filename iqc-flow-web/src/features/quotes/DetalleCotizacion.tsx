@@ -5,6 +5,7 @@ import { day, errorText, isoDay } from '../../lib/format';
 import { Drawer } from '../../components/Drawer';
 import { FormularioCotizacion } from './FormularioCotizacion';
 import { EstadoCotizacion, SERVICIOS, dinero } from './textos';
+import { Boton } from '../../components/ui/Boton';
 
 type Accion = 'ver' | 'editar' | 'enviar' | 'responder' | 'anular';
 
@@ -88,7 +89,7 @@ export function DetalleCotizacion({ id, puedeGestionar, alCerrar, alCambiar, alA
             <label>Fecha de envío<input type="date" required max={isoDay(new Date())} value={fecha} onChange={e => setFecha(e.target.value)} /></label>
             <label>Destinatarios<input maxLength={1000} value={destinatarios} onChange={e => setDestinatarios(e.target.value)} placeholder="Correos o nombres, separados por comas" /></label>
           </div>
-          <div className="form-actions"><button type="button" className="secondary" onClick={() => setAccion('ver')}>Volver</button><button className="primary" disabled={ocupado}>Marcar como enviada</button></div>
+          <div className="form-actions"><Boton type="button" variante="secundario" onClick={() => setAccion('ver')}>Volver</Boton><Boton type="submit" variante="primario" disabled={ocupado}>Marcar como enviada</Boton></div>
         </form>}
         {accion === 'responder' && <form className="paso-cotizacion" onSubmit={responderPaso}>
           <h3>Respuesta del cliente</h3>
@@ -98,20 +99,20 @@ export function DetalleCotizacion({ id, puedeGestionar, alCerrar, alCambiar, alA
           </div>
           <label>{aceptada === 'SI' ? 'Comentario (opcional)' : 'Motivo del rechazo'}<input required={aceptada === 'NO'} maxLength={1000} value={motivo} onChange={e => setMotivo(e.target.value)}
             placeholder={aceptada === 'SI' ? 'Ej.: aceptó por correo el 24/11' : 'Ej.: eligió otra certificadora por precio'} /></label>
-          <div className="form-actions"><button type="button" className="secondary" onClick={() => setAccion('ver')}>Volver</button><button className="primary" disabled={ocupado}>Registrar respuesta</button></div>
+          <div className="form-actions"><Boton type="button" variante="secundario" onClick={() => setAccion('ver')}>Volver</Boton><Boton type="submit" variante="primario" disabled={ocupado}>Registrar respuesta</Boton></div>
         </form>}
         {accion === 'anular' && <form className="paso-cotizacion" onSubmit={anularPaso}>
           <h3>Anular cotización</h3>
           <label>Motivo<input required maxLength={1000} value={motivo} onChange={e => setMotivo(e.target.value)} placeholder="Ej.: se emitió con datos equivocados" /></label>
-          <div className="form-actions"><button type="button" className="secondary" onClick={() => setAccion('ver')}>Volver</button><button className="primary danger-fill" disabled={ocupado}>Confirmar anulación</button></div>
+          <div className="form-actions"><Boton type="button" variante="secundario" onClick={() => setAccion('ver')}>Volver</Boton><Boton type="submit" variante="peligro" disabled={ocupado}>Confirmar anulación</Boton></div>
         </form>}
 
         {puedeGestionar && accion === 'ver' && <div className="form-actions">
-          <button className="secondary" onClick={duplicar} disabled={ocupado}><Copy size={16} aria-hidden /> Duplicar</button>
-          {(q.estado === 'BORRADOR' || q.estado === 'ENVIADA') && <button className="secondary" onClick={() => abrirPaso('anular')}><Ban size={16} aria-hidden /> Anular</button>}
-          {q.estado === 'BORRADOR' && <button className="secondary" onClick={() => abrirPaso('editar')}><Pencil size={16} aria-hidden /> Editar</button>}
-          {q.estado === 'BORRADOR' && <button className="primary" onClick={() => abrirPaso('enviar')}><Send size={16} aria-hidden /> Marcar como enviada</button>}
-          {q.estado === 'ENVIADA' && <button className="primary" onClick={() => abrirPaso('responder')}><Check size={16} aria-hidden /> Registrar respuesta</button>}
+          <Boton variante="secundario" onClick={duplicar} disabled={ocupado}><Copy size={16} aria-hidden /> Duplicar</Boton>
+          {(q.estado === 'BORRADOR' || q.estado === 'ENVIADA') && <Boton variante="secundario" onClick={() => abrirPaso('anular')}><Ban size={16} aria-hidden /> Anular</Boton>}
+          {q.estado === 'BORRADOR' && <Boton variante="secundario" onClick={() => abrirPaso('editar')}><Pencil size={16} aria-hidden /> Editar</Boton>}
+          {q.estado === 'BORRADOR' && <Boton variante="primario" onClick={() => abrirPaso('enviar')}><Send size={16} aria-hidden /> Marcar como enviada</Boton>}
+          {q.estado === 'ENVIADA' && <Boton variante="primario" onClick={() => abrirPaso('responder')}><Check size={16} aria-hidden /> Registrar respuesta</Boton>}
         </div>}
       </div>}
   </Drawer>;
