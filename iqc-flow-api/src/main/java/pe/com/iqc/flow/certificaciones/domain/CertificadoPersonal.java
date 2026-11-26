@@ -129,8 +129,11 @@ public class CertificadoPersonal extends EntidadBase {
       throw new ReglaNegocioException("DURACION_INVALIDA", "La duración debe ser mayor que cero.");
     }
     this.curso = d.curso();
-    this.normaReferencia = d.normaReferencia();
-    this.normaAnio = d.normaAnio();
+    if (d.normaAnio() != null && !d.normaAnio().isBlank() && !d.normaAnio().strip().matches("\\d{4}")) {
+      throw new ReglaNegocioException("ANIO_NORMA_INVALIDO", "El año de la norma tiene 4 dígitos, por ejemplo 2016.");
+    }
+    this.normaReferencia = normalizarNorma(d.normaReferencia());
+    this.normaAnio = d.normaAnio() == null || d.normaAnio().isBlank() ? null : d.normaAnio().strip();
     this.subtitulo = d.subtitulo();
     this.descripcion = d.descripcion();
     this.duracionHoras = d.duracionHoras();
@@ -151,6 +154,15 @@ public class CertificadoPersonal extends EntidadBase {
   public UUID getPersonaId() { return personaId; }
   public String getCodigo() { return codigo; }
   public String getCurso() { return curso; }
+  /**«37001» o «iso 37001» → «ISO 37001»: la plantilla imprime la norma tal cual y debe llevar su familia*/
+  public static String normalizarNorma(String norma) {
+    if (norma == null || norma.isBlank()) return null;
+    String n = norma.strip().replaceAll("\\s+", " ");
+    if (n.matches("\\d.*")) return "ISO " + n;
+    java.util.regex.Matcher familia = java.util.regex.Pattern.compile("(?i)^(iso(?:/iec)?)\\s*").matcher(n);
+    return familia.find() ? familia.group(1).toUpperCase(java.util.Locale.ROOT) + " " + n.substring(familia.end()) : n;
+  }
+
   public String getNormaReferencia() { return normaReferencia; }
   public String getNormaAnio() { return normaAnio; }
   public String getSubtitulo() { return subtitulo; }

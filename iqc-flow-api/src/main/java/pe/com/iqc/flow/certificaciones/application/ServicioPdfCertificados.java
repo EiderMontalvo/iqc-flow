@@ -239,12 +239,32 @@ public class ServicioPdfCertificados {
   public CertificadoPersonalRespuesta generarPersonal(UUID id) {
     UUID org = exigirModo(ParametroOrganizacion.CERT_PERSONAL_MODO_PLANTILLA);
     CertificadoPersonal c = cargarPersonal(org, id);
+    exigirDatosDePlantilla(c);
     DocumentoReferencia documento = documentos.guardarGenerado(CategoriaDocumento.CERTIFICADO_PDF, nombreArchivo(c.getCodigo()),
         pdfPersonal(org, c));
     CertificadoPersonalRespuesta respuesta = servicioPersonales.adjuntarPdf(id, new SolicitudPdfPersonal(documento.id(), MOTIVO, c.getVersion()));
     bitacora.registrar(EntradaBitacora.accion("CERTIFICADO_PDF_DE_PLANTILLA").entidad("CERTIFICADO_PERSONAL", id)
         .estadoNuevo(Map.of("codigo", c.getCodigo(), "documentoId", documento.id().toString())));
     return respuesta;
+  }
+
+  /**
+   *el PDF definitivo no sale con huecos: la plantilla imprime norma y año, duración, modalidad, fechas del curso y entrenador.
+   *La vista previa sí acepta datos a medias (es para ver mientras se llena)
+   */
+  static void exigirDatosDePlantilla(CertificadoPersonal c) {
+    java.util.List<String> faltan = new java.util.ArrayList<>();
+    if (c.getNormaReferencia() == null || c.getNormaReferencia().isBlank()) faltan.add("norma de referencia");
+    if (c.getNormaAnio() == null || c.getNormaAnio().isBlank()) faltan.add("año de la norma");
+    if (c.getDuracionHoras() == null) faltan.add("horas");
+    if (c.getModalidad() == null || c.getModalidad().isBlank()) faltan.add("modalidad");
+    if (c.getFechaInicio() == null) faltan.add("fecha de inicio");
+    if (c.getFechaFin() == null) faltan.add("fecha de fin");
+    if (c.getEntrenador() == null || c.getEntrenador().isBlank()) faltan.add("entrenador");
+    if (!faltan.isEmpty()) {
+      throw new pe.com.iqc.flow.compartido.domain.ReglaNegocioException("DATOS_INCOMPLETOS_PLANTILLA",
+          "Para generar el PDF con la plantilla falta: " + String.join(", ", faltan) + ". Complétalos con «Corregir datos».");
+    }
   }
 
   /**vista previa en vivo del certificado personal: sin guardar nada ni crear a la persona*/

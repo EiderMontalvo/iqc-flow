@@ -117,7 +117,8 @@ public class ServicioCertificadosPersonales implements ImportacionCertificadosPe
   public record ResumenPais(String codigoPais, long emitidos, long anulados) {
   }
 
-  public record TipoDocumentoRespuesta(String codigo, String etiqueta, String ayuda) {
+  /**patron: la regla del número (expresión regular completa, ya en mayúsculas), para que el panel valide igual que la API*/
+  public record TipoDocumentoRespuesta(String codigo, String etiqueta, String ayuda, String patron) {
   }
 
   @Transactional(readOnly = true)
@@ -175,7 +176,7 @@ public class ServicioCertificadosPersonales implements ImportacionCertificadosPe
   public Map<String, List<TipoDocumentoRespuesta>> tiposDocumento() {
     Map<String, List<TipoDocumentoRespuesta>> r = new LinkedHashMap<>();
     DocumentoPersona.tipos().forEach((pais, tipos) -> r.put(pais, tipos.values().stream()
-        .map(t -> new TipoDocumentoRespuesta(t.codigo(), t.etiqueta(), t.ayuda())).toList()));
+        .map(t -> new TipoDocumentoRespuesta(t.codigo(), t.etiqueta(), t.ayuda(), t.regla().pattern())).toList()));
     return r;
   }
 

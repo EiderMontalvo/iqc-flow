@@ -98,6 +98,21 @@ class PdfPlantillaIT extends PruebaIntegracion {
   }
 
   @Test
+  void sinLosDatosQueImprimeLaPlantillaNoSeGeneraElPdf() throws Exception {
+    String creado = enviar(post("/api/v1/certificados-personales"), master, """
+        {"persona": {"codigoPais": "PE", "tipoDocumento": "DNI", "numeroDocumento": "45678913", "nombres": "Ana Ríos Salas"},
+         "codigo": "IQC/PE/ABM9003",
+         "datos": {"curso": "Curso de auditor interno", "normaReferencia": "37001", "fechaEmision": "2026-11-10"}}""", 201);
+    String id = JsonPath.read(creado, "$.id");
+    // la norma se guarda con su familia aunque llegue solo el número
+    assertThat((String) JsonPath.read(creado, "$.normaReferencia")).isEqualTo("ISO 37001");
+    String error = enviar(post("/api/v1/certificados-personales/" + id + "/pdf-plantilla"), master, "", 422);
+    assertThat(error).contains("año de la norma", "horas", "modalidad", "fecha de inicio", "fecha de fin", "entrenador");
+    // la vista previa sí se puede ver con datos a medias
+    mvc.perform(get("/api/v1/certificados-personales/{id}/vista-previa-plantilla", id).session(master)).andExpect(status().isOk());
+  }
+
+  @Test
   void conElModoPlantillaApagadoNoSeGeneraNiSeVeLaVistaPrevia() throws Exception {
     String id = registrarEmpresarial("SAE", "PE-SAE-03820260111A", "ISO_37001", "2025");
     jdbc.update("INSERT INTO parametros_organizacion (organizacion_id, clave, valor, actualizado_en) VALUES (?, ?, 'NO', now())",
