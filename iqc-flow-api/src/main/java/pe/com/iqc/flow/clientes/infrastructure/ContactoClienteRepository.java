@@ -11,6 +11,9 @@ import pe.com.iqc.flow.clientes.domain.ContactoCliente;
 public interface ContactoClienteRepository extends JpaRepository<ContactoCliente, UUID> {
   List<ContactoCliente> findByClienteIdOrderByEsPrincipalDescNombreCompletoAsc(UUID clienteId);
 
+  @Query("select distinct c.clienteId from ContactoCliente c where lower(c.correo) = :correo")
+  List<UUID> clientesPorCorreo(String correo);
+
   Optional<ContactoCliente> findByIdAndClienteId(UUID id, UUID clienteId);
 
   /**quita la marca de principal a los demás contactos del cliente antes de asignarla a otro. */

@@ -24,6 +24,12 @@ public interface ConsultaClientes {
 
   Set<UUID> idsPorPais(UUID organizacionId, String codigoPais);
 
+  /**
+   *el cliente (no archivado) del que alguno de sus contactos tiene ese correo, sin distinguir mayúsculas; vacío si ninguno o si hay
+   *más de uno, porque entonces no se sabe de cuál es
+   */
+  Optional<UUID> clientePorCorreoDeContacto(UUID organizacionId, String correo);
+
   boolean contactoPerteneceACliente(UUID clienteId, UUID contactoId);
 
   /**direcciones (fiscal, sedes, correspondencia) del cliente, indexadas por id*/

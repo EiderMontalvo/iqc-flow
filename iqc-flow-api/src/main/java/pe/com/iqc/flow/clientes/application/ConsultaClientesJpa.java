@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -57,6 +58,15 @@ class ConsultaClientesJpa implements ConsultaClientes {
         .filter(cliente -> cliente.getOrganizacionId().equals(organizacionId))
         .map(ConsultaClientesJpa::referencia)
         .collect(Collectors.toMap(ClienteReferencia::id, Function.identity()));
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Optional<UUID> clientePorCorreoDeContacto(UUID organizacionId, String correo) {
+    if (correo == null || correo.isBlank()) return Optional.empty();
+    List<UUID> ids = clientes.findAllById(contactos.clientesPorCorreo(correo.strip().toLowerCase(Locale.ROOT))).stream()
+        .filter(c -> c.getOrganizacionId().equals(organizacionId) && !c.estaArchivado()).map(Cliente::getId).toList();
+    return ids.size() == 1 ? Optional.of(ids.get(0)) : Optional.empty();
   }
 
   @Override

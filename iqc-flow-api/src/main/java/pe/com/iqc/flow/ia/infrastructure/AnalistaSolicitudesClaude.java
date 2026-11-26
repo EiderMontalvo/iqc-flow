@@ -1,7 +1,5 @@
 package pe.com.iqc.flow.ia.infrastructure;
 
-import com.anthropic.client.AnthropicClient;
-import com.anthropic.client.okhttp.AnthropicOkHttpClient;
 import com.anthropic.errors.AnthropicException;
 import com.anthropic.errors.AnthropicServiceException;
 import com.anthropic.models.beta.messages.BetaBase64PdfSource;
@@ -12,7 +10,6 @@ import com.anthropic.models.beta.messages.StructuredMessage;
 import com.anthropic.models.beta.messages.StructuredMessageCreateParams;
 import com.anthropic.models.beta.messages.StructuredTextBlock;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -25,8 +22,7 @@ import pe.com.iqc.flow.cotizaciones.AnalistaIaSolicitudes;
 
 /**
  *análisis de solicitudes de clientes con Claude (API de Anthropic, SDK oficial). Salida estructurada: el modelo
- *devuelve exactamente los campos del registro. La clave va en el entorno del servicio (ANTHROPIC_API_KEY); sin ella,
- *disponible() es false y no se llama a nadie. Con «fallbacks» en modo default, si el modelo se niega por un
+ *devuelve exactamente los campos del registro. Sin clave (ver ClienteClaude), disponible() es false y no se llama a nadie. Con «fallbacks» en modo default, si el modelo se niega por un
  *clasificador de seguridad, la API reintenta con otro modelo; si aun así se niega, se devuelve vacío
  */
 @Component
@@ -72,17 +68,16 @@ class AnalistaSolicitudesClaude implements AnalistaIaSolicitudes {
       @JsonPropertyDescription("Plazo o fecha deseada para certificarse") String plazo) {
   }
 
-  private final String clave;
+  private final ClienteClaude claude;
   private final String modelo;
-  private volatile AnthropicClient cliente;
 
-  AnalistaSolicitudesClaude(@Value("${ANTHROPIC_API_KEY:}") String clave, @Value("${iqc.ia.modelo:claude-opus-5-5}") String modelo) {
-    this.clave = clave == null ? "" : clave.trim();
+  AnalistaSolicitudesClaude(ClienteClaude claude, @Value("${iqc.ia.modelo:claude-opus-5-5}") String modelo) {
+    this.claude = claude;
     this.modelo = modelo;
   }
 
   @Override
-  public boolean disponible() { return !clave.isEmpty(); }
+  public boolean disponible() { return claude.disponible(); }
 
   @Override
   public Optional<PropuestaIa> analizar(String texto, byte[] pdfOriginal) {
@@ -104,7 +99,7 @@ class AnalistaSolicitudesClaude implements AnalistaIaSolicitudes {
         .addUserMessageOfContentBlockParams(bloques)
         .build();
     try {
-      StructuredMessage<Respuesta> r = cliente().beta().messages().create(params);
+      StructuredMessage<Respuesta> r = claude.cliente().beta().messages().create(params);
       if (r.stopReason().map(BetaStopReason.REFUSAL::equals).orElse(false)) {
         log.warn("El modelo no analizó la solicitud (refusal)");
         return Optional.empty();
@@ -121,14 +116,5 @@ class AnalistaSolicitudesClaude implements AnalistaIaSolicitudes {
       log.warn("No se pudo contactar con la API de Claude: {}", e.getMessage());
       return Optional.empty();
     }
-  }
-
-  private AnthropicClient cliente() {
-    if (cliente == null) {
-      synchronized (this) {
-        if (cliente == null) cliente = AnthropicOkHttpClient.builder().apiKey(clave).timeout(Duration.ofSeconds(120)).maxRetries(2).build();
-      }
-    }
-    return cliente;
   }
 }
