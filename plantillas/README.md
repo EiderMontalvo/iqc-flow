@@ -6,19 +6,21 @@ contratos, cartas y correos. Son el punto de partida. Más adelante se suben y s
 es la copia de referencia versionada en git.
 
 > **Estado (25/11/2026):**
+> - **Certificados (empresarial y personal):** ya se generan en PDF desde IQC Flow, en el modo «Desde plantilla». No usan Word:
+>   se dibujan con PDFBox sobre los fondos de `iqc-flow-api/src/main/resources/certificados/`. Los PDF de referencia
+>   (con datos reales de clientes, fuera de git) están en `certificados/*/_originales/`.
+> - **Cotización y contrato:** los Word de IQC (GCO-FRM-003, 004, 005 y 008) ya están en `cotizaciones/` y `contratos/`, pero aún
+>   **sin campos** `{{…}}`. Falta marcarlos y generar el PDF con LibreOffice (instalado en el servidor desde el 25/11/2026).
 > - Hay cuatro cartas listas en `cartas/`, con la firma siempre al pie de la última página (ver «Cartas»).
-> - Faltan las plantillas de certificados, cotización y contrato.
 > - Los correos de `correos/comerciales/` son borradores para revisar.
-> - LibreOffice ya está instalado en el servidor (25/11/2026) para convertir a PDF. El generador dentro de IQC Flow
->   (pantalla Plantillas y botón «Generar carta») está pendiente. Ver
->   [docs/architecture/pendiente-configuracion-master-plantillas.md](../docs/architecture/pendiente-configuracion-master-plantillas.md).
+> - El detalle del plan: [docs/architecture/pendiente-configuracion-master-plantillas.md](../docs/architecture/pendiente-configuracion-master-plantillas.md).
 
 ## Carpetas
 
 | Carpeta | Qué va | Formato |
 |---|---|---|
-| `certificados/empresariales/` | Certificado de sistema de gestión (una plantilla por marca o país y por esquema si cambia el diseño) | Word `.docx` |
-| `certificados/personales/` | Certificado de curso o capacitación | Word `.docx` |
+| `certificados/empresariales/` | Certificado de sistema de gestión DDC-FRM-015. Hoy solo guarda los PDF de referencia en `_originales/` | PDF de referencia |
+| `certificados/personales/` | Certificado de curso o capacitación. Hoy solo guarda los PDF de referencia en `_originales/` | PDF de referencia |
 | `cotizaciones/` | Propuesta económica que se envía al cliente | Word `.docx` |
 | `contratos/` | Contrato de servicios de certificación | Word `.docx` |
 | `cartas/` | Cartas: otorgamiento, suspensión, retiro, programación de auditoría, cobranza… | Word `.docx` |
